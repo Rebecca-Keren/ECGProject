@@ -19,17 +19,18 @@ epochs = 20
 learning_rate = 1e-3
 
 class ResNet(nn.Module):
-    def __init__(self, in_channels, n_classes, *args, **kwargs):
+    def __init__(self, in_channels, *args, **kwargs):
         super().__init__()
-        self.latentHalf = 256/2
         self.encoder = ResNetEncoder(in_channels, *args, **kwargs)
-        self.Mdecoder = ResnetDecoder(self.encoder.blocks[-1].blocks[-1].expanded_channels, n_classes)
-        self.Fdecoder = ResnetDecoder(self.encoder.blocks[-1].blocks[-1].expanded_channels, n_classes)
+        self.Mdecoder = ResnetDecoder()
+        self.Fdecoder = ResnetDecoder()
 
         def forward(self, x):
             x = self.encoder(x)
-            m = x[:self.latentHalf - 1].type(x.type())
-            f = x[self.latentHalf:].type(x.type())
+
+            ## TODO CHANGE according to right dimensions
+            # m = x[:self.latentHalf - 1].type(x.type())
+            # f = x[self.latentHalf:].type(x.type())
             m_out,one_before_last_m = self.Mdecoder(m)
             f_out, one_before_last_f = self.Fdecoder(f)
             return m_out,one_before_last_m, f_out, one_before_last_f
@@ -85,7 +86,7 @@ def main():
 
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
-    resnet_model = ResNet(1024,).to(device)#todo - add paameters
+    resnet_model = ResNet(1).to(device)
     optimizer_model = optim.Adam(resnet_model.parameters(), lr=learning_rate)
 
     criterion = nn.MSELoss()
@@ -114,13 +115,13 @@ def main():
             train_loss_fecg.backward()
 
             #Center loss(one before last decoder M, one before last decoder F)
-            one_before_last_m = nn.Sequential(*list(outputs_m.children())[:-2])
-            one_before_last_f = nn.Sequential(*list(outputs_f.children())[:-2])
-            loss_cent = criterion_cent(one_before_last_m, one_before_last_f)
+            # one_before_last_m = nn.Sequential(*list(outputs_m.children())[:-2]) #TODO change
+            # one_before_last_f = nn.Sequential(*list(outputs_f.children())[:-2]) #TODO change
+            # loss_cent = criterion_cent(one_before_last_m, one_before_last_f) #TODO change
             loss_cent.backword()
 
             #Clustering loss(one before last decoder M, one before last decoder F)
-            hinge_loss = criterion_clustering(one_before_last_m, one_before_last_f)
+            # hinge_loss = criterion_clustering(one_before_last_m, one_before_last_f) #TODO change
             hinge_loss.backward()
 
             optimizer_model.step()
