@@ -27,13 +27,12 @@ class ResNet(nn.Module):
 
         def forward(self, x):
             x = self.encoder(x)
-
-            ## TODO CHANGE according to right dimensions
-            # m = x[:self.latentHalf - 1].type(x.type())
-            # f = x[self.latentHalf:].type(x.type())
+            latent_half = (x.size()[2] / 2)
+            m = x[:,:,:latent_half].type(x.type())
+            f = x[:,:,latent_half:].type(x.type())
             m_out,one_before_last_m = self.Mdecoder(m)
             f_out, one_before_last_f = self.Fdecoder(f)
-            return m_out,one_before_last_m, f_out, one_before_last_f
+            return m_out,one_before_last_m,f_out,one_before_last_f
 
 # class RealDataset(Dataset):
 #     def __init__(self, real_dir):
@@ -56,16 +55,27 @@ class SimulatedDataset(Dataset):
     def __len__(self):
         return len(self.simulated_signals)
 
+    def get_m(self,idx):
+        path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
+        mecg = torch.from_numpy(loadmat(path_mecg)['data'])
+        return mecg
+
+    def get_f(self,idx):
+        path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
+        fecg = torch.from_numpy(loadmat(path_fecg)['data'])
+        return fecg
+
     def __getitem__(self, idx):
         path_mix = os.path.join(self.simulated_dir, self.simulated_signals[idx][0])
-        path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
-        path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
-        mix = loadmat(path_mix)['data']
-        mecg = loadmat(path_mecg)['data']
-        fecg = loadmat(path_fecg)['data']
-        return [mix,mecg,fecg]
+        # path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
+        # path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
+        mix =  torch.from_numpy(loadmat(path_mix)['data'])
+        # mecg =  torch.from_numpy(loadmat(path_mecg)['data'])
+        # fecg =  torch.from_numpy(loadmat(path_fecg)['data'])
+        return mix
 
 def main():
+
     list_simulated = simulated_database_list(SIMULATED_DATASET)
     #real_dataset = RealDataset(REAL_DATASET)
     simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated)
@@ -92,7 +102,7 @@ def main():
     criterion = nn.MSELoss()
     criterion_clustering = nn.HingeEmbeddingLoss()
 
-    criterion_cent = CenterLoss(num_classes=dataset.num_classes, feat_dim=2, use_gpu=device)  #todo - change params
+    criterion_cent = CenterLoss(num_classes=dataset.num_classes, feat_dim=2, use_gpu=device)  #todo - change params, how to insert f and m?
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):
@@ -104,7 +114,7 @@ def main():
             optimizer_model.zero_grad()
             optimizer_centloss.zero_grad()
 
-            outputs_m,outputs_f = resnet_model(batch_features[0]).to(device)
+            outputs_m,one_before_last_m,outputs_f,one_before_last_f = resnet_model(batch_features).to(device)
 
             #COST(M,M^)
             train_loss_mecg = criterion(outputs_m, batch_features)
@@ -115,13 +125,11 @@ def main():
             train_loss_fecg.backward()
 
             #Center loss(one before last decoder M, one before last decoder F)
-            # one_before_last_m = nn.Sequential(*list(outputs_m.children())[:-2]) #TODO change
-            # one_before_last_f = nn.Sequential(*list(outputs_f.children())[:-2]) #TODO change
-            # loss_cent = criterion_cent(one_before_last_m, one_before_last_f) #TODO change
+            loss_cent = criterion_cent(one_before_last_m, one_before_last_f)
             loss_cent.backword()
 
             #Clustering loss(one before last decoder M, one before last decoder F)
-            # hinge_loss = criterion_clustering(one_before_last_m, one_before_last_f) #TODO change
+            hinge_loss = criterion_clustering(one_before_last_m, one_before_last_f)
             hinge_loss.backward()
 
             optimizer_model.step()
