@@ -100,9 +100,9 @@ def main():
     optimizer_model = optim.Adam(resnet_model.parameters(), lr=learning_rate)
 
     criterion = nn.MSELoss()
-    criterion_clustering = nn.HingeEmbeddingLoss()
+    criterion_clustering = nn.HingeEmbeddingLoss() #TODO
 
-    criterion_cent = CenterLoss(num_classes=2, feat_dim=2, use_gpu=device)  #TODO - change params, how to insert f and m?
+    criterion_cent = CenterLoss(num_classes=2, feat_dim=2, use_gpu=device)  #TODO
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):

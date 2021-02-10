@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import os
+import numpy as np
 
 def activation_func(activation):
     return  nn.ModuleDict([
