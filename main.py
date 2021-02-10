@@ -55,24 +55,24 @@ class SimulatedDataset(Dataset):
     def __len__(self):
         return len(self.simulated_signals)
 
-    def get_m(self,idx):
-        path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
-        mecg = torch.from_numpy(loadmat(path_mecg)['data'])
-        return mecg
-
-    def get_f(self,idx):
-        path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
-        fecg = torch.from_numpy(loadmat(path_fecg)['data'])
-        return fecg
+    # def get_m(self,idx):
+    #     path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
+    #     mecg = torch.from_numpy(loadmat(path_mecg)['data'])
+    #     return mecg
+    #
+    # def get_f(self,idx):
+    #     path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
+    #     fecg = torch.from_numpy(loadmat(path_fecg)['data'])
+    #     return fecg
 
     def __getitem__(self, idx):
         path_mix = os.path.join(self.simulated_dir, self.simulated_signals[idx][0])
-        # path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
-        # path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
+        path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
+        path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
         mix =  torch.from_numpy(loadmat(path_mix)['data'])
-        # mecg =  torch.from_numpy(loadmat(path_mecg)['data'])
-        # fecg =  torch.from_numpy(loadmat(path_fecg)['data'])
-        return mix
+        mecg =  torch.from_numpy(loadmat(path_mecg)['data'])
+        fecg =  torch.from_numpy(loadmat(path_fecg)['data'])
+        return [mix,mecg,fecg]
 
 def main():
 
@@ -102,26 +102,31 @@ def main():
     criterion = nn.MSELoss()
     criterion_clustering = nn.HingeEmbeddingLoss()
 
-    criterion_cent = CenterLoss(num_classes=dataset.num_classes, feat_dim=2, use_gpu=device)  #todo - change params, how to insert f and m?
+    criterion_cent = CenterLoss(num_classes=2, feat_dim=2, use_gpu=device)  #TODO - change params, how to insert f and m?
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):
-        loss_m = 0
-        loss_f = 0
+        total_loss_m = 0
+        total_loss_f = 0
+        total_loss_cent = 0
+        total_loss_hinge = 0
 
         for batch_features in train_data_loader_sim:
-            batch_features = batch_features.to(device)
+            batch_for_model = batch_features[:,:,:1].to(device)
+            batch_for_m =  batch_features[:,:,1:2].to(device)
+            batch_for_f = batch_features[:,:,2:].to(device)
+            # batch_features = batch_features.to(device)
             optimizer_model.zero_grad()
             optimizer_centloss.zero_grad()
 
-            outputs_m,one_before_last_m,outputs_f,one_before_last_f = resnet_model(batch_features).to(device)
+            outputs_m,one_before_last_m,outputs_f,one_before_last_f = resnet_model(batch_for_model).to(device)
 
             #COST(M,M^)
-            train_loss_mecg = criterion(outputs_m, batch_features)
+            train_loss_mecg = criterion(outputs_m, batch_for_m)
             train_loss_mecg.backward()
 
             #COST(F,F^)
-            train_loss_fecg = criterion(outputs_f, batch_features)
+            train_loss_fecg = criterion(outputs_f, batch_for_f)
             train_loss_fecg.backward()
 
             #Center loss(one before last decoder M, one before last decoder F)
@@ -135,16 +140,23 @@ def main():
             optimizer_model.step()
             optimizer_centloss.step()
 
-            loss_m += train_loss_mecg.item()
-            loss_f += train_loss_mecg.item()
+            total_loss_m += train_loss_mecg.item()
+            total_loss_f += train_loss_fecg.item()
+            total_loss_cent += loss_cent.item()
+            total_loss_hinge += hinge_loss.item()
             del batch_features
             torch.cuda.empty_cache()
 
         # compute the epoch training loss
-        loss_m = loss_m / (len(train_data_loader_sim)/2)
-        loss_f = loss_f / (len(train_data_loader_sim)/2)
+        total_loss_m = total_loss_m / (len(train_data_loader_sim))
+        total_loss_f = total_loss_f / (len(train_data_loader_sim))
+        total_loss_cent = total_loss_cent / (len(train_data_loader_sim))
+        total_loss_hinge = total_loss_hinge / (len(train_data_loader_sim))
 
         # display the epoch training loss
-        print("epoch : {}/{}, loss mecg = {:.8f}, loss fecg = {:.8f}".format(epoch + 1, epochs, loss_m, loss_f))
+        print("epoch : {}/{}, loss_mecg = {:.8f}, loss_fecg = {:.8f}, loss_cent = {:.8f}, loss_hinge = {:.8f}".format(epoch + 1, epochs, total_loss_m, total_loss_f, total_loss_cent, total_loss_hinge))
 
+    del resnet_model
+    del simulated_dataset
+    del train_data_loader_sim
     torch.cuda.empty_cache()

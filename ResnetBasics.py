@@ -45,12 +45,6 @@ class ResNetLayerEncoder(nn.Module):
             x = self.blocks(x)
             return x
 
-
-from HelpFunctions import *
-import torch
-import torch.nn as nn
-
-
 class ResNetBasicBlockDecoder(nn.Module):
     def __init__(self, in_channels, out_channels, activation='relu', expansion=1, downsampling=1, output_padding = 0, *args,
                  **kwargs):
