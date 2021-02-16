@@ -11,6 +11,14 @@ def activation_func(activation):
         ['none', nn.Identity()]
     ])[activation]
 
+def hinge_loss(m_feature,f_feature,delta):
+    m_normalized = torch.norm(m_feature)
+    f_normalized = torch.norm(f_feature)
+
+    distance = nn.MSELoss(m_normalized,f_normalized)
+
+    return torch.max(delta - distance, 0)
+
 def simulated_database_list(sim_dir):
     list = []
     for filename in os.listdir(sim_dir):
