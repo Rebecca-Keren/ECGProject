@@ -3,16 +3,17 @@ import torch
 import torch.nn as nn
 
 class ResNetBasicBlockEncoder(nn.Module):
-    def __init__(self, in_channels, out_channels,conv, activation='relu',expansion=1, downsampling=1, *args, **kwargs):
+    def __init__(self, in_channels, out_channels, activation='relu', expansion=1, downsampling=1, *args, **kwargs):
         super().__init__()
-        self.in_channels, self.out_channels, self.activation,self.expansion, self.downsampling = in_channels , out_channels ,activation,expansion, downsampling
+        self.in_channels, self.out_channels = in_channels , out_channels
+        self.activation, self.expansion, self.downsampling = activation, expansion, downsampling
         self.blocks = nn.Sequential(nn.Conv1d(self.in_channels, self.out_channels,kernel_size= 3, padding = 1, bias=False, stride=self.downsampling),
                         nn.BatchNorm1d(out_channels),
-                        activation(),
+                        nn.ReLU(inplace=True),
                         nn.Conv1d(self.out_channels, self.expanded_channels, kernel_size=3, padding=1,bias=False),
                         nn.BatchNorm1d(out_channels),)
-        self.activate = activation_func(activation)
-        self.shortcut = nn.Sequential(conv(self.in_channels, self.expanded_channels, kernel_size=3,
+        #self.activate = activation_func(activation)
+        self.shortcut = nn.Sequential(nn.Conv1d(self.in_channels, self.expanded_channels, kernel_size=3,
                                                     stride=self.downsampling,padding = 1,bias=False),nn.BatchNorm1d(self.expanded_channels)) if self.should_apply_shortcut else None
 
     def forward(self, x):
@@ -37,8 +38,8 @@ class ResNetLayerEncoder(nn.Module):
         downsampling = 2 if in_channels != out_channels else 1
 
         self.blocks = nn.Sequential(
-            block(in_channels, out_channels, *args, **kwargs, downsampling=downsampling),
-                *[block(out_channels * block.expansion,
+            block(in_channels, out_channels, downsampling=downsampling, *args, **kwargs),
+                *[block(out_channels,
             out_channels, downsampling=1, *args, **kwargs) for _ in range(n - 1)])
 
         def forward(self, x):
@@ -53,10 +54,10 @@ class ResNetBasicBlockDecoder(nn.Module):
         self.blocks = nn.Sequential(
             nn.ConvTranspose1d(self.in_channels, self.out_channels, kernel_size=3, padding=1, bias=False, stride=self.downsampling,output_padding = self.output_padding),
             nn.BatchNorm1d(out_channels),
-            activation(),
+            nn.ReLU(inplace=True),
             nn.ConvTranspose1d(self.out_channels, self.expanded_channels, kernel_size=3, padding=1, bias=False),
             nn.BatchNorm1d(out_channels), )
-        self.activate = activation_func(activation)
+        #self.activate = activation_func(activation)
         self.shortcut = nn.Sequential(nn.ConvTranspose1d(self.in_channels, self.expanded_channels, kernel_size=3,
                                            stride=self.downsampling,output_padding = self.output_padding, padding=1, bias=False),
                                       nn.BatchNorm1d(self.expanded_channels)) if self.should_apply_shortcut else None
@@ -86,7 +87,7 @@ class ResNetLayerDecoder(nn.Module):
 
         self.blocks = nn.Sequential(
             block(in_channels, out_channels, *args, **kwargs, downsampling=downsampling,output_padding= ouput_padding),
-            *[block(out_channels * block.expansion,
+            *[block(out_channels,
                     out_channels, downsampling=1, *args, **kwargs) for _ in range(n - 1)])
 
         def forward(self, x):

@@ -20,7 +20,7 @@ class ResNetEncoder(nn.Module):
         self.blocks = nn.ModuleList([
             ResNetLayerEncoder(blocks_sizes[0], blocks_sizes[0], n=deepths[0], activation=activation,
                         block=block, *args, **kwargs),
-            *[ResNetLayerEncoder(in_channels * block.expansion,
+            *[ResNetLayerEncoder(in_channels,
                           out_channels, n=n, activation=activation,
                           block=block, *args, **kwargs)
               for (in_channels, out_channels), n in zip(self.in_out_block_sizes, deepths[1:])]
@@ -53,10 +53,10 @@ class ResnetDecoder(nn.Module):
 
         self.in_out_block_sizes = list(zip(blocks_sizes[1:], blocks_sizes[2:]))
         self.blocks = nn.ModuleList([
-            ResNetLayerDecoder(blocks_sizes[0], blocks_sizes[1], self.conv, n=deepths[0], activation=activation,
+            ResNetLayerDecoder(blocks_sizes[0], blocks_sizes[1], n=deepths[0], activation=activation,
                         block=block, *args, **kwargs),
-            *[ResNetLayerDecoder(in_channels * block.expansion,
-                          out_channels,self.conv, n=n, activation=activation,
+            *[ResNetLayerDecoder(in_channels,
+                          out_channels, n=n, activation=activation,
                           block=block, *args, **kwargs)
               for (in_channels, out_channels), n in zip(self.in_out_block_sizes, deepths[1:])]
         ])
