@@ -9,7 +9,7 @@ import scipy.io as sio
 REAL_DATASET = "Real Database"
 SIMULATED_SIGNAL_MAT = "Simulated Database Dat"
 MAT_SIMULATED_SIGNAL = "Simulated Database Mat"
-MERGED_SIMULATED_SIGNAL = "Merged Simulated Database"
+MERGED_SIMULATED_SIGNAL = "SimulatedDatabase"
 SIMULATED_SIGNAL = "Simulated Database"
 
 dir_path = os.path.dirname(os.path.realpath(__file__))

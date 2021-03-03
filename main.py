@@ -1,3 +1,4 @@
+from __future__ import print_function
 from ResnetNetwork import *
 import torch
 import torch.nn as nn
@@ -5,14 +6,13 @@ import torch.optim as optim
 import torch.utils.data as data
 import torchvision
 from CenterLoss import *
-from __future__ import print_function
 import numpy as np
 from torch.utils.data import Dataset
 from scipy.io import loadmat
 import os
 
-REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Real Database") #TODO sistemare grandezza
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Merged Simulated Database")
+#REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Real Database") #TODO sistemare grandezza
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
 BATCH_SIZE = 16 #TODO vedere bene i parametri
 epochs = 20
@@ -26,14 +26,14 @@ class ResNet(nn.Module):
         self.Mdecoder = ResnetDecoder()
         self.Fdecoder = ResnetDecoder()
 
-        def forward(self, x):
-            x = self.encoder(x)
-            latent_half = (x.size()[2] / 2)
-            m = x[:,:,:latent_half]
-            f = x[:,:,latent_half:]
-            m_out,one_before_last_m = self.Mdecoder(m)
-            f_out, one_before_last_f = self.Fdecoder(f)
-            return m_out,one_before_last_m,f_out,one_before_last_f
+    def forward(self, x):
+        x = self.encoder(x)
+        latent_half = (x.size()[2] / 2)
+        m = x[:,:,:latent_half]
+        f = x[:,:,latent_half:]
+        m_out,one_before_last_m = self.Mdecoder(m)
+        f_out, one_before_last_f = self.Fdecoder(f)
+        return m_out,one_before_last_m,f_out,one_before_last_f
 
 class RealDataset(Dataset):
     def __init__(self, real_dir):
@@ -68,26 +68,28 @@ class SimulatedDataset(Dataset):
 def main():
 
     list_simulated = simulated_database_list(SIMULATED_DATASET)
-    real_dataset = RealDataset(REAL_DATASET)
+    #print(list_simulated)
+    #real_dataset = RealDataset(REAL_DATASET)
     simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated)
 
-    train_size_real = int(0.8 * len(real_dataset))
-    test_size_real = len(real_dataset) - train_size_real
-    train_dataset_real, test_dataset_real = torch.utils.data.random_split(real_dataset, [train_size_real, test_size_real])
+    #train_size_real = int(0.8 * len(real_dataset))
+    #test_size_real = len(real_dataset) - train_size_real
+    #train_dataset_real, test_dataset_real = torch.utils.data.random_split(real_dataset, [train_size_real, test_size_real])
 
     train_size_sim = int(0.8 * len(simulated_dataset))
     test_size_sim = len(simulated_dataset) - train_size_sim
     train_dataset_sim, test_dataset_sim = torch.utils.data.random_split(simulated_dataset, [train_size_sim, test_size_sim])
 
-    train_data_loader_real = data.DataLoader(train_dataset_real, batch_size=BATCH_SIZE, shuffle=True)
-    test_data_loader_real = data.DataLoader(test_dataset_real, batch_size=BATCH_SIZE, shuffle=True)
+    #train_data_loader_real = data.DataLoader(train_dataset_real, batch_size=BATCH_SIZE, shuffle=True)
+    #test_data_loader_real = data.DataLoader(test_dataset_real, batch_size=BATCH_SIZE, shuffle=True)
 
     train_data_loader_sim = data.DataLoader(train_dataset_sim, batch_size=BATCH_SIZE, shuffle=True)
     test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=True)
 
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
-    resnet_model = ResNet(1).to(device)
+    #resnet_model = ResNet(1).to(device)
+    resnet_model = ResNet(1)
     optimizer_model = optim.Adam(resnet_model.parameters(), lr=learning_rate)
 
     criterion = nn.MSELoss()
@@ -103,12 +105,13 @@ def main():
         total_loss_cent = 0
         total_loss_hinge = 0
 
-        real_epoch = ((epoch % 5) == 0)
+        #real_epoch = ((epoch % 5) == 0)
+        real_epoch = 0
 
-        if (real_epoch):
-            data_loader = train_data_loader_real
-        else:
-            data_loader = train_data_loader_sim
+        #if (real_epoch):
+        #    data_loader = train_data_loader_real
+        #else:
+        data_loader = train_data_loader_sim
 
         for i, batch_features in enumerate(data_loader):
             if (real_epoch):
@@ -121,7 +124,8 @@ def main():
             optimizer_model.zero_grad()
             optimizer_centloss.zero_grad()
 
-            outputs_m,one_before_last_m,outputs_f,one_before_last_f = resnet_model(batch_for_model).to(device)
+            #outputs_m,one_before_last_m,outputs_f,one_before_last_f = resnet_model(batch_for_model).to(device)
+            outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model)
 
             if(not real_epoch):
                 #COST(M,M^)
@@ -183,3 +187,8 @@ def main():
     del simulated_dataset
     del train_data_loader_sim
     torch.cuda.empty_cache()
+
+if __name__=="__main__":
+    device = torch.device("cuda:1" if (torch.cuda.is_available()) else "cpu")
+    #print(device)
+    main()

@@ -24,11 +24,11 @@ def simulated_database_list(sim_dir):
     for filename in os.listdir(sim_dir):
         if 'mix' not in filename:
             continue
-        name = filename[:len(filename) - 4]
+        name = filename[:(filename.find("mix"))]
         if 'mix0' in filename:
-            list.append([filename, name + 'mecg0',name + 'fecg10'])
+            list.append([filename, name + 'mecg0', name + 'fecg10'])
         elif 'mix1' in filename:
-            list.append([filename, name + 'mecg1',name + 'fecg11'])
+            list.append([filename, name + 'mecg1', name + 'fecg11'])
         else:
-            list.append([filename, name + 'mecg2',name + 'fecg12'])
+            list.append([filename, name + 'mecg2', name + 'fecg12'])
     return list
