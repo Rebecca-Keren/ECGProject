@@ -42,9 +42,9 @@ class ResNetLayerEncoder(nn.Module):
                 *[block(out_channels,
             out_channels, downsampling=1, *args, **kwargs) for _ in range(n - 1)])
 
-        def forward(self, x):
-            x = self.blocks(x)
-            return x
+    def forward(self, x):
+        x = self.blocks(x)
+        return x
 
 class ResNetBasicBlockDecoder(nn.Module):
     def __init__(self, in_channels, out_channels, activation='relu', expansion=1, downsampling=1, output_padding = 0, *args,
@@ -90,6 +90,6 @@ class ResNetLayerDecoder(nn.Module):
             *[block(out_channels,
                     out_channels, downsampling=1, *args, **kwargs) for _ in range(n - 1)])
 
-        def forward(self, x):
-            x = self.blocks(x)
-            return x
+    def forward(self, x):
+        x = self.blocks(x)
+        return x

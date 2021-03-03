@@ -9,12 +9,17 @@ class ResNetEncoder(nn.Module):
         super().__init__()
 
         self.blocks_sizes = blocks_sizes
-        self.gate = nn.Sequential(
-            nn.Conv1d(in_channels, self.blocks_sizes[0], kernel_size= 3, stride=1, padding=1, bias=False),
-            nn.BatchNorm1d(self.blocks_sizes[0]),
-            activation(),
-            nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
-        )
+        self.conv1 = nn.Conv1d(in_channels, self.blocks_sizes[0], kernel_size= 3, stride=1, padding=1, bias=False)
+        self.batch = nn.BatchNorm1d(self.blocks_sizes[0])
+        self.relu = activation()
+        self.maxpool1d = nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
+        # self.gate = nn.Sequential(
+        #     nn.Conv1d(in_channels, self.blocks_sizes[0], kernel_size= 3, stride=1, padding=1, bias=False),
+        #     nn.BatchNorm1d(self.blocks_sizes[0]),
+        #     activation(),
+        #     nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
+        # )
+
 
         self.in_out_block_sizes = list(zip(blocks_sizes, blocks_sizes[1:]))
         self.blocks = nn.ModuleList([
@@ -28,8 +33,10 @@ class ResNetEncoder(nn.Module):
 
     def forward(self, x):
         #print(x.size())
-        x = self.gate(x)
-
+        x = self.conv1(x.float())
+        x = self.batch(x)
+        x = self.relu(x)
+        x = self.maxpool1d(x)
         for block in self.blocks:
             x = block(x)
         return x

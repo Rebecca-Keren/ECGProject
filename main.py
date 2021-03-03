@@ -128,7 +128,7 @@ def main():
             print(batch_for_model.size())
             batch_for_model = batch_for_model.transpose(1,2)
             print(batch_for_model.size())
-            outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model)
+            outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model.double())
 
             if(not real_epoch):
                 #COST(M,M^)
