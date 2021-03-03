@@ -27,7 +27,9 @@ class ResNetEncoder(nn.Module):
         ])
 
     def forward(self, x):
+        #print(x.size())
         x = self.gate(x)
+
         for block in self.blocks:
             x = block(x)
         return x

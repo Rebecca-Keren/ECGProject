@@ -125,6 +125,9 @@ def main():
             optimizer_centloss.zero_grad()
 
             #outputs_m,one_before_last_m,outputs_f,one_before_last_f = resnet_model(batch_for_model).to(device)
+            print(batch_for_model.size())
+            batch_for_model = batch_for_model.transpose(1,2)
+            print(batch_for_model.size())
             outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model)
 
             if(not real_epoch):
