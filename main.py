@@ -33,7 +33,7 @@ class ResNet(nn.Module):
             f = x[:,:,latent_half:]
             m_out,one_before_last_m = self.Mdecoder(m)
             f_out, one_before_last_f = self.Fdecoder(f)
-            return m_out,one_before_last_m, f_out, one_before_last_f
+            return m_out,one_before_last_m,f_out,one_before_last_f
 
 class RealDataset(Dataset):
     def __init__(self, real_dir):
@@ -60,27 +60,27 @@ class SimulatedDataset(Dataset):
         path_mix = os.path.join(self.simulated_dir, self.simulated_signals[idx][0])
         path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
         path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
-        mix = torch.from_numpy(loadmat(path_mix)['data']) #TODO cambiare il cast
-        mecg = torch.from_numpy(loadmat(path_mecg)['data'])
-        fecg = torch.from_numpy(loadmat(path_fecg)['data'])
-        return mix, mecg, fecg
+        mix =  torch.from_numpy(loadmat(path_mix)['data']) #TODO cambiare il cast
+        mecg =  torch.from_numpy(loadmat(path_mecg)['data'])
+        fecg =  torch.from_numpy(loadmat(path_fecg)['data'])
+        return mix,mecg,fecg
 
 def main():
 
     list_simulated = simulated_database_list(SIMULATED_DATASET)
-    # real_dataset = RealDataset(REAL_DATASET)
+    real_dataset = RealDataset(REAL_DATASET)
     simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated)
 
-    # train_size_real = int(0.8 * len(real_dataset))
-    # test_size_real = len(real_dataset) - train_size_real
-    # train_dataset_real, test_dataset_real = torch.utils.data.random_split(real_dataset, [train_size_real, test_size_real])
+    train_size_real = int(0.8 * len(real_dataset))
+    test_size_real = len(real_dataset) - train_size_real
+    train_dataset_real, test_dataset_real = torch.utils.data.random_split(real_dataset, [train_size_real, test_size_real])
 
     train_size_sim = int(0.8 * len(simulated_dataset))
     test_size_sim = len(simulated_dataset) - train_size_sim
     train_dataset_sim, test_dataset_sim = torch.utils.data.random_split(simulated_dataset, [train_size_sim, test_size_sim])
 
-    # train_data_loader_real = data.DataLoader(train_dataset_real, batch_size=BATCH_SIZE, shuffle=True)
-    # test_data_loader_real = data.DataLoader(test_dataset_real, batch_size=BATCH_SIZE, shuffle=True)
+    train_data_loader_real = data.DataLoader(train_dataset_real, batch_size=BATCH_SIZE, shuffle=True)
+    test_data_loader_real = data.DataLoader(test_dataset_real, batch_size=BATCH_SIZE, shuffle=True)
 
     train_data_loader_sim = data.DataLoader(train_dataset_sim, batch_size=BATCH_SIZE, shuffle=True)
     test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=True)
@@ -103,13 +103,12 @@ def main():
         total_loss_cent = 0
         total_loss_hinge = 0
 
-        # real_epoch = ((epoch % 5) == 0)
-        real_epoch = 0
+        real_epoch = ((epoch % 5) == 0)
 
-        # if (real_epoch):
-        #     data_loader = train_data_loader_real
-        # else:
-        data_loader = train_data_loader_sim
+        if (real_epoch):
+            data_loader = train_data_loader_real
+        else:
+            data_loader = train_data_loader_sim
 
         for i, batch_features in enumerate(data_loader):
             if (real_epoch):
