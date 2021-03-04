@@ -12,7 +12,8 @@ class ResNetEncoder(nn.Module):
         self.conv1 = nn.Conv1d(in_channels, self.blocks_sizes[0], kernel_size= 3, stride=1, padding=1, bias=False)
         self.batch = nn.BatchNorm1d(self.blocks_sizes[0])
         self.relu = activation()
-        self.maxpool1d = nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
+        self.maxpool1d = nn.MaxPool1d(kernel_size=3, stride=1, padding=1, return_indices = True)
+
         # self.gate = nn.Sequential(
         #     nn.Conv1d(in_channels, self.blocks_sizes[0], kernel_size= 3, stride=1, padding=1, bias=False),
         #     nn.BatchNorm1d(self.blocks_sizes[0]),
@@ -33,13 +34,13 @@ class ResNetEncoder(nn.Module):
 
     def forward(self, x):
         #print(x.size())
+        x, indices = self.maxpool1d(x)
         x = self.conv1(x.float())
         x = self.batch(x)
         x = self.relu(x)
-        x = self.maxpool1d(x)
         for block in self.blocks:
             x = block(x)
-        return x
+        return x, indices
 
 class ResnetDecoder(nn.Module):
     """
@@ -70,10 +71,12 @@ class ResnetDecoder(nn.Module):
               for (in_channels, out_channels), n in zip(self.in_out_block_sizes, deepths[1:])]
         ])
 
-    def forward(self, x):
+    def forward(self, x, indices):
         for block in self.blocks:
             x = block(x)
         x = self.exit(x)
-        one_before_last = x.copy()
-        x = self.last_layer(x)
+        one_before_last = x.clone()
+        # print(x.size())
+        # print(indices.size())
+        x = self.last_layer(x, indices)
         return x,one_before_last

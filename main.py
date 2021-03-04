@@ -14,7 +14,7 @@ import os
 #REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Real Database") #TODO sistemare grandezza
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
-BATCH_SIZE = 16 #TODO vedere bene i parametri
+BATCH_SIZE = 16
 epochs = 20
 learning_rate = 1e-3
 delta = 1e-2
@@ -27,12 +27,12 @@ class ResNet(nn.Module):
         self.Fdecoder = ResnetDecoder()
 
     def forward(self, x):
-        x = self.encoder(x)
-        latent_half = (x.size()[2] / 2)
+        x, indices = self.encoder(x)
+        latent_half = int((x.size()[2] / 2))
         m = x[:,:,:latent_half]
         f = x[:,:,latent_half:]
-        m_out,one_before_last_m = self.Mdecoder(m)
-        f_out, one_before_last_f = self.Fdecoder(f)
+        m_out,one_before_last_m = self.Mdecoder(m, indices)
+        f_out, one_before_last_f = self.Fdecoder(f, indices)
         return m_out,one_before_last_m,f_out,one_before_last_f
 
 class RealDataset(Dataset):
@@ -66,7 +66,7 @@ class SimulatedDataset(Dataset):
         return mix,mecg,fecg
 
 def main():
-
+    #torch.set_default_tensor_type('torch.FloatTensor')
     list_simulated = simulated_database_list(SIMULATED_DATASET)
     #print(list_simulated)
     #real_dataset = RealDataset(REAL_DATASET)
@@ -94,8 +94,9 @@ def main():
 
     criterion = nn.MSELoss()
 
-    criterion_cent = CenterLoss(num_classes=2, feat_dim=512*16, use_gpu=device)
+    criterion_cent = CenterLoss(num_classes=2, feat_dim=1024, use_gpu=device)
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
+
 
     for epoch in range(epochs):
         total_loss_epoch = 0
@@ -114,46 +115,63 @@ def main():
         data_loader = train_data_loader_sim
 
         for i, batch_features in enumerate(data_loader):
+            print(i)
             if (real_epoch):
                 batch_for_model = batch_features.to(device)
             else:
                 batch_for_model = batch_features[0].to(device)
                 batch_for_m =  batch_features[1].to(device)
                 batch_for_f = batch_features[2].to(device)
-
+            batch_size = batch_for_model.size()[0]
+            print("batch: "+str(batch_for_model.size()[0]))
             optimizer_model.zero_grad()
             optimizer_centloss.zero_grad()
 
             #outputs_m,one_before_last_m,outputs_f,one_before_last_f = resnet_model(batch_for_model).to(device)
-            print(batch_for_model.size())
+            #print(batch_for_model.size())
             batch_for_model = batch_for_model.transpose(1,2)
-            print(batch_for_model.size())
+            batch_for_m = batch_for_m.transpose(1, 2)
+            batch_for_f = batch_for_f.transpose(1, 2)
+
+            #print(batch_for_model.size())
             outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model.double())
 
             if(not real_epoch):
                 #COST(M,M^)
-                train_loss_mecg = criterion(batch_for_m,outputs_m)
+                #print(batch_for_m.size())
+                #print(outputs_m.size())
+                train_loss_mecg = criterion(batch_for_m.float(),outputs_m)
                 #COST(F,F^)
-                train_loss_fecg = criterion(batch_for_f,outputs_f)
+                train_loss_fecg = criterion(batch_for_f.float(),outputs_f)
             else:
                 outputs_m = torch.add(outputs_m,outputs_f)
-                train_loss_ecg = criterion(batch_for_model,outputs_m)
+                train_loss_ecg = criterion(batch_for_model.float(),outputs_m)
 
 
             #Center loss(one before last decoder M, one before last decoder F)
-            flatten_m,flatten_f = torch.flatten(one_before_last_m,start_dim=1), torch.flatten(one_before_last_f,start_dim=1) #TODO check
-            input = torch.cat((flatten_f,flatten_m), 0) #TODO check
-            first_label,second_label = torch.zeros(BATCH_SIZE), torch.ones(BATCH_SIZE)
+            flatten_m,flatten_f = torch.flatten(one_before_last_m,start_dim=1), torch.flatten(one_before_last_f,start_dim=1)
+            input = torch.cat((flatten_f,flatten_m), 0)
+            first_label,second_label = torch.zeros(batch_size), torch.ones(batch_size)
             labels = torch.cat((first_label,second_label))
+            print("input: " +str(input.size()))
+            print("labels: "+ str(labels.size()))
             loss_cent = criterion_cent(input, labels)
 
             #Clustering loss(one before last decoder M, one before last decoder F)
-            hinge_loss = hinge_loss(one_before_last_m, one_before_last_f,delta)
+            hinge_loss = criterion_hinge_loss(one_before_last_m, one_before_last_f,delta)
+            hinge_loss = torch.tensor(hinge_loss,dtype=torch.float32)
+
+            # print(train_loss_mecg.float().dtype)
+            # print(train_loss_fecg.float().dtype)
+            # print(loss_cent.dtype)
+            # print(torch.tensor(hinge_loss,dtype=torch.float32).dtype)
 
             if(not real_epoch):
                 total_loss = train_loss_mecg + train_loss_fecg + loss_cent + hinge_loss
             else:
                 total_loss = train_loss_ecg + loss_cent + hinge_loss
+
+            #print(total_loss.dtype)
             total_loss.backward()
             optimizer_model.step()
             optimizer_centloss.step()
@@ -165,7 +183,7 @@ def main():
                 total_loss_ecg += train_loss_ecg.item()
             total_loss_cent += loss_cent.item()
             total_loss_hinge += hinge_loss.item()
-            total_loss_epoch += total_loss #TODO non devo dividere anche questo per len(data_loader) ?
+            total_loss_epoch += total_loss
             del batch_features
             torch.cuda.empty_cache()
 
@@ -177,7 +195,7 @@ def main():
             total_loss_ecg = total_loss_ecg / (len(data_loader))
         total_loss_cent = total_loss_cent / (len(data_loader))
         total_loss_hinge = total_loss_hinge / (len(data_loader))
-
+        total_loss = total_loss / (len(data_loader))
         # display the epoch training loss
         if(not real_epoch):
             print("epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}, loss_cent = {:.8f}, loss_hinge = {:.8f}".format(epoch + 1, epochs, total_loss_epoch, total_loss_m, total_loss_f, total_loss_cent, total_loss_hinge))
