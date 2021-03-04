@@ -15,7 +15,7 @@ import os
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
 BATCH_SIZE = 16
-epochs = 20
+epochs = 100
 learning_rate = 1e-3
 delta = 1e-2
 
@@ -115,7 +115,7 @@ def main():
         data_loader = train_data_loader_sim
 
         for i, batch_features in enumerate(data_loader):
-            print(i)
+            #print(i)
             if (real_epoch):
                 batch_for_model = batch_features.to(device)
             else:
@@ -123,7 +123,7 @@ def main():
                 batch_for_m =  batch_features[1].to(device)
                 batch_for_f = batch_features[2].to(device)
             batch_size = batch_for_model.size()[0]
-            print("batch: "+str(batch_for_model.size()[0]))
+            # print("batch: "+str(batch_for_model.size()[0]))
             optimizer_model.zero_grad()
             optimizer_centloss.zero_grad()
 
@@ -153,8 +153,8 @@ def main():
             input = torch.cat((flatten_f,flatten_m), 0)
             first_label,second_label = torch.zeros(batch_size), torch.ones(batch_size)
             labels = torch.cat((first_label,second_label))
-            print("input: " +str(input.size()))
-            print("labels: "+ str(labels.size()))
+            # print("input: " +str(input.size()))
+            # print("labels: "+ str(labels.size()))
             loss_cent = criterion_cent(input, labels)
 
             #Clustering loss(one before last decoder M, one before last decoder F)
