@@ -4,8 +4,8 @@ import wfdb
 from scipy.io import loadmat
 import os
 import scipy.io as sio
+from HelpFunctions import *
 
-# TODO divide into smaller signal also for real
 REAL_DATASET = "Real Database"
 SIMULATED_SIGNAL_MAT = "Simulated Database Dat"
 MAT_SIMULATED_SIGNAL = "Simulated Database Mat"
@@ -19,16 +19,6 @@ merged_dir = os.path.join(dir_path,MERGED_SIMULATED_SIGNAL)
 last_dir = os.path.join(dir_path,SIMULATED_SIGNAL)
 real_dir = os.path.join(dir_path,REAL_DATASET)
 
-def increase_sampling_rate(signal,rate):
-    signal_size = len(signal)
-    x = [j for j in range(signal_size)]
-    y = [signal[i] for i in range(signal_size)]
-    xvals = np.linspace(0, signal_size, int(signal_size*rate))
-    interpolated_signal = np.interp(xvals, x, y)
-    print(len(interpolated_signal))
-    if (rate >= 1):
-        interpolated_signal = interpolated_signal[:signal_size]
-    return interpolated_signal
 
 if __name__ == '__main__':
     # Transforming from dat to mat
