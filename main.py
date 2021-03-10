@@ -84,7 +84,7 @@ def main():
     #test_data_loader_real = data.DataLoader(test_dataset_real, batch_size=BATCH_SIZE, shuffle=True)
 
     train_data_loader_sim = data.DataLoader(train_dataset_sim, batch_size=BATCH_SIZE, shuffle=True)
-    test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=True)
+    test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
 
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
@@ -146,7 +146,6 @@ def main():
             else:
                 outputs_m = torch.add(outputs_m,outputs_f)
                 train_loss_ecg = criterion(batch_for_model.float(),outputs_m)
-
 
             #Center loss(one before last decoder M, one before last decoder F)
             flatten_m,flatten_f = torch.flatten(one_before_last_m,start_dim=1), torch.flatten(one_before_last_f,start_dim=1)

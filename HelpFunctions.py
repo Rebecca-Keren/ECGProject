@@ -12,11 +12,11 @@ def activation_func(activation):
     ])[activation]
 
 def criterion_hinge_loss(m_feature,f_feature,delta):
-    m_normalized = torch.norm(m_feature)
-    f_normalized = torch.norm(f_feature)
+    # m_normalized = torch.norm(m_feature)
+    # f_normalized = torch.norm(f_feature)
 
-    distance = nn.MSELoss()
-    return np.max(delta - distance(m_normalized,f_normalized).item(), 0)
+    distance = nn.functional.mse_loss(m_feature,f_feature)
+    return nn.functional.relu(delta - distance)
 
 def simulated_database_list(sim_dir):
     list = []
