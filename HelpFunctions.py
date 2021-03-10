@@ -3,6 +3,16 @@ import torch.nn as nn
 import os
 import numpy as np
 
+def increase_sampling_rate(signal,rate):
+    signal_size = len(signal)
+    x = [j for j in range(signal_size)]
+    y = [signal[i] for i in range(signal_size)]
+    xvals = np.linspace(0, signal_size, int(signal_size*rate))
+    interpolated_signal = np.interp(xvals, x, y)
+    if (rate >= 1):
+        interpolated_signal = interpolated_signal[:signal_size]
+    return interpolated_signal
+
 def activation_func(activation):
     return  nn.ModuleDict([
         ['relu', nn.ReLU(inplace=True)],
