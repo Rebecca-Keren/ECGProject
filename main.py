@@ -18,12 +18,12 @@ BATCH_SIZE = 16
 epochs = 100
 learning_rate = 1e-3
 delta = 1e-2
-fecg_lamda = 10
-cent_lamda = 1e-3
-hinge_lamda = 100
-mecg_weight = fecg_weight = 0.35
-cent_weight = 0.15
-hinge_weight = 0.15
+fecg_lamda = 1
+cent_lamda = 1
+hinge_lamda = 1
+mecg_weight = fecg_weight = 1
+cent_weight = 1
+hinge_weight = 1
 
 class ResNet(nn.Module):
     def __init__(self, in_channels, *args, **kwargs):
@@ -33,12 +33,12 @@ class ResNet(nn.Module):
         self.Fdecoder = ResnetDecoder()
 
     def forward(self, x):
-        x, indices = self.encoder(x)
+        x = self.encoder(x)
         latent_half = int((x.size()[2] / 2))
         m = x[:,:,:latent_half]
         f = x[:,:,latent_half:]
-        m_out,one_before_last_m = self.Mdecoder(m, indices)
-        f_out, one_before_last_f = self.Fdecoder(f, indices)
+        m_out,one_before_last_m = self.Mdecoder(m)
+        f_out, one_before_last_f = self.Fdecoder(f)
         return m_out,one_before_last_m,f_out,one_before_last_f
 
 class RealDataset(Dataset):
@@ -154,6 +154,8 @@ def main():
                 train_loss_ecg = criterion(batch_for_model.float(),outputs_m)
 
             #Center loss(one before last decoder M, one before last decoder F)
+            # print(outputs_m.size())
+            # print(outputs_f.size())
             flatten_m,flatten_f = torch.flatten(one_before_last_m,start_dim=1), torch.flatten(one_before_last_f,start_dim=1)
             input = torch.cat((flatten_f,flatten_m), 0)
             first_label,second_label = torch.zeros(batch_size), torch.ones(batch_size)
@@ -172,9 +174,9 @@ def main():
             # print(torch.tensor(hinge_loss,dtype=torch.float32).dtype)
 
             if(not real_epoch):
-                total_loss = train_loss_mecg + fecg_lamda*train_loss_fecg + cent_lamda*loss_cent + hinge_lamda*hinge_loss
+                total_loss = mecg_weight*train_loss_mecg + fecg_weight*fecg_lamda*train_loss_fecg + cent_weight*cent_lamda*loss_cent + hinge_weight*hinge_lamda*hinge_loss
             else:
-                total_loss = train_loss_ecg + cent_lamda*loss_cent + hinge_lamda*hinge_loss #TODO: check lamda for ecg
+                total_loss = train_loss_ecg + cent_weight*cent_lamda*loss_cent + hinge_weight*hinge_lamda*hinge_loss #TODO: check lamda for ecg
 
             #print(total_loss.dtype)
             total_loss.backward()
@@ -182,12 +184,12 @@ def main():
             optimizer_centloss.step()
 
             if(not real_epoch):
-                total_loss_m += train_loss_mecg.item()
-                total_loss_f += fecg_lamda*train_loss_fecg.item()
+                total_loss_m += mecg_weight*train_loss_mecg.item()
+                total_loss_f += fecg_weight*fecg_lamda*train_loss_fecg.item()
             else:
-                total_loss_ecg += train_loss_ecg.item()
-            total_loss_cent += cent_lamda*loss_cent.item()
-            total_loss_hinge += hinge_lamda*hinge_loss.item()
+                total_loss_ecg += train_loss_ecg.item()#TODO: check adding lamdas and weights
+            total_loss_cent += cent_weight*cent_lamda*loss_cent.item()
+            total_loss_hinge += hinge_weight*hinge_lamda*hinge_loss.item()
             total_loss_epoch += total_loss
             del batch_features
             torch.cuda.empty_cache()
@@ -200,7 +202,7 @@ def main():
             total_loss_ecg = total_loss_ecg / (len(data_loader))
         total_loss_cent = total_loss_cent / (len(data_loader))
         total_loss_hinge = total_loss_hinge / (len(data_loader))
-        total_loss = total_loss / (len(data_loader))
+        total_loss_epoch = total_loss_epoch / (len(data_loader))
         # display the epoch training loss
         if(not real_epoch):
             print("epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}, loss_cent = {:.8f}, loss_hinge = {:.8f}".format(epoch + 1, epochs, total_loss_epoch, total_loss_m, total_loss_f, total_loss_cent, total_loss_hinge))

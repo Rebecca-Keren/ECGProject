@@ -12,7 +12,7 @@ class ResNetEncoder(nn.Module):
         self.conv1 = nn.Conv1d(in_channels, self.blocks_sizes[0], kernel_size= 3, stride=1, padding=1, bias=False)
         self.batch = nn.BatchNorm1d(self.blocks_sizes[0])
         self.relu = activation()
-        self.maxpool1d = nn.MaxPool1d(kernel_size=3, stride=1, padding=1, return_indices = True)
+        self.maxpool1d = nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
 
         # self.gate = nn.Sequential(
         #     nn.Conv1d(in_channels, self.blocks_sizes[0], kernel_size= 3, stride=1, padding=1, bias=False),
@@ -34,13 +34,15 @@ class ResNetEncoder(nn.Module):
 
     def forward(self, x):
         #print(x.size())
-        x, indices = self.maxpool1d(x)
+        #x, indices = self.maxpool1d(x)
         x = self.conv1(x.float())
         x = self.batch(x)
         x = self.relu(x)
+        x = self.maxpool1d(x)
+
         for block in self.blocks:
             x = block(x)
-        return x, indices
+        return x
 
 class ResnetDecoder(nn.Module):
     """
@@ -53,13 +55,15 @@ class ResnetDecoder(nn.Module):
 
         self.blocks_sizes = blocks_sizes
         self.last_block_index = len(blocks_sizes) - 1
-
-        self.exit = nn.Sequential(
-            nn.ConvTranspose1d(blocks_sizes[self.last_block_index], in_channels, kernel_size=3, stride=2, padding=1, output_padding=1,bias=False),
-            nn.BatchNorm1d(in_channels),
-            activation()
-        )
-        self.last_layer = nn.MaxUnpool1d(kernel_size=3, stride=1, padding=1)
+        self.convT = nn.ConvTranspose1d(blocks_sizes[self.last_block_index], in_channels, kernel_size=3, stride=2, padding=1, output_padding=1,bias=False)
+        self.batch_norm = nn.BatchNorm1d(in_channels)
+        self.activation_function = nn.ReLU()
+        # self.exit = nn.Sequential(
+        #     nn.ConvTranspose1d(blocks_sizes[self.last_block_index], in_channels, kernel_size=3, stride=2, padding=1, output_padding=1,bias=False),
+        #     nn.BatchNorm1d(in_channels),
+        #     activation()
+        # )
+        #self.last_layer = nn.MaxUnpool1d(kernel_size=3, stride=1, padding=1)
 
         self.in_out_block_sizes = list(zip(blocks_sizes[1:], blocks_sizes[2:]))
         self.blocks = nn.ModuleList([
@@ -71,12 +75,20 @@ class ResnetDecoder(nn.Module):
               for (in_channels, out_channels), n in zip(self.in_out_block_sizes, deepths[1:])]
         ])
 
-    def forward(self, x, indices):
+    def forward(self, x):
+        # print("s")
         for block in self.blocks:
             x = block(x)
-        x = self.exit(x)
+            # print(x.size())
+        #print("e")
+        #x = self.exit(x)
+        x =self.convT(x)
+        x = self.batch_norm(x)
         one_before_last = x.clone()
+        x = self.activation_function(x)
         # print(x.size())
-        # print(indices.size())
-        x = self.last_layer(x, indices)
+        # # print(indices.size())
+        # x = self.last_layer(x, indices)
+        # print("after")
+        # print(x.size())
         return x,one_before_last
