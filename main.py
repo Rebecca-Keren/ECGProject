@@ -18,6 +18,12 @@ BATCH_SIZE = 16
 epochs = 100
 learning_rate = 1e-3
 delta = 1e-2
+fecg_lamda = 10
+cent_lamda = 1e-3
+hinge_lamda = 100
+mecg_weight = fecg_weight = 0.35
+cent_weight = 0.15
+hinge_weight = 0.15
 
 class ResNet(nn.Module):
     def __init__(self, in_channels, *args, **kwargs):
@@ -158,7 +164,7 @@ def main():
 
             #Clustering loss(one before last decoder M, one before last decoder F)
             hinge_loss = criterion_hinge_loss(one_before_last_m, one_before_last_f,delta)
-            hinge_loss = torch.tensor(hinge_loss,dtype=torch.float32)
+            hinge_loss = torch.tensor(hinge_loss , dtype=torch.float32)
 
             # print(train_loss_mecg.float().dtype)
             # print(train_loss_fecg.float().dtype)
@@ -166,9 +172,9 @@ def main():
             # print(torch.tensor(hinge_loss,dtype=torch.float32).dtype)
 
             if(not real_epoch):
-                total_loss = train_loss_mecg + train_loss_fecg + loss_cent + hinge_loss
+                total_loss = train_loss_mecg + fecg_lamda*train_loss_fecg + cent_lamda*loss_cent + hinge_lamda*hinge_loss
             else:
-                total_loss = train_loss_ecg + loss_cent + hinge_loss
+                total_loss = train_loss_ecg + cent_lamda*loss_cent + hinge_lamda*hinge_loss #TODO: check lamda for ecg
 
             #print(total_loss.dtype)
             total_loss.backward()
@@ -177,11 +183,11 @@ def main():
 
             if(not real_epoch):
                 total_loss_m += train_loss_mecg.item()
-                total_loss_f += train_loss_fecg.item()
+                total_loss_f += fecg_lamda*train_loss_fecg.item()
             else:
                 total_loss_ecg += train_loss_ecg.item()
-            total_loss_cent += loss_cent.item()
-            total_loss_hinge += hinge_loss.item()
+            total_loss_cent += cent_lamda*loss_cent.item()
+            total_loss_hinge += hinge_lamda*hinge_loss.item()
             total_loss_epoch += total_loss
             del batch_features
             torch.cuda.empty_cache()
