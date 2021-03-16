@@ -73,15 +73,18 @@ class SimulatedDataset(Dataset):
         path_mix = os.path.join(self.simulated_dir, self.simulated_signals[idx][0])
         path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
         path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
-        mix =  torch.from_numpy(loadmat(path_mix)['data']) #TODO cambiare il cast
-        mecg =  torch.from_numpy(loadmat(path_mecg)['data'])
-        fecg =  torch.from_numpy(loadmat(path_fecg)['data'])
+        mix = torch.from_numpy(loadmat(path_mix)['data']) #TODO cambiare il cast
+        mecg = torch.from_numpy(loadmat(path_mecg)['data'])
+        fecg = torch.from_numpy(loadmat(path_fecg)['data'])
         return mix,mecg,fecg
 
 def main():
-    #torch.set_default_tensor_type('torch.FloatTensor')
     list_simulated = simulated_database_list(SIMULATED_DATASET)
-    #print(list_simulated)
+    for i in list_simulated:
+        print(i)
+    print(len(list_simulated))
+    print(list_simulated)
+
     #real_dataset = RealDataset(REAL_DATASET)
     simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated)
 
@@ -102,14 +105,12 @@ def main():
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     #resnet_model = ResNet(1).to(device)
-    resnet_model = ResNet(1)
+    resnet_model = ResNet(1) # 1 for the initial input channel
     optimizer_model = optim.Adam(resnet_model.parameters(), lr=learning_rate)
 
     criterion = nn.MSELoss()
-
     criterion_cent = CenterLoss(num_classes=2, feat_dim=1024, use_gpu=device)
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
-
 
     for epoch in range(epochs):
         total_loss_epoch = 0
@@ -128,13 +129,16 @@ def main():
         data_loader = train_data_loader_sim
 
         for i, batch_features in enumerate(data_loader):
-            #print(i)
             if (real_epoch):
                 batch_for_model = batch_features.to(device)
             else:
-                batch_for_model = batch_features[0].to(device)
-                batch_for_m =  batch_features[1].to(device)
-                batch_for_f = batch_features[2].to(device)
+                batch_for_model = batch_features[0]
+                batch_for_m = batch_features[1]
+                batch_for_f = batch_features[2]
+                # batch_for_model = batch_features[0].to(device)
+                # batch_for_m =  batch_features[1].to(device)
+                # batch_for_f = batch_features[2].to(device)
+
             batch_size = batch_for_model.size()[0]
             # print("batch: "+str(batch_for_model.size()[0]))
             optimizer_model.zero_grad()
