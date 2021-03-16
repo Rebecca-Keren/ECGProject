@@ -10,6 +10,7 @@ import numpy as np
 from torch.utils.data import Dataset
 from scipy.io import loadmat
 import os
+import matplotlib.pyplot as plt
 
 #REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Real Database") #TODO sistemare grandezza
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
@@ -73,17 +74,17 @@ class SimulatedDataset(Dataset):
         path_mix = os.path.join(self.simulated_dir, self.simulated_signals[idx][0])
         path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
         path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
-        mix = torch.from_numpy(loadmat(path_mix)['data']) #TODO cambiare il cast
+        mix = torch.from_numpy(loadmat(path_mix)['data'])
         mecg = torch.from_numpy(loadmat(path_mecg)['data'])
         fecg = torch.from_numpy(loadmat(path_fecg)['data'])
         return mix,mecg,fecg
 
 def main():
     list_simulated = simulated_database_list(SIMULATED_DATASET)
-    for i in list_simulated:
-        print(i)
-    print(len(list_simulated))
-    print(list_simulated)
+    # for i in list_simulated:
+    #     print(i)
+    # print(len(list_simulated))
+    # print(list_simulated)
 
     #real_dataset = RealDataset(REAL_DATASET)
     simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated)
@@ -106,6 +107,7 @@ def main():
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     #resnet_model = ResNet(1).to(device)
     resnet_model = ResNet(1) # 1 for the initial input channel
+
     optimizer_model = optim.Adam(resnet_model.parameters(), lr=learning_rate)
 
     criterion = nn.MSELoss()
@@ -113,6 +115,7 @@ def main():
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):
+
         total_loss_epoch = 0
         total_loss_m = 0
         total_loss_f = 0
@@ -135,6 +138,13 @@ def main():
                 batch_for_model = batch_features[0]
                 batch_for_m = batch_features[1]
                 batch_for_f = batch_features[2]
+                # plt.plot(batch_for_f[0])
+                # plt.show()
+                # plt.plot(batch_for_m[0])
+                # plt.show()
+                # plt.plot(batch_for_model[0])
+                # plt.show()
+
                 # batch_for_model = batch_features[0].to(device)
                 # batch_for_m =  batch_features[1].to(device)
                 # batch_for_f = batch_features[2].to(device)
@@ -149,6 +159,9 @@ def main():
             batch_for_m = batch_for_m.transpose(1, 2)
             batch_for_f = batch_for_f.transpose(1, 2)
             outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model.double())
+
+            #plt.plot(outputs_f[0][0].detach().numpy())
+            #plt.show()
 
             if(not real_epoch):
                 #COST(M,M^)
@@ -170,7 +183,7 @@ def main():
 
             #Clustering loss(one before last decoder M, one before last decoder F)
             hinge_loss = criterion_hinge_loss(one_before_last_m, one_before_last_f,delta)
-            hinge_loss = torch.tensor(hinge_loss , dtype=torch.float32)
+            #hinge_loss = torch.tensor(hinge_loss , dtype=torch.float32) //TODO: check
 
             if(not real_epoch):
                 total_loss = 0
@@ -224,6 +237,5 @@ def main():
     torch.cuda.empty_cache()
 
 if __name__=="__main__":
-    device = torch.device("cuda:1" if (torch.cuda.is_available()) else "cpu")
-    #print(device)
+    device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     main()

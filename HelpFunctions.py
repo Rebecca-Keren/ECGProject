@@ -24,20 +24,22 @@ def activation_func(activation):
 def criterion_hinge_loss(m_feature,f_feature,delta):
     # m_normalized = torch.norm(m_feature)
     # f_normalized = torch.norm(f_feature)
-
+    #print(f_feature.size())
     distance = nn.functional.mse_loss(m_feature,f_feature)
+    #print(delta)
     return nn.functional.relu(delta - distance)
 
 def simulated_database_list(sim_dir):
     list = []
+    signal_given = []
     for filename in os.listdir(sim_dir):
         if 'mix' not in filename:
             continue
         name = filename[:(filename.find("mix"))]
-        if 'mix0' in filename:
-            list.append([filename, name + 'mecg0', name + 'fecg10'])
-        elif 'mix1' in filename:
-            list.append([filename, name + 'mecg1', name + 'fecg11'])
+        if name not in signal_given:
+            signal_given.append(name);
+            for i in range(73):
+                list.append([name + 'mix' + str(i), name + 'mecg' + str(i) , name + 'fecg1' + str(i)])
         else:
-            list.append([filename, name + 'mecg2', name + 'fecg12'])
+            continue
     return list
