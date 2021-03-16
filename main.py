@@ -18,12 +18,19 @@ BATCH_SIZE = 16
 epochs = 100
 learning_rate = 1e-3
 delta = 1e-2
+
 fecg_lamda = 1
 cent_lamda = 1
 hinge_lamda = 1
+
 mecg_weight = fecg_weight = 1
 cent_weight = 1
 hinge_weight = 1
+
+include_mecg_loss = True
+include_fecg_loss = True
+include_center_loss = True
+include_hinge_loss = True
 
 class ResNet(nn.Module):
     def __init__(self, in_channels, *args, **kwargs):
@@ -168,13 +175,16 @@ def main():
             hinge_loss = criterion_hinge_loss(one_before_last_m, one_before_last_f,delta)
             hinge_loss = torch.tensor(hinge_loss , dtype=torch.float32)
 
-            # print(train_loss_mecg.float().dtype)
-            # print(train_loss_fecg.float().dtype)
-            # print(loss_cent.dtype)
-            # print(torch.tensor(hinge_loss,dtype=torch.float32).dtype)
-
             if(not real_epoch):
-                total_loss = mecg_weight*train_loss_mecg + fecg_weight*fecg_lamda*train_loss_fecg + cent_weight*cent_lamda*loss_cent + hinge_weight*hinge_lamda*hinge_loss
+                total_loss = 0
+                if(include_mecg_loss):
+                    total_loss = total_loss + mecg_weight * train_loss_mecg
+                if(include_fecg_loss):
+                    total_loss = total_loss + fecg_weight*fecg_lamda*train_loss_fecg
+                if(include_center_loss):
+                    total_loss = total_loss + cent_weight*cent_lamda*loss_cent
+                if(include_hinge_loss):
+                    total_loss = total_loss + hinge_weight*hinge_lamda*hinge_loss
             else:
                 total_loss = train_loss_ecg + cent_weight*cent_lamda*loss_cent + hinge_weight*hinge_lamda*hinge_loss #TODO: check lamda for ecg
 
