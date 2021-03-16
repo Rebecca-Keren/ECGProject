@@ -141,18 +141,13 @@ def main():
             optimizer_centloss.zero_grad()
 
             #outputs_m,one_before_last_m,outputs_f,one_before_last_f = resnet_model(batch_for_model).to(device)
-            #print(batch_for_model.size())
             batch_for_model = batch_for_model.transpose(1,2)
             batch_for_m = batch_for_m.transpose(1, 2)
             batch_for_f = batch_for_f.transpose(1, 2)
-
-            #print(batch_for_model.size())
             outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model.double())
 
             if(not real_epoch):
                 #COST(M,M^)
-                #print(batch_for_m.size())
-                #print(outputs_m.size())
                 train_loss_mecg = criterion(batch_for_m.float(),outputs_m)
                 #COST(F,F^)
                 train_loss_fecg = criterion(batch_for_f.float(),outputs_f)
@@ -161,8 +156,6 @@ def main():
                 train_loss_ecg = criterion(batch_for_model.float(),outputs_m)
 
             #Center loss(one before last decoder M, one before last decoder F)
-            # print(outputs_m.size())
-            # print(outputs_f.size())
             flatten_m,flatten_f = torch.flatten(one_before_last_m,start_dim=1), torch.flatten(one_before_last_f,start_dim=1)
             input = torch.cat((flatten_f,flatten_m), 0)
             first_label,second_label = torch.zeros(batch_size), torch.ones(batch_size)
