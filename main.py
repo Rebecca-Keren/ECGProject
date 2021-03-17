@@ -19,7 +19,7 @@ ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutp
 BATCH_SIZE = 16
 epochs = 100
 learning_rate = 1e-3
-delta = 1e-2
+delta = 0.1
 
 fecg_lamda = 1
 cent_lamda = 1
@@ -83,10 +83,6 @@ class SimulatedDataset(Dataset):
 
 def main():
     list_simulated = simulated_database_list(SIMULATED_DATASET)
-    # for i in list_simulated:
-    #     print(i)
-    # print(len(list_simulated))
-    # print(list_simulated)
 
     #real_dataset = RealDataset(REAL_DATASET)
     simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated)
@@ -107,6 +103,7 @@ def main():
 
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
+
     #resnet_model = ResNet(1).to(device)
     resnet_model = ResNet(1) # 1 for the initial input channel
 
@@ -158,7 +155,7 @@ def main():
 
             #outputs_m,one_before_last_m,outputs_f,one_before_last_f = resnet_model(batch_for_model).to(device)
             batch_for_model = batch_for_model.transpose(1,2)
-            batch_for_m = batch_for_m.transpose(1, 2)
+            batch_for_m = batch_for_m.transpose(1, 2) # switching the second and third dimentions since they are reversed
             batch_for_f = batch_for_f.transpose(1, 2)
             outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model.double())
 
@@ -167,9 +164,11 @@ def main():
 
             # plt.plot(outputs_f[0][0].detach().numpy())
             # plt.show()
-            if(epoch == 99):
+            if(epoch == 24):
                 path = os.path.join(ECG_OUTPUTS, "fecg" + str(i))
                 np.save(path, outputs_f[0][0].detach().numpy())
+                path = os.path.join(ECG_OUTPUTS, "mecg" + str(i))
+                np.save(path, outputs_m[0][0].detach().numpy())
 
             if(not real_epoch):
                 #COST(M,M^)
@@ -191,7 +190,8 @@ def main():
 
             #Clustering loss(one before last decoder M, one before last decoder F)
             hinge_loss = criterion_hinge_loss(one_before_last_m, one_before_last_f,delta)
-            hinge_loss = torch.tensor(hinge_loss , dtype=torch.float32) #TODO: check
+            hinge_loss = hinge_loss.clone().detach().requires_grad_(True)
+            #hinge_loss = torch.tensor(hinge_loss , dtype=torch.float32) #TODO: check
 
             if(not real_epoch):
                 total_loss = 0
@@ -248,5 +248,12 @@ if __name__=="__main__":
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     main()
     for filename in os.listdir(ECG_OUTPUTS): #present the fecg outputs
-        plt.plot(np.load(filename))
-        plt.show()
+        if "fecg" in filename:
+            path = os.path.join(ECG_OUTPUTS, filename)
+            plt.plot(np.load(path))
+            plt.show()
+        print ("mecg")
+        if "mecg" in filename:
+            path = os.path.join(ECG_OUTPUTS, filename)
+            plt.plot(np.load(path))
+            plt.show()

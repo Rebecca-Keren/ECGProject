@@ -14,18 +14,8 @@ class Conv1dAuto(nn.Conv1d):
         self.padding = (self.kernel_size[0] // 2,)  # dynamic add padding based on the kernel_size
         # print(self.kernel_size, self.padding)
 
-
-def activation_func(activation):
-    return nn.ModuleDict([
-        ['relu', nn.ReLU(inplace=True)],
-        ['leaky_relu', nn.LeakyReLU(negative_slope=0.01, inplace=True)],
-        ['selu', nn.SELU(inplace=True)],
-        ['none', nn.Identity()]
-    ])[activation]
-
-
 class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, activation='relu'):
+    def __init__(self, in_channels, out_channels, activation='leaky_relu'):
         super().__init__()
         self.in_channels, self.out_channels, self.activation = in_channels, out_channels, activation
         self.blocks = nn.Identity()
@@ -113,17 +103,16 @@ class ResNetLayer(nn.Module):
         return x
 
 class ResNetBasicBlockDecoder(nn.Module):
-    def __init__(self, in_channels, out_channels, activation='relu', expansion=1, downsampling=1, output_padding = 0, *args,
+    def __init__(self, in_channels, out_channels, activation='leaky_relu', expansion=1, downsampling=1, output_padding = 0, *args,
                  **kwargs):
         super().__init__()
         self.in_channels, self.out_channels, self.activation, self.expansion, self.downsampling,self.output_padding= in_channels, out_channels, activation, expansion, downsampling, output_padding
         self.blocks = nn.Sequential(
             nn.ConvTranspose1d(self.in_channels, self.out_channels, kernel_size=3, padding=1, bias=False, stride=self.downsampling,output_padding = self.output_padding),
             nn.BatchNorm1d(out_channels),
-            nn.ReLU(inplace=True),
+            activation_func(activation),
             nn.ConvTranspose1d(self.out_channels, self.expanded_channels, kernel_size=3, padding=1, bias=False),
             nn.BatchNorm1d(out_channels), )
-        #self.activate = activation_func(activation)
         self.shortcut = nn.Sequential(nn.ConvTranspose1d(self.in_channels, self.expanded_channels, kernel_size=3,
                                            stride=self.downsampling,output_padding = self.output_padding, padding=1, bias=False),
                                       nn.BatchNorm1d(self.expanded_channels)) if self.should_apply_shortcut else None

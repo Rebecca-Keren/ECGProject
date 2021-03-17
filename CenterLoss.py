@@ -21,13 +21,18 @@ class CenterLoss(nn.Module):
             labels: ground truth labels with shape (batch_size).
         """
         batch_size = x.size(0)
+        # print("batch size")
+        # print(batch_size)
         distmat = torch.pow(x, 2).sum(dim=1, keepdim=True).expand(batch_size, self.num_classes) + \
                   torch.pow(self.centers, 2).sum(dim=1, keepdim=True).expand(self.num_classes, batch_size).t()
         #distmat.addmm_(1, -2, x, self.centers.t())
+        # print("dismat:")
         # print(distmat.size())
+        # print("x")
         # print(x.size())
+        # print("centers:")
         # print(self.centers.t().size())
-        torch.addmm(distmat,x,self.centers.t(), beta=-2, alpha=1)
+        distmat = torch.addmm(distmat,x,self.centers.t(), beta=1, alpha=-2)
 
         classes = torch.arange(self.num_classes).long()
         # if self.use_gpu: classes = classes.cuda()

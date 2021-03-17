@@ -39,14 +39,14 @@ class ResnetDecoder(nn.Module):
     correct class by using a fully connected layer.
     """
     def __init__(self, in_channels=1, blocks_sizes=[128, 64, 32, 16], deepths=[2, 2, 2],
-                 activation=nn.ReLU, block=ResNetBasicBlockDecoder, *args, **kwargs):
+                 activation='leaky_relu', block=ResNetBasicBlockDecoder, *args, **kwargs):
         super().__init__()
 
         self.blocks_sizes = blocks_sizes
         self.last_block_index = len(blocks_sizes) - 1
         self.convT = nn.ConvTranspose1d(blocks_sizes[self.last_block_index], in_channels, kernel_size=3, stride=2, padding=1, output_padding=1,bias=False)
         self.batch_norm = nn.BatchNorm1d(in_channels)
-        self.activation_function = nn.LeakyReLU(negative_slope=1.5, inplace=True)
+        self.activation_function = activation_func(activation)
         # self.exit = nn.Sequential(
         #     nn.ConvTranspose1d(blocks_sizes[self.last_block_index], in_channels, kernel_size=3, stride=2, padding=1, output_padding=1,bias=False),
         #     nn.BatchNorm1d(in_channels),
