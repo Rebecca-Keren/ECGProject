@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 #REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Real Database") #TODO sistemare grandezza
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
+ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs")
 
 BATCH_SIZE = 16
 epochs = 100
@@ -42,7 +43,7 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         x = self.encoder(x)
-        print(x.size())
+        #print(x.size())
         latent_half = int((x.size()[2] / 2))
         m = x[:,:,:latent_half]
         f = x[:,:,latent_half:]
@@ -112,7 +113,7 @@ def main():
     optimizer_model = optim.Adam(resnet_model.parameters(), lr=learning_rate)
 
     criterion = nn.MSELoss()
-    criterion_cent = CenterLoss(num_classes=2, feat_dim=1024, use_gpu=device)
+    criterion_cent = CenterLoss(num_classes=2, feat_dim=8192, use_gpu=device)
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):
@@ -161,8 +162,14 @@ def main():
             batch_for_f = batch_for_f.transpose(1, 2)
             outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model.double())
 
-            #plt.plot(outputs_f[0][0].detach().numpy())
-            #plt.show()
+            # print(one_before_last_f.size())
+            # print(one_before_last_m.size())
+
+            # plt.plot(outputs_f[0][0].detach().numpy())
+            # plt.show()
+            if(epoch == 99):
+                path = os.path.join(ECG_OUTPUTS, "fecg" + str(i))
+                np.save(path, outputs_f[0][0].detach().numpy())
 
             if(not real_epoch):
                 #COST(M,M^)
@@ -184,7 +191,7 @@ def main():
 
             #Clustering loss(one before last decoder M, one before last decoder F)
             hinge_loss = criterion_hinge_loss(one_before_last_m, one_before_last_f,delta)
-            #hinge_loss = torch.tensor(hinge_loss , dtype=torch.float32) //TODO: check
+            hinge_loss = torch.tensor(hinge_loss , dtype=torch.float32) #TODO: check
 
             if(not real_epoch):
                 total_loss = 0
@@ -240,3 +247,6 @@ def main():
 if __name__=="__main__":
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     main()
+    for filename in os.listdir(ECG_OUTPUTS): #present the fecg outputs
+        plt.plot(np.load(filename))
+        plt.show()

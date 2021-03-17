@@ -6,7 +6,7 @@ class ResNetEncoder(nn.Module):
     """
 
     def __init__(self, in_channels, blocks_sizes,
-                 n,block = ResNet753Block, activation='relu', *args, **kwargs):
+                 n,block = ResNet753Block, activation='leaky_relu', *args, **kwargs):
         super().__init__()
         self.blocks_sizes = blocks_sizes
 
@@ -28,7 +28,7 @@ class ResNetEncoder(nn.Module):
         ])
 
     def forward(self, x):
-        x = self.gate(x)
+        x = self.gate(x.float())
         for block in self.blocks:
             x = block(x)
         return x
@@ -46,7 +46,7 @@ class ResnetDecoder(nn.Module):
         self.last_block_index = len(blocks_sizes) - 1
         self.convT = nn.ConvTranspose1d(blocks_sizes[self.last_block_index], in_channels, kernel_size=3, stride=2, padding=1, output_padding=1,bias=False)
         self.batch_norm = nn.BatchNorm1d(in_channels)
-        self.activation_function = nn.ReLU()
+        self.activation_function = nn.LeakyReLU(negative_slope=1.5, inplace=True)
         # self.exit = nn.Sequential(
         #     nn.ConvTranspose1d(blocks_sizes[self.last_block_index], in_channels, kernel_size=3, stride=2, padding=1, output_padding=1,bias=False),
         #     nn.BatchNorm1d(in_channels),
@@ -69,13 +69,15 @@ class ResnetDecoder(nn.Module):
         for block in self.blocks:
             x = block(x)
             # print(x.size())
-        #print("e")
+
         #x = self.exit(x)
+        one_before_last = x.clone()
         x =self.convT(x)
         x = self.batch_norm(x)
-        one_before_last = x.clone()
         x = self.activation_function(x)
+
         # print(x.size())
+        # print("e")
         # # print(indices.size())
         # x = self.last_layer(x, indices)
         # print("after")
