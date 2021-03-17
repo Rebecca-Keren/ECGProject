@@ -34,14 +34,15 @@ include_center_loss = True
 include_hinge_loss = True
 
 class ResNet(nn.Module):
-    def __init__(self, in_channels, *args, **kwargs):
+    def __init__(self, in_channels,block_sizes = [64, 128, 128],n =3,*args, **kwargs):
         super().__init__()
-        self.encoder = ResNetEncoder(in_channels, *args, **kwargs)
+        self.encoder = ResNetEncoder(in_channels,block_sizes,n,*args, **kwargs)
         self.Mdecoder = ResnetDecoder()
         self.Fdecoder = ResnetDecoder()
 
     def forward(self, x):
         x = self.encoder(x)
+        print(x.size())
         latent_half = int((x.size()[2] / 2))
         m = x[:,:,:latent_half]
         f = x[:,:,latent_half:]

@@ -2,43 +2,33 @@ from ResnetBasics import *
 
 class ResNetEncoder(nn.Module):
     """
-    ResNet encoder composed by increasing different layers with increasing features.
+    ResNet encoder composed by layers with increasing features.
     """
-    def __init__(self, in_channels = 1, blocks_sizes=[16, 32, 64, 128], deepths=[2, 2, 2, 2],
-                 activation=nn.ReLU,block=ResNetBasicBlockEncoder, *args, **kwargs):
+
+    def __init__(self, in_channels, blocks_sizes,
+                 n,block = ResNet753Block, activation='relu', *args, **kwargs):
         super().__init__()
-
         self.blocks_sizes = blocks_sizes
-        self.conv1 = nn.Conv1d(in_channels, self.blocks_sizes[0], kernel_size= 3, stride=1, padding=1, bias=False)
-        self.batch = nn.BatchNorm1d(self.blocks_sizes[0])
-        self.relu = activation()
-        self.maxpool1d = nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
 
-        # self.gate = nn.Sequential(
-        #     nn.Conv1d(in_channels, self.blocks_sizes[0], kernel_size= 3, stride=1, padding=1, bias=False),
-        #     nn.BatchNorm1d(self.blocks_sizes[0]),
-        #     activation(),
-        #     nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
-        # )
+        self.gate = nn.Sequential(
+            nn.Conv1d(in_channels, blocks_sizes[0], kernel_size=7, stride=2, padding=3, bias=False),
+            nn.BatchNorm1d(blocks_sizes[0]),
+            activation_func(activation),
+            nn.MaxPool1d(kernel_size=3, stride=2, padding=1),
+        )
 
         self.in_out_block_sizes = list(zip(blocks_sizes, blocks_sizes[1:]))
         self.blocks = nn.ModuleList([
-            ResNetLayerEncoder(blocks_sizes[0], blocks_sizes[0], n=deepths[0], activation=activation,
+            ResNetLayer(blocks_sizes[0], blocks_sizes[0], n=1, activation=activation,
                         block=block, *args, **kwargs),
-            *[ResNetLayerEncoder(in_channels,
+            *[ResNetLayer(in_channels,
                           out_channels, n=n, activation=activation,
                           block=block, *args, **kwargs)
-              for (in_channels, out_channels), n in zip(self.in_out_block_sizes, deepths[1:])]
+              for k, (in_channels, out_channels) in enumerate(self.in_out_block_sizes)]
         ])
 
     def forward(self, x):
-        #print(x.size())
-        #x, indices = self.maxpool1d(x)
-        x = self.conv1(x.float())
-        x = self.batch(x)
-        x = self.relu(x)
-        x = self.maxpool1d(x)
-
+        x = self.gate(x)
         for block in self.blocks:
             x = block(x)
         return x
