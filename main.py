@@ -22,8 +22,8 @@ learning_rate = 1e-3
 delta = 0.1
 
 fecg_lamda = 1
-cent_lamda = 1
-hinge_lamda = 1
+cent_lamda = 1/10000
+hinge_lamda = 10
 
 mecg_weight = fecg_weight = 1
 cent_weight = 1
@@ -164,7 +164,7 @@ def main():
 
             # plt.plot(outputs_f[0][0].detach().numpy())
             # plt.show()
-            if(epoch == 24):
+            if(epoch == 99):
                 path = os.path.join(ECG_OUTPUTS, "fecg" + str(i))
                 np.save(path, outputs_f[0][0].detach().numpy())
                 path = os.path.join(ECG_OUTPUTS, "mecg" + str(i))

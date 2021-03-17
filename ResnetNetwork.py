@@ -73,8 +73,8 @@ class ResnetDecoder(nn.Module):
         #x = self.exit(x)
         one_before_last = x.clone()
         x =self.convT(x)
-        x = self.batch_norm(x)
-        x = self.activation_function(x)
+        # x = self.batch_norm(x)
+        # x = self.activation_function(x)
 
         # print(x.size())
         # print("e")
