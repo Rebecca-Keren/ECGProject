@@ -3,6 +3,7 @@ import torch.nn as nn
 import os
 import numpy as np
 
+
 def increase_sampling_rate(signal,rate):
     signal_size = len(signal)
     x = [j for j in range(signal_size)]
@@ -43,3 +44,13 @@ def simulated_database_list(sim_dir):
         else:
             continue
     return list
+
+
+if __name__ == '__main__':
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    path = os.path.join(dir_path, "fecg0")
+    plt.plot(np.load(path))
+    plt.show()
+    path = os.path.join(dir_path, "mecg0")
+    plt.plot(np.load(path))
+    plt.show()

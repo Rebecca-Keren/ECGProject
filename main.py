@@ -4,14 +4,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data
-import torchvision
+# import torchvision
 from CenterLoss import *
 import numpy as np
 from torch.utils.data import Dataset
 from scipy.io import loadmat
 import os
-import matplotlib.pyplot as plt
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
 #REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Real Database") #TODO sistemare grandezza
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
@@ -38,18 +38,20 @@ include_hinge_loss = True
 class ResNet(nn.Module):
     def __init__(self, in_channels,*args, **kwargs):
         super().__init__()
-        self.encoder = ResNetEncoder(in_channels,block_sizes = [64, 128, 128], n=3,*args, **kwargs)
+        self.encoder = ResNetEncoder(in_channels,*args, **kwargs)
         self.Mdecoder = ResnetDecoder()
         self.Fdecoder = ResnetDecoder()
 
     def forward(self, x):
-        x = self.encoder(x)
+        x = self.encoder(x.float())
         #print(x.size())
         latent_half = int((x.size()[2] / 2))
         m = x[:,:,:latent_half]
         f = x[:,:,latent_half:]
-        m_out,one_before_last_m = self.Mdecoder(m)
-        f_out, one_before_last_f = self.Fdecoder(f)
+        one_before_last_m = m
+        one_before_last_f = f
+        m_out = self.Mdecoder(m)
+        f_out = self.Fdecoder(f)
         return m_out,one_before_last_m,f_out,one_before_last_f
 
 class RealDataset(Dataset):
@@ -113,7 +115,7 @@ def main():
     optimizer_model = optim.Adam(resnet_model.parameters(), lr=learning_rate)
 
     criterion = nn.MSELoss()
-    criterion_cent = CenterLoss(num_classes=2, feat_dim=16*512, use_gpu=device)
+    criterion_cent = CenterLoss(num_classes=2, feat_dim=512*128, use_gpu=device)
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):
@@ -172,10 +174,10 @@ def main():
                 train_loss_mecg = criterion(batch_for_m.float(), outputs_m)
 
                 # print(criterion(batch_for_m[0][0].float(),outputs_m[0][0]))
-                plt.plot(batch_for_m[0][0])
-                plt.show()
-                plt.plot(outputs_m[0][0].detach().numpy())
-                plt.show()
+                # plt.plot(batch_for_m[0][0])
+                # plt.show()
+                # plt.plot(outputs_m[0][0].detach().numpy())
+                # plt.show()
 
                 #COST(F,F^)
                 train_loss_fecg = criterion(batch_for_f.float(),outputs_f)
@@ -251,7 +253,7 @@ def main():
 
 if __name__=="__main__":
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
-    main()
+    #main()
     for filename in os.listdir(ECG_OUTPUTS): #present the fecg outputs
         if "fecg" in filename:
             path = os.path.join(ECG_OUTPUTS, filename)
