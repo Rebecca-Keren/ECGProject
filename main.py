@@ -115,7 +115,7 @@ def main():
     optimizer_model = optim.Adam(resnet_model.parameters(), lr=learning_rate)
 
     criterion = nn.MSELoss()
-    criterion_cent = CenterLoss(num_classes=2, feat_dim=512*128, use_gpu=device)
+    criterion_cent = CenterLoss(num_classes=2, feat_dim=1024*128, use_gpu=device)
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):
@@ -253,7 +253,7 @@ def main():
 
 if __name__=="__main__":
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
-    #main()
+    main()
     for filename in os.listdir(ECG_OUTPUTS): #present the fecg outputs
         if "fecg" in filename:
             path = os.path.join(ECG_OUTPUTS, filename)
