@@ -25,13 +25,6 @@ class CenterLoss(nn.Module):
         # print(batch_size)
         distmat = torch.pow(x, 2).sum(dim=1, keepdim=True).expand(batch_size, self.num_classes) + \
                   torch.pow(self.centers, 2).sum(dim=1, keepdim=True).expand(self.num_classes, batch_size).t()
-        #distmat.addmm_(1, -2, x, self.centers.t())
-        # print("dismat:")
-        # print(distmat.size())
-        # print("x")
-        # print(x.size())
-        # print("centers:")
-        # print(self.centers.t().size())
         distmat = torch.addmm(distmat,x,self.centers.t(), beta=1, alpha=-2)
 
         classes = torch.arange(self.num_classes).long()

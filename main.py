@@ -11,6 +11,7 @@ from torch.utils.data import Dataset
 from scipy.io import loadmat
 import os
 import matplotlib.pyplot as plt
+import torch.nn.functional as F
 
 #REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)),"Real Database") #TODO sistemare grandezza
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
@@ -22,8 +23,8 @@ learning_rate = 1e-3
 delta = 0.1
 
 fecg_lamda = 1
-cent_lamda = 1/10000
-hinge_lamda = 10
+cent_lamda = 1
+hinge_lamda = 1
 
 mecg_weight = fecg_weight = 1
 cent_weight = 1
@@ -35,9 +36,9 @@ include_center_loss = True
 include_hinge_loss = True
 
 class ResNet(nn.Module):
-    def __init__(self, in_channels,block_sizes = [64, 128, 128],n =3,*args, **kwargs):
+    def __init__(self, in_channels,*args, **kwargs):
         super().__init__()
-        self.encoder = ResNetEncoder(in_channels,block_sizes,n,*args, **kwargs)
+        self.encoder = ResNetEncoder(in_channels,block_sizes = [64, 128, 128], n=3,*args, **kwargs)
         self.Mdecoder = ResnetDecoder()
         self.Fdecoder = ResnetDecoder()
 
@@ -84,8 +85,10 @@ class SimulatedDataset(Dataset):
 def main():
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
+    list_simulated_overfit = list_simulated[:100] # TODO: put in comment after validating
+
     #real_dataset = RealDataset(REAL_DATASET)
-    simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated)
+    simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
     #train_size_real = int(0.8 * len(real_dataset))
     #test_size_real = len(real_dataset) - train_size_real
@@ -110,7 +113,7 @@ def main():
     optimizer_model = optim.Adam(resnet_model.parameters(), lr=learning_rate)
 
     criterion = nn.MSELoss()
-    criterion_cent = CenterLoss(num_classes=2, feat_dim=8192, use_gpu=device)
+    criterion_cent = CenterLoss(num_classes=2, feat_dim=16*512, use_gpu=device)
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):
@@ -137,12 +140,6 @@ def main():
                 batch_for_model = batch_features[0]
                 batch_for_m = batch_features[1]
                 batch_for_f = batch_features[2]
-                # plt.plot(batch_for_f[0])
-                # plt.show()
-                # plt.plot(batch_for_m[0])
-                # plt.show()
-                # plt.plot(batch_for_model[0])
-                # plt.show()
 
                 # batch_for_model = batch_features[0].to(device)
                 # batch_for_m =  batch_features[1].to(device)
@@ -172,7 +169,14 @@ def main():
 
             if(not real_epoch):
                 #COST(M,M^)
-                train_loss_mecg = criterion(batch_for_m.float(),outputs_m)
+                train_loss_mecg = criterion(batch_for_m.float(), outputs_m)
+
+                # print(criterion(batch_for_m[0][0].float(),outputs_m[0][0]))
+                plt.plot(batch_for_m[0][0])
+                plt.show()
+                plt.plot(outputs_m[0][0].detach().numpy())
+                plt.show()
+
                 #COST(F,F^)
                 train_loss_fecg = criterion(batch_for_f.float(),outputs_f)
             else:
@@ -186,6 +190,7 @@ def main():
             labels = torch.cat((first_label,second_label))
             # print("input: " +str(input.size()))
             # print("labels: "+ str(labels.size()))
+            #print(one_before_last_m.size())
             loss_cent = criterion_cent(input, labels)
 
             #Clustering loss(one before last decoder M, one before last decoder F)
@@ -252,8 +257,8 @@ if __name__=="__main__":
             path = os.path.join(ECG_OUTPUTS, filename)
             plt.plot(np.load(path))
             plt.show()
-        print ("mecg")
         if "mecg" in filename:
+            print("mecg")
             path = os.path.join(ECG_OUTPUTS, filename)
             plt.plot(np.load(path))
             plt.show()
