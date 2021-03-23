@@ -19,6 +19,7 @@ def activation_func(activation):
         ['relu', nn.ReLU(inplace=True)],
         ['leaky_relu', nn.LeakyReLU(negative_slope=0.1, inplace=True)],
         ['selu', nn.SELU(inplace=True)],
+        ['tanh', nn.Tanh()],
         ['none', nn.Identity()]
     ])[activation]
 

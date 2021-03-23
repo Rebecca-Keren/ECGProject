@@ -32,8 +32,8 @@ hinge_weight = 1
 
 include_mecg_loss = True
 include_fecg_loss = True
-include_center_loss = True
-include_hinge_loss = True
+include_center_loss = False
+include_hinge_loss = False
 
 class ResNet(nn.Module):
     def __init__(self, in_channels,*args, **kwargs):
@@ -240,7 +240,13 @@ def main():
         total_loss_epoch = total_loss_epoch / (len(data_loader))
         # display the epoch training loss
         if(not real_epoch):
-            print("epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}, loss_cent = {:.8f}, loss_hinge = {:.8f}".format(epoch + 1, epochs, total_loss_epoch, total_loss_m, total_loss_f, total_loss_cent, total_loss_hinge))
+            if (include_center_loss == False and include_center_loss == False):
+                print("epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}".format(epoch + 1, epochs, total_loss_epoch, total_loss_m, total_loss_f))
+            else:
+                print(
+                    "epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}, loss_cent = {:.8f}, loss_hinge = {:.8f}".format(
+                        epoch + 1, epochs, total_loss_epoch, total_loss_m, total_loss_f, total_loss_cent,
+                        total_loss_hinge))
         else:
             print(
                 "epoch R : {}/{}, total_loss = {:.8f}, loss_ecg = {:.8f}, loss_cent = {:.8f}, loss_hinge = {:.8f}".format(
