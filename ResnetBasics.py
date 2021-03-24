@@ -8,13 +8,15 @@ from torch import nn
 from functools import partial
 
 class ResNetBasicBlockEncoder(nn.Module):
-    def __init__(self, in_channels, out_channels, activation='relu', expansion=1, downsampling=1, *args, **kwargs):
+    def __init__(self, in_channels, out_channels, activation='leaky_relu', expansion=1, downsampling=1, *args, **kwargs):
         super().__init__()
         self.in_channels, self.out_channels = in_channels , out_channels
         self.activation, self.expansion, self.downsampling = activation, expansion, downsampling
+
+        # nn.ReLU(inplace=True),
         self.blocks = nn.Sequential(nn.Conv1d(self.in_channels, self.out_channels,kernel_size= 3, padding = 1, bias=False, stride=self.downsampling),
                         nn.BatchNorm1d(out_channels),
-                        nn.ReLU(inplace=True),
+                        nn.LeakyReLU(negative_slope=0.1, inplace=True),
                         nn.Conv1d(self.out_channels, self.expanded_channels, kernel_size=3, padding=1,bias=False),
                         nn.BatchNorm1d(out_channels),)
         #self.activate = activation_func(activation)
@@ -58,7 +60,7 @@ class Conv1dAuto(nn.Conv1d):
         # print(self.kernel_size, self.padding)
 
 class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, activation='relu'):
+    def __init__(self, in_channels, out_channels, activation='leaky_relu'):
         super().__init__()
         self.in_channels, self.out_channels, self.activation = in_channels, out_channels, activation
         self.blocks = nn.Identity()
@@ -145,7 +147,7 @@ class ResNetLayer(nn.Module):
         return x
 
 class ResNetBasicBlockDecoder(nn.Module):
-    def __init__(self, in_channels, out_channels, activation='relu', expansion=1, downsampling=1, output_padding = 0, *args,
+    def __init__(self, in_channels, out_channels, activation='leaky_relu', expansion=1, downsampling=1, output_padding = 0, *args,
                  **kwargs):
         super().__init__()
         self.in_channels, self.out_channels, self.activation, self.expansion, self.downsampling,self.output_padding= in_channels, out_channels, activation, expansion, downsampling, output_padding

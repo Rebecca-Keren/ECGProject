@@ -6,13 +6,13 @@ class ResNetEncoder(nn.Module):
     ResNet encoder composed by increasing different layers with increasing features.
     """
     def __init__(self, in_channels = 1, blocks_sizes=[16, 32, 64, 128, 256, 512], deepths=[2, 2, 2, 2, 2, 2],
-                 activation=nn.ReLU,block=ResNetBasicBlockEncoder, *args, **kwargs):
+                 activation='leaky_relu',block=ResNetBasicBlockEncoder, *args, **kwargs):
         super().__init__()
 
         self.blocks_sizes = blocks_sizes
         self.conv1 = nn.Conv1d(in_channels, self.blocks_sizes[0], kernel_size= 3, stride=1, padding=1, bias=False)
         self.batch = nn.BatchNorm1d(self.blocks_sizes[0])
-        self.relu = activation()
+        self.relu = activation_func(activation)
         self.maxpool1d = nn.MaxPool1d(kernel_size=3, stride=1, padding=1)
 
 
@@ -96,7 +96,7 @@ class ResnetDecoder(nn.Module):
     correct class by using a fully connected layer.
     """
     def __init__(self, in_channels=1, blocks_sizes=[128, 64, 32, 16], deepths=[2, 2, 2],
-                 activation='relu', block=ResNetBasicBlockDecoder, *args, **kwargs):
+                 activation='leaky_relu', block=ResNetBasicBlockDecoder, *args, **kwargs):
         super().__init__()
 
         self.blocks_sizes = blocks_sizes

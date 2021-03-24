@@ -87,7 +87,7 @@ class SimulatedDataset(Dataset):
 def main():
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
-    list_simulated_overfit = list_simulated[:100] # TODO: put in comment after validating
+    list_simulated_overfit = list_simulated[:200] # TODO: put in comment after validating
 
     #real_dataset = RealDataset(REAL_DATASET)
     simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
@@ -163,7 +163,7 @@ def main():
 
             # plt.plot(outputs_f[0][0].detach().numpy())
             # plt.show()
-            if(epoch == 99):
+            if(epoch == 40):
                 path = os.path.join(ECG_OUTPUTS, "fecg" + str(i))
                 np.save(path, outputs_f[0][0].detach().numpy())
                 path = os.path.join(ECG_OUTPUTS, "mecg" + str(i))
@@ -240,7 +240,7 @@ def main():
         total_loss_epoch = total_loss_epoch / (len(data_loader))
         # display the epoch training loss
         if(not real_epoch):
-            if (include_center_loss == False and include_center_loss == False):
+            if (include_center_loss == False and include_hinge_loss == False):
                 print("epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}".format(epoch + 1, epochs, total_loss_epoch, total_loss_m, total_loss_f))
             else:
                 print(
@@ -259,7 +259,7 @@ def main():
 
 if __name__=="__main__":
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
-    main()
+    #main()
     for filename in os.listdir(ECG_OUTPUTS): #present the fecg outputs
         if "fecg" in filename:
             path = os.path.join(ECG_OUTPUTS, filename)
