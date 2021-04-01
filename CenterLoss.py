@@ -9,10 +9,10 @@ class CenterLoss(nn.Module):
         self.use_gpu = use_gpu
 
         if self.use_gpu:
-            #self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim).cuda())
-            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim))
+            #self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim).cuda(), requires_grad=True) TODO: if in cuda
+            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim), requires_grad=True)
         else:
-            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim))
+            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim), requires_grad=True)
 
     def forward(self, x, labels):
         """
@@ -28,7 +28,7 @@ class CenterLoss(nn.Module):
         distmat = torch.addmm(distmat,x,self.centers.t(), beta=1, alpha=-2)
 
         classes = torch.arange(self.num_classes).long()
-        # if self.use_gpu: classes = classes.cuda()
+        if self.use_gpu: classes = classes.cuda()
         labels = labels.unsqueeze(1).expand(batch_size, self.num_classes)
         mask = labels.eq(classes.expand(batch_size, self.num_classes))
 
