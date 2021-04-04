@@ -86,6 +86,7 @@ class ResnetDecoder(nn.Module):
     def forward(self, x):
         x = self.block1(x)
         x = self.block2(x)[:, :, :-1]
+        one_before_last = x
         x = self.block3(x)
         x = self.block4(x)
         x = self.block5(x)
@@ -98,4 +99,4 @@ class ResnetDecoder(nn.Module):
         x = self.block12(x)
         x = self.batch_norm(x)
         x = self.conv_out(x)[:, :, :-1]
-        return x
+        return x, one_before_last
