@@ -14,13 +14,13 @@ SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "S
 ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs")
 
 BATCH_SIZE = 10
-epochs = 1000
+epochs = 800
 learning_rate = 1e-3
-delta = 0.1
+delta = 5
 
 fecg_lamda = 10.
 cent_lamda = 1.
-hinge_lamda = 1.
+hinge_lamda = 0.5
 
 mecg_weight = fecg_weight = 1.
 cent_weight = 1.
@@ -29,7 +29,7 @@ hinge_weight = 1.
 include_mecg_loss = True
 include_fecg_loss = True
 include_center_loss = False
-include_hinge_loss = False
+include_hinge_loss = True
 
 
 class ResNet(nn.Module):
@@ -44,10 +44,10 @@ class ResNet(nn.Module):
         latent_half = x.size()[1] // 2
         m = x[:, :latent_half, :]
         f = x[:, latent_half:, :]
-        one_before_last_m = m
-        one_before_last_f = f
-        m_out = self.Mdecoder(m)
-        f_out = self.Fdecoder(f)
+        # one_before_last_m = m
+        # one_before_last_f = f
+        m_out,one_before_last_m = self.Mdecoder(m)
+        f_out,one_before_last_f = self.Fdecoder(f)
         return m_out, one_before_last_m, f_out, one_before_last_f
 
 
@@ -158,19 +158,19 @@ def main():
                 outputs_m += outputs_f
                 train_loss_ecg = criterion(outputs_m, batch_for_model)
 
-            # flatten_m, flatten_f = torch.flatten(one_before_last_m, start_dim=1), torch.flatten(one_before_last_f,
-            #                                                                                     start_dim=1)
-            # hinge_loss = criterion_hinge_loss(one_before_last_m, one_before_last_f, delta)
-            #
-            # labels_center_loss = Variable(torch.cat((torch.zeros(BATCH_SIZE), torch.ones(BATCH_SIZE))).cuda())
+            # flatten_m, flatten_f = torch.flatten(one_before_last_m, start_dim=1), torch.flatten(one_before_last_f, start_dim=1)
+            hinge_loss = criterion_hinge_loss(one_before_last_m, one_before_last_f, delta)
+
+            #labels_center_loss = Variable(torch.cat((torch.zeros(BATCH_SIZE), torch.ones(BATCH_SIZE))).cuda()) #TODO: for gpu running
+            # labels_center_loss = Variable(torch.cat((torch.zeros(BATCH_SIZE), torch.ones(BATCH_SIZE))))
             # loss_cent = criterion_cent(torch.cat((flatten_f, flatten_m), 0), labels_center_loss)
 
             # if not real_epoch:
             total_loss = mecg_weight * train_loss_mecg + fecg_weight*fecg_lamda*train_loss_fecg
-                # if include_center_loss:
-                #     total_loss += cent_weight*cent_lamda*loss_cent
-                # if include_hinge_loss:
-                #     total_loss += hinge_weight*hinge_lamda*hinge_loss
+            # if include_center_loss:
+            #     total_loss += cent_weight*cent_lamda*loss_cent
+            if include_hinge_loss:
+                total_loss += hinge_weight*hinge_lamda*hinge_loss
             # else:
             #     total_loss = train_loss_ecg + cent_weight*cent_lamda*loss_cent + hinge_weight*hinge_lamda*hinge_loss #TODO: check lamda for ecg
 
@@ -184,8 +184,8 @@ def main():
                 total_loss_f += fecg_weight*fecg_lamda*train_loss_fecg.item()
             else:
                 total_loss_ecg += train_loss_ecg.item()#TODO: check adding lamdas and weights
-            # total_loss_cent += cent_weight*cent_lamda*loss_cent.item()
-            # total_loss_hinge += hinge_weight*hinge_lamda*hinge_loss.item()
+            #total_loss_cent += cent_weight*cent_lamda*loss_cent.item()
+            total_loss_hinge += hinge_weight*hinge_lamda*hinge_loss.item()
             total_loss_epoch += total_loss.item()
             batch_features, batch_for_model, batch_for_m, batch_for_f, total_loss, outputs_m, one_before_last_m, \
             outputs_f, one_before_last_f, train_loss_mecg, train_loss_fecg = None, None, None, None, None, None, None, \
@@ -202,8 +202,10 @@ def main():
         total_loss_epoch = total_loss_epoch / (len(train_data_loader_sim))
         # display the epoch training loss
         if not real_epoch:
-            if not include_center_loss and not include_hinge_loss:
-                print("epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}".format(epoch + 1, epochs, total_loss_epoch, total_loss_m, total_loss_f))
+            if not include_hinge_loss:
+                print("epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}, loss_cent = {:.8f}".format(epoch + 1, epochs, total_loss_epoch, total_loss_m, total_loss_f, total_loss_cent))
+            if not include_center_loss:
+                print("epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}, loss_hinge = {:.8f}".format(epoch + 1, epochs, total_loss_epoch, total_loss_m, total_loss_f, total_loss_hinge))
             else:
                 print(
                     "epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}, loss_cent = {:.8f}, loss_hinge = {:.8f}".format(
@@ -222,7 +224,7 @@ def main():
 
 if __name__=="__main__":
     # device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
-    main()
+    #main()
     for filename in os.listdir(ECG_OUTPUTS): #present the fecg outputs
         if "ecg_all" in filename:
             path = os.path.join(ECG_OUTPUTS, filename)
