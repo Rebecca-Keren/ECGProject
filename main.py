@@ -166,7 +166,7 @@ def main():
             if include_hinge_loss:
              total_loss += hinge_weight*hinge_lamda*hinge_loss
             # else:
-            #     total_loss = train_loss_ecg + cent_weight*cent_lamda*loss_cent + hinge_weight*hinge_lamda*hinge_loss #TODO: check lamda for ecg
+            #     total_loss = train_loss_ecg + cent_weight*cent_lamda*loss_cent + hinge_weight*hinge_lamda*hinge_loss #TODO: check lamda for ecg and change loss ecg
 
 
             total_loss.backward()
@@ -246,7 +246,7 @@ def main():
 
 if __name__=="__main__":
     # device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
-    main()
+    #main()
 
     for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
         if "ecg_all" in filename:
