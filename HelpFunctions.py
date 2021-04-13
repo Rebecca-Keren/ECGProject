@@ -28,7 +28,7 @@ def criterion_hinge_loss(m_feature,f_feature,delta):
     # f_normalized = torch.norm(f_feature)
     #print(f_feature.size())
     distance = nn.functional.mse_loss(m_feature,f_feature)
-    print(str(delta-distance))
+    #print(str(delta-distance))
     return nn.functional.relu(delta - distance)
 
 def simulated_database_list(sim_dir):
