@@ -30,6 +30,8 @@ if __name__ == '__main__':
         #record,fields = wfdb.rdsamp(os.path.join(simulated_dir,filename[:len(filename)-4]), channels=[20])
         #sio.savemat(os.path.join(new_dir,filename[:len(filename)-4]),{'data': record})
 
+
+
     #Merging Data,dividing into windows and saving
     # files = os.listdir(new_dir).copy()
     # for filename in os.listdir(new_dir):
@@ -95,6 +97,10 @@ if __name__ == '__main__':
     #
     #     else:
     #         print('ciao')
+
+
+
+
 
 
     #Check for number of beats
