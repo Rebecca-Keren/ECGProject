@@ -14,7 +14,7 @@ import HelpFunctions as hp
 import math
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
 ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs")
 ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsTest")
 ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal")
@@ -27,7 +27,7 @@ network_file_name_best = "best_model"
 
 
 BATCH_SIZE = 32
-epochs = 10
+epochs = 700
 learning_rate = 1e-3
 delta = 3
 
@@ -133,7 +133,7 @@ def main():
     pl.seed_everything(1234)
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
-    list_simulated_overfit = list_simulated[:10]  # TODO: put in comment after validating
+    list_simulated_overfit = list_simulated[:20000]  # TODO: put in comment after validating
 
     simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -307,7 +307,7 @@ def main():
             np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
 
     #plotting validation losses and saving them
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    """fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
     ax1.plot(validation_loss_m_list)
     ax1.set_ylabel("L1 M")
     ax1.set_xlabel("Epoch")
@@ -318,7 +318,7 @@ def main():
     ax3.set_ylabel("L1 Avg")
     ax3.set_xlabel("Epoch")
     plt.show()
-    plt.close()
+    plt.close()"""
 
     path_losses = os.path.join(LOSSES, "L1M")
     np.save(path_losses, np.array(validation_loss_m_list))
