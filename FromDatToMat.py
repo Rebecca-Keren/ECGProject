@@ -18,8 +18,12 @@ if __name__ == '__main__':
     # Transforming from dat to mat
     channels=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]
     for dirname in os.listdir(physionet_path):
+        if ".html" in dirname:
+            continue
         path_1 = os.path.join(physionet_path,dirname)
         for subdirname in os.listdir(path_1):
+            if ".html" in dirname:
+                continue
             path_2 = os.path.join(path_1,subdirname)
             for filename in os.listdir(path_2):
                 if not(filename.endswith(".dat")):

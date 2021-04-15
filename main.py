@@ -8,14 +8,26 @@ from torch.utils.data import Dataset
 from scipy.io import loadmat
 import os
 import matplotlib.pyplot as plt
+import pytorch_lightning as pl
+import SSIMMetrics
+import HelpFunctions as hp
+import math
 
 
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs")
 ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsTest")
+ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal")
+MODELS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Models")
+LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
+
+network_save_folder = "./Models/"
+network_file_name_last = "last_model"
+network_file_name_best = "best_model"
+
 
 BATCH_SIZE = 32
-epochs = 700
+epochs = 10
 learning_rate = 1e-3
 delta = 3
 
@@ -81,19 +93,60 @@ class SimulatedDataset(Dataset):
         fecg = torch.from_numpy(loadmat(path_fecg)['data'])
         return mix, mecg, fecg
 
+def test_ecg_model(filename,test_data_loader_sim):
+    resnet_model = ResNet(1)
+    resnet_model.load_state_dict(torch.load(filename))
+    resnet_model.eval()
+
+    resnet_model.cuda()
+
+    criterion = nn.L1Loss().cuda()
+
+    test_loss_m = 0
+    test_loss_f = 0
+    with torch.no_grad():
+        for i, batch_features in enumerate(test_data_loader_sim):
+            batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+            batch_for_m_test = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
+            batch_for_f_test = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
+            outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_test)
+            test_loss_m += criterion(outputs_m_test, batch_for_m_test)
+            test_loss_f += criterion(outputs_f_test, batch_for_f_test)
+    test_loss_m /= len(test_data_loader_sim.dataset)
+    test_loss_f /= len(test_data_loader_sim.dataset)
+    test_loss_average = (test_loss_m + test_loss_f) / 2  # TODO check
+    if not os.path.exists(ECG_OUTPUTS_TEST):
+        os.mkdir(ECG_OUTPUTS_TEST)
+    path = os.path.join(ECG_OUTPUTS_TEST, "ecg_all" + str(i))
+    np.save(path, batch_features[0][0].cpu().detach().numpy()[:, 0])
+    path = os.path.join(ECG_OUTPUTS_TEST, "label_m" + str(i))
+    np.save(path, batch_features[1][0].cpu().detach().numpy()[:, 0])
+    path = os.path.join(ECG_OUTPUTS_TEST, "label_f" + str(i))
+    np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
+    path = os.path.join(ECG_OUTPUTS_TEST, "fecg" + str(i))
+    np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
+    path = os.path.join(ECG_OUTPUTS_TEST, "mecg" + str(i))
+    np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
+    return test_loss_m,test_loss_f,test_loss_average
 
 def main():
+    pl.seed_everything(1234)
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
     list_simulated_overfit = list_simulated[:10]  # TODO: put in comment after validating
 
-    simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated) # TODO: change to original list size after validating
+    simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
-    train_size_sim = int(0.8 * len(simulated_dataset))
-    test_size_sim = len(simulated_dataset) - train_size_sim
-    train_dataset_sim, test_dataset_sim = torch.utils.data.random_split(simulated_dataset, [train_size_sim, test_size_sim])
+    train_size_sim = int(0.6 * len(simulated_dataset))
+    val_size_sim = int(0.2 * len(simulated_dataset))
+    test_size_sim = int(0.2 * len(simulated_dataset))
 
-    train_data_loader_sim = data.DataLoader(simulated_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=12)
+    train_dataset_sim, val_dataset_sim, test_dataset_sim = torch.utils.data.random_split(simulated_dataset, [train_size_sim, val_size_sim,test_size_sim])
+
+
+
+    train_data_loader_sim = data.DataLoader(train_dataset_sim, batch_size=BATCH_SIZE, shuffle=True, num_workers=12)
+    val_data_loader_sim = data.DataLoader(val_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
     test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
 
     #  use gpu if available
@@ -103,10 +156,13 @@ def main():
     resnet_model = ResNet(1).cuda()
 
     optimizer_model = optim.SGD(resnet_model.parameters(), lr=learning_rate, momentum=0.9)
-
+    best_model_accuracy = math.inf
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate)
+    validation_loss_f_list = []
+    validation_loss_m_list = []
+    validation_loss_average_list = []
     for epoch in range(epochs):
 
         total_loss_epoch = 0.
@@ -207,37 +263,74 @@ def main():
 
 
         resnet_model.eval()
-        test_loss_m = 0
-        test_loss_f = 0
+        val_loss_m = 0
+        val_loss_f = 0
         with torch.no_grad():
-            for i, batch_features in enumerate(test_data_loader_sim):
-                batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
-                batch_for_m_test = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
-                batch_for_f_test = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
-                outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_test)
-                test_loss_m += criterion(outputs_m_test, batch_for_m_test)
-                test_loss_f += criterion(outputs_f_test, batch_for_f_test)
+            for i, batch_features in enumerate(val_data_loader_sim):
+                batch_for_model_val = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+                batch_for_m_val = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
+                batch_for_f_val = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
+                outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_val)
+                val_loss_m += criterion(outputs_m_test, batch_for_m_val)
+                val_loss_f += criterion(outputs_f_test, batch_for_f_val)
+        val_loss_m /= len(val_data_loader_sim.dataset)
+        val_loss_f /= len(val_data_loader_sim.dataset)
+        val_loss_average = (val_loss_m + val_loss_f) / 2 #TODO check
 
-        test_loss_m /= len(test_data_loader_sim.dataset)
-        test_loss_f /= len(test_data_loader_sim.dataset)
+        #saving validation losses
+        validation_loss_m_list.append(val_loss_m.cpu().detach())
+        validation_loss_f_list.append(val_loss_f.cpu().detach())
+        validation_loss_average_list.append(val_loss_average.cpu().detach())
 
-        print('Test set: Average loss M: {:.4f}, Average Loss F: {:.4f})\n'.format(
-            test_loss_m, test_loss_f))
+        #saving last model
+        torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_last))
+        #saving best model
+        if (val_loss_average < best_model_accuracy):
+            best_model_accuracy = val_loss_average
+            torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_best))
+            print("saving best model")
+
+        print('Test set: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f})\n'.format(val_loss_m, val_loss_f,val_loss_average))
 
         if epoch + 1 == epochs:
-            if not os.path.exists(ECG_OUTPUTS_TEST):
-                os.mkdir(ECG_OUTPUTS_TEST)
-            path = os.path.join(ECG_OUTPUTS_TEST, "ecg_all" + str(i))
+            if not os.path.exists(ECG_OUTPUTS_VAL):
+                os.mkdir(ECG_OUTPUTS_VAL)
+            path = os.path.join(ECG_OUTPUTS_VAL, "ecg_all" + str(i))
             np.save(path, batch_features[0][0].cpu().detach().numpy()[:, 0])
-            path = os.path.join(ECG_OUTPUTS_TEST, "label_m" + str(i))
+            path = os.path.join(ECG_OUTPUTS_VAL, "label_m" + str(i))
             np.save(path, batch_features[1][0].cpu().detach().numpy()[:, 0])
-            path = os.path.join(ECG_OUTPUTS_TEST, "label_f" + str(i))
+            path = os.path.join(ECG_OUTPUTS_VAL, "label_f" + str(i))
             np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
-            path = os.path.join(ECG_OUTPUTS_TEST, "fecg" + str(i))
+            path = os.path.join(ECG_OUTPUTS_VAL, "fecg" + str(i))
             np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
-            path = os.path.join(ECG_OUTPUTS_TEST, "mecg" + str(i))
+            path = os.path.join(ECG_OUTPUTS_VAL, "mecg" + str(i))
             np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
 
+    #plotting validation losses and saving them
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    ax1.plot(validation_loss_m_list)
+    ax1.set_ylabel("L1 M")
+    ax1.set_xlabel("Epoch")
+    ax2.plot(validation_loss_f_list)
+    ax2.set_ylabel("L1 F")
+    ax2.set_xlabel("Epoch")
+    ax3.plot(validation_loss_average_list)
+    ax3.set_ylabel("L1 Avg")
+    ax3.set_xlabel("Epoch")
+    plt.show()
+    plt.close()
+
+    path_losses = os.path.join(LOSSES, "L1M")
+    np.save(path_losses, np.array(validation_loss_m_list))
+    path_losses = os.path.join(LOSSES, "L1F")
+    np.save(path_losses, np.array(validation_loss_f_list))
+    path_losses = os.path.join(LOSSES, "L1Avg")
+    np.save(path_losses, np.array(validation_loss_average_list))
+
+    test_loss_m, test_loss_f, test_loss_avg = test_ecg_model(str(network_save_folder + network_file_name_best),test_data_loader_sim)
+
+    with open("test_loss.txt", 'w') as f:
+        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f}\n".format(test_loss_m,test_loss_f,test_loss_avg))
     del resnet_model
     del simulated_dataset
     del train_data_loader_sim
@@ -246,34 +339,34 @@ def main():
 
 if __name__=="__main__":
     # device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
-    #main()
+    main()
 
-    for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
+    """for filename in os.listdir(ECG_OUTPUTS_VAL): #present the fecg outputs
         if "ecg_all" in filename:
-            path = os.path.join(ECG_OUTPUTS_TEST, filename)
+            path = os.path.join(ECG_OUTPUTS_VAL, filename)
             plt.plot(np.load(path))
             plt.title("all")
             plt.show()
         if "fecg" in filename:
-            path = os.path.join(ECG_OUTPUTS_TEST, filename)
+            path = os.path.join(ECG_OUTPUTS_VAL, filename)
             plt.plot(np.load(path))
             plt.title("fecg")
             plt.show()
         if "mecg" in filename:
             print("mecg")
-            path = os.path.join(ECG_OUTPUTS_TEST, filename)
+            path = os.path.join(ECG_OUTPUTS_VAL, filename)
             plt.plot(np.load(path))
             plt.title("mecg")
             plt.show()
         if "label_m" in filename:
             print("label_m")
-            path = os.path.join(ECG_OUTPUTS_TEST, filename)
+            path = os.path.join(ECG_OUTPUTS_VAL, filename)
             plt.plot(np.load(path))
             plt.title("label_m")
             plt.show()
         if "label_f" in filename:
             print("label_f")
-            path = os.path.join(ECG_OUTPUTS_TEST, filename)
+            path = os.path.join(ECG_OUTPUTS_VAL, filename)
             plt.plot(np.load(path))
             plt.title("label_f")
-            plt.show()
+            plt.show()"""
