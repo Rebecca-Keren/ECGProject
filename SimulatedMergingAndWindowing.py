@@ -23,7 +23,7 @@ if __name__ == '__main__':
             continue
         print(filename)
         files.remove(filename)
-        name = filename[:len(filename)-5]
+        name = filename[:len(filename)-6]
         signals = [filename]
         for elem in files:
             tmp = '_'.join(str.split(elem,'_')[:-1])
@@ -39,7 +39,7 @@ if __name__ == '__main__':
             sig2 = loadmat(os.path.join(save_mat_dir, signals[1]))['data'][num_of_signal_to_remove:]
             for i in range(number_of_window):
                 record = [a + b  for a, b in zip(sig1[i*window_size:(i+1)*window_size], sig2[i*window_size:(i+1)*window_size])]
-                sio.savemat(os.path.join(window_sim_dir, name + 'mix' + str(i)), {'data': record})
+                sio.savemat(os.path.join(window_sim_dir, name + '_mix' + str(i)), {'data': record})
                 for elem in signals:
                     if ('fecg1' in elem or 'mecg' in elem):
                         data = loadmat(os.path.join(save_mat_dir, elem))['data'][i*window_size:(i+1)*window_size]
@@ -52,7 +52,7 @@ if __name__ == '__main__':
             sig4 = loadmat(os.path.join(save_mat_dir,signals[3]))['data'][num_of_signal_to_remove:]
             for i in range(number_of_window):
                 record = [a + b + c + d for a, b, c, d in zip(sig1[i*window_size:(i+1)*window_size], sig2[i*window_size:(i+1)*window_size], sig3[i*window_size:(i+1)*window_size], sig4[i*window_size:(i+1)*window_size])]
-                sio.savemat(os.path.join(window_sim_dir, name + 'mix' + str(i)), {'data': record})
+                sio.savemat(os.path.join(window_sim_dir, name + '_mix' + str(i)), {'data': record})
                 for elem in signals:
                     if ('fecg1' in elem or 'mecg' in elem):
                         data = loadmat(os.path.join(save_mat_dir, elem))['data'][i * window_size:(i + 1) * window_size]
@@ -67,7 +67,7 @@ if __name__ == '__main__':
             for i in range(number_of_window):
                 record = [a + b + c + d + e for a, b, c, d, e in zip(sig1[i*window_size:(i+1)*window_size], sig2[i*window_size:(i+1)*window_size], sig3[i*window_size:(i+1)*window_size], sig4[i*window_size:(i+1)*window_size], sig5[i*window_size:(i+1)*window_size])]
                 # print(len(record))
-                sio.savemat(os.path.join(window_sim_dir, name + 'mix' + str(i)), {'data': record})
+                sio.savemat(os.path.join(window_sim_dir, name + '_mix' + str(i)), {'data': record})
                 for elem in signals:
                     if ('fecg1' in elem or 'mecg' in elem):
                         data = loadmat(os.path.join(save_mat_dir, elem))['data'][i * window_size:(i + 1) * window_size]
