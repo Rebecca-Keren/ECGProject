@@ -25,9 +25,11 @@ if __name__ == '__main__':
         files.remove(filename)
         name = filename[:len(filename)-5]
         signals = [filename]
-        for filename in files:
-            if name in filename:
-                signals.append(filename)
+        for elem in files:
+            tmp = '_'.join(str.split(elem,'_')[:-1])
+            if tmp == name:
+                signals.append(elem)
+                files.remove(elem)
         size = len(signals)
         window_size = 1024
         number_of_window = 73
