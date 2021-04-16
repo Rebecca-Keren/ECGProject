@@ -133,7 +133,7 @@ def main():
     pl.seed_everything(1234)
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
-    list_simulated_overfit = list_simulated[:20000]  # TODO: put in comment after validating
+    list_simulated_overfit = list_simulated[:50000]  # TODO: put in comment after validating
 
     simulated_dataset = SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -290,7 +290,7 @@ def main():
             torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_best))
             print("saving best model")
 
-        print('Test set: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f})\n'.format(val_loss_m, val_loss_f,val_loss_average))
+        print('Validation: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f})\n'.format(val_loss_m, val_loss_f,val_loss_average))
 
         if epoch + 1 == epochs:
             if not os.path.exists(ECG_OUTPUTS_VAL):
@@ -341,32 +341,54 @@ if __name__=="__main__":
     # device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     main()
 
-    """for filename in os.listdir(ECG_OUTPUTS_VAL): #present the fecg outputs
+    """path_losses = os.path.join(LOSSES, "L1M.npy")
+    validation_loss_m_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "L1F.npy")
+    validation_loss_f_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "L1Avg.npy")
+    validation_loss_average_list = np.load(path_losses)
+
+    # plotting validation losses and saving them
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    ax1.plot(validation_loss_m_list)
+    ax1.set_ylabel("L1 M")
+    ax1.set_xlabel("Epoch")
+    ax2.plot(validation_loss_f_list)
+    ax2.set_ylabel("L1 F")
+    ax2.set_xlabel("Epoch")
+    ax3.plot(validation_loss_average_list)
+    ax3.set_ylabel("L1 Avg")
+    ax3.set_xlabel("Epoch")
+    plt.show()
+    plt.close()
+
+
+    for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
         if "ecg_all" in filename:
-            path = os.path.join(ECG_OUTPUTS_VAL, filename)
+            path = os.path.join(ECG_OUTPUTS_TEST, filename)
             plt.plot(np.load(path))
             plt.title("all")
             plt.show()
         if "fecg" in filename:
-            path = os.path.join(ECG_OUTPUTS_VAL, filename)
+            path = os.path.join(ECG_OUTPUTS_TEST, filename)
             plt.plot(np.load(path))
             plt.title("fecg")
             plt.show()
         if "mecg" in filename:
             print("mecg")
-            path = os.path.join(ECG_OUTPUTS_VAL, filename)
+            path = os.path.join(ECG_OUTPUTS_TEST, filename)
             plt.plot(np.load(path))
             plt.title("mecg")
             plt.show()
         if "label_m" in filename:
             print("label_m")
-            path = os.path.join(ECG_OUTPUTS_VAL, filename)
+            path = os.path.join(ECG_OUTPUTS_TEST, filename)
             plt.plot(np.load(path))
             plt.title("label_m")
             plt.show()
         if "label_f" in filename:
             print("label_f")
-            path = os.path.join(ECG_OUTPUTS_VAL, filename)
+            path = os.path.join(ECG_OUTPUTS_TEST, filename)
             plt.plot(np.load(path))
             plt.title("label_f")
             plt.show()"""
