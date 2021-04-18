@@ -4,27 +4,11 @@ import os
 import numpy as np
 import scipy.stats
 
-
-def _get_ranks(x: torch.Tensor) -> torch.Tensor:
-    tmp = x.argsort()
-    ranks = torch.zeros_like(tmp)
-    ranks[tmp] = torch.arange(len(x))
-    return ranks
-
-
-def spearman_correlation(x: torch.Tensor, y: torch.Tensor):
-    """Compute correlation between 2 1-D vectors
-    Args:
-        x: Shape (N, )
-        y: Shape (N, )
-    """
-    x_rank = _get_ranks(x)
-    y_rank = _get_ranks(y)
-
-    n = x.size(0)
-    upper = 6 * torch.sum((x_rank - y_rank).pow(2))
-    down = n * (n ** 2 - 1.0)
-    return 1.0 - (upper / down)
+def check_correlation(orig_signal,changed_signal):
+    orig = orig_signal
+    signal_to_compare = changed_signal
+    correlation, p_value = scipy.stats.pearsonr(orig, signal_to_compare)
+    return correlation.real #the correlation of the original signal in comperison to the changed signal
 
 def increase_sampling_rate(signal,rate):
     signal_size = len(signal)

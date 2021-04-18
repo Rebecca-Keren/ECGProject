@@ -9,8 +9,6 @@ from scipy.io import loadmat
 import os
 import matplotlib.pyplot as plt
 import pytorch_lightning as pl
-import SSIMMetrics
-import HelpFunctions as hp
 import math
 
 
@@ -28,7 +26,7 @@ network_file_name_best = "best_model"
 
 BATCH_SIZE = 32
 epochs = 700
-learning_rate = 1e-3
+learning_rate = 1e-4
 delta = 3
 
 fecg_lamda = 10.
@@ -163,6 +161,8 @@ def main():
     validation_loss_f_list = []
     validation_loss_m_list = []
     validation_loss_average_list = []
+    validation_corr_m_list = []
+    validation_corr_f_list = []
     for epoch in range(epochs):
 
         total_loss_epoch = 0.
@@ -261,10 +261,17 @@ def main():
             print("epoch R : {}/{}, total_loss = {:.8f}, loss_ecg = {:.8f}, loss_cent = {:.8f}, loss_hinge = {:.8f}".format(
                     epoch + 1, epochs, total_loss_epoch, total_loss_ecg, total_loss_cent, total_loss_hinge))
 
+        if epoch + 1 == epochs:
+            with open("losses.txt", 'a') as f:
+                f.write("epoch S : {}/{}, total_loss = {:.8f}, loss_mecg = {:.8f}, loss_fecg = {:.8f}, loss_cent = {:.8f}, loss_hinge = {:.8f}\n".format(
+                        epoch + 1, epochs, total_loss_epoch, total_loss_m, total_loss_f, total_loss_cent,total_loss_hinge))
+
 
         resnet_model.eval()
         val_loss_m = 0
         val_loss_f = 0
+        val_corr_m = 0
+        val_corr_f = 0
         with torch.no_grad():
             for i, batch_features in enumerate(val_data_loader_sim):
                 batch_for_model_val = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
@@ -273,14 +280,22 @@ def main():
                 outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_val)
                 val_loss_m += criterion(outputs_m_test, batch_for_m_val)
                 val_loss_f += criterion(outputs_f_test, batch_for_f_val)
+                for i,elem in enumerate(outputs_m_test):
+                    val_corr_m += np.corrcoef(outputs_m_test.cpu().detach().numpy()[i],batch_for_m_val.cpu().detach().numpy()[i])[0][1]
+                    val_corr_f += np.corrcoef(outputs_f_test.cpu().detach().numpy()[i],batch_for_f_val.cpu().detach().numpy()[i])[0][1]
         val_loss_m /= len(val_data_loader_sim.dataset)
         val_loss_f /= len(val_data_loader_sim.dataset)
+        val_corr_m /= len(val_data_loader_sim.dataset)
+        val_corr_f /= len(val_data_loader_sim.dataset)
+        val_corr_average = (val_corr_m + val_corr_f) / 2
         val_loss_average = (val_loss_m + val_loss_f) / 2 #TODO check
 
         #saving validation losses
         validation_loss_m_list.append(val_loss_m.cpu().detach())
         validation_loss_f_list.append(val_loss_f.cpu().detach())
         validation_loss_average_list.append(val_loss_average.cpu().detach())
+        validation_corr_m_list.append(val_corr_m)
+        validation_corr_f_list.append(val_corr_f)
 
         #saving last model
         torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_last))
@@ -290,7 +305,7 @@ def main():
             torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_best))
             print("saving best model")
 
-        print('Validation: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f})\n'.format(val_loss_m, val_loss_f,val_loss_average))
+        print('Validation: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f}, Correlation M: {:.4f},Correlation F: {:.4f},Correlation Average: {:.4f})\n'.format(val_loss_m, val_loss_f,val_loss_average,val_corr_m,val_corr_f,val_corr_average))
 
         if epoch + 1 == epochs:
             if not os.path.exists(ECG_OUTPUTS_VAL):
@@ -306,8 +321,8 @@ def main():
             path = os.path.join(ECG_OUTPUTS_VAL, "mecg" + str(i))
             np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
 
-    #plotting validation losses and saving them
-    """fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    """#plotting validation losses and saving them
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
     ax1.plot(validation_loss_m_list)
     ax1.set_ylabel("L1 M")
     ax1.set_xlabel("Epoch")
@@ -318,7 +333,16 @@ def main():
     ax3.set_ylabel("L1 Avg")
     ax3.set_xlabel("Epoch")
     plt.show()
-    plt.close()"""
+    plt.close()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(validation_corr_m_list)
+    ax1.set_ylabel("Corr M")
+    ax1.set_xlabel("Epoch")
+    ax2.plot(validation_corr_f_list)
+    ax2.set_ylabel("Corr F")
+    ax2.set_xlabel("Epoch")"""
+
 
     path_losses = os.path.join(LOSSES, "L1M")
     np.save(path_losses, np.array(validation_loss_m_list))
@@ -326,11 +350,16 @@ def main():
     np.save(path_losses, np.array(validation_loss_f_list))
     path_losses = os.path.join(LOSSES, "L1Avg")
     np.save(path_losses, np.array(validation_loss_average_list))
+    path_losses = os.path.join(LOSSES, "CorrM")
+    np.save(path_losses, np.array(validation_corr_m_list))
+    path_losses = os.path.join(LOSSES, "CorrF")
+    np.save(path_losses, np.array(validation_corr_f_list))
 
-    test_loss_m, test_loss_f, test_loss_avg = test_ecg_model(str(network_save_folder + network_file_name_best),test_data_loader_sim)
+    #TODO UNCOMMENT
+    """test_loss_m, test_loss_f, test_loss_avg = test_ecg_model(str(network_save_folder + network_file_name_best),test_data_loader_sim)
 
     with open("test_loss.txt", 'w') as f:
-        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f}\n".format(test_loss_m,test_loss_f,test_loss_avg))
+        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f}\n".format(test_loss_m,test_loss_f,test_loss_avg))"""
     del resnet_model
     del simulated_dataset
     del train_data_loader_sim
@@ -341,7 +370,60 @@ if __name__=="__main__":
     # device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     main()
 
-    """path_losses = os.path.join(LOSSES, "L1M.npy")
+    """for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
+        if "fecg" in filename:
+            path = os.path.join(ECG_OUTPUTS_TEST, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path_label = os.path.join(ECG_OUTPUTS_TEST,"label_f" + end_path)
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.plot(np.load(path))
+            ax1.set_ylabel("FECG")
+            ax2.plot(np.load(path_label))
+            ax2.set_ylabel("LABEL")
+            plt.show()
+            plt.close()
+        if "mecg" in filename:
+            path = os.path.join(ECG_OUTPUTS_TEST, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path_label = os.path.join(ECG_OUTPUTS_TEST, "label_m" + end_path)
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.plot(np.load(path))
+            ax1.set_ylabel("MECG")
+            ax2.plot(np.load(path_label))
+            ax2.set_ylabel("LABEL")
+            plt.show()
+            plt.close()
+
+    print("VAL")
+    for filename in os.listdir(ECG_OUTPUTS_VAL): #present the fecg outputs
+        if "fecg" in filename:
+            path = os.path.join(ECG_OUTPUTS_VAL, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path_label = os.path.join(ECG_OUTPUTS_VAL,"label_f" + end_path)
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.plot(np.load(path))
+            ax1.set_ylabel("FECG")
+            ax2.plot(np.load(path_label))
+            ax2.set_ylabel("LABEL")
+            plt.show()
+            plt.close()
+        if "mecg" in filename:
+            path = os.path.join(ECG_OUTPUTS_VAL, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path_label = os.path.join(ECG_OUTPUTS_VAL, "label_m" + end_path)
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.plot(np.load(path))
+            ax1.set_ylabel("MECG")
+            ax2.plot(np.load(path_label))
+            ax2.set_ylabel("LABEL")
+            plt.show()
+            plt.close()
+
+    path_losses = os.path.join(LOSSES, "L1M.npy")
     validation_loss_m_list = np.load(path_losses)
     path_losses = os.path.join(LOSSES, "L1F.npy")
     validation_loss_f_list = np.load(path_losses)
@@ -360,10 +442,9 @@ if __name__=="__main__":
     ax3.set_ylabel("L1 Avg")
     ax3.set_xlabel("Epoch")
     plt.show()
-    plt.close()
+    plt.close()"""
 
-
-    for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
+    """for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
         if "ecg_all" in filename:
             path = os.path.join(ECG_OUTPUTS_TEST, filename)
             plt.plot(np.load(path))
