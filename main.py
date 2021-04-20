@@ -25,7 +25,7 @@ network_file_name_best = "best_model"
 
 
 BATCH_SIZE = 32
-epochs = 250
+epochs = 300
 learning_rate = 1e-3
 delta = 3
 
