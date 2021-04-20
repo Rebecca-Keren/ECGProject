@@ -1,13 +1,10 @@
 from ResnetBasics import *
 
-
 class ResNetEncoder(nn.Module):
 
-    def __init__(self, in_channels = 1, blocks_sizes=[16, 32, 64, 128, 256, 512], deepths=[2, 2, 2, 2, 2, 2],
-                 activation='leaky_relu', block=ResNetBasicBlockEncoder, *args, **kwargs):
+    def __init__(self, in_channels = 1,activation='leaky_relu'):
         super().__init__()
 
-        self.blocks_sizes = blocks_sizes
         self.conv1 = nn.Conv1d(in_channels, 16, kernel_size=3, stride=2, padding=1, bias=False)
         self.batch = nn.BatchNorm1d(16)
         self.relu = activation_func(activation)
@@ -57,8 +54,7 @@ class ResNetEncoder(nn.Module):
 
 
 class ResnetDecoder(nn.Module):
-    def __init__(self, out_channels=1, blocks_sizes=[128, 64, 32, 16], deepths=[2, 2, 2],
-                 activation='leaky_relu', block=ResNetBasicBlockDecoder, *args, **kwargs):
+    def __init__(self, out_channels=1):
         super().__init__()
 
         self.conv_out = nn.ConvTranspose1d(16, out_channels, kernel_size=3, stride=2, padding=2, output_padding=0,
@@ -100,3 +96,19 @@ class ResnetDecoder(nn.Module):
         x = self.batch_norm(x)
         x = self.conv_out(x)[:, :, :-1]
         return x, one_before_last
+
+class ResNet(nn.Module):
+    def __init__(self, in_channels,*args, **kwargs):
+        super().__init__()
+        self.encoder = ResNetEncoder(in_channels, *args, **kwargs)
+        self.Mdecoder = ResnetDecoder()
+        self.Fdecoder = ResnetDecoder()
+
+    def forward(self, x):
+        x = self.encoder(x)
+        latent_half = x.size()[1] // 2
+        m = x[:, :latent_half, :]
+        f = x[:, latent_half:, :]
+        m_out, one_before_last_m = self.Mdecoder(m)
+        f_out, one_before_last_f = self.Fdecoder(f)
+        return m_out, one_before_last_m, f_out, one_before_last_f
