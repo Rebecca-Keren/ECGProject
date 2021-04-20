@@ -25,8 +25,8 @@ network_file_name_best = "best_model"
 
 
 BATCH_SIZE = 32
-epochs = 700
-learning_rate = 1e-4
+epochs = 250
+learning_rate = 1e-3
 delta = 3
 
 fecg_lamda = 10.
@@ -163,6 +163,7 @@ def main():
     validation_loss_average_list = []
     validation_corr_m_list = []
     validation_corr_f_list = []
+
     for epoch in range(epochs):
 
         total_loss_epoch = 0.
@@ -321,29 +322,6 @@ def main():
             path = os.path.join(ECG_OUTPUTS_VAL, "mecg" + str(i))
             np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
 
-    """#plotting validation losses and saving them
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-    ax1.plot(validation_loss_m_list)
-    ax1.set_ylabel("L1 M")
-    ax1.set_xlabel("Epoch")
-    ax2.plot(validation_loss_f_list)
-    ax2.set_ylabel("L1 F")
-    ax2.set_xlabel("Epoch")
-    ax3.plot(validation_loss_average_list)
-    ax3.set_ylabel("L1 Avg")
-    ax3.set_xlabel("Epoch")
-    plt.show()
-    plt.close()
-
-    fig, (ax1, ax2) = plt.subplots(2, 1)
-    ax1.plot(validation_corr_m_list)
-    ax1.set_ylabel("Corr M")
-    ax1.set_xlabel("Epoch")
-    ax2.plot(validation_corr_f_list)
-    ax2.set_ylabel("Corr F")
-    ax2.set_xlabel("Epoch")"""
-
-
     path_losses = os.path.join(LOSSES, "L1M")
     np.save(path_losses, np.array(validation_loss_m_list))
     path_losses = os.path.join(LOSSES, "L1F")
@@ -355,11 +333,11 @@ def main():
     path_losses = os.path.join(LOSSES, "CorrF")
     np.save(path_losses, np.array(validation_corr_f_list))
 
-    #TODO UNCOMMENT
-    """test_loss_m, test_loss_f, test_loss_avg = test_ecg_model(str(network_save_folder + network_file_name_best),test_data_loader_sim)
+
+    test_loss_m, test_loss_f, test_loss_avg = test_ecg_model(str(network_save_folder + network_file_name_best),test_data_loader_sim)
 
     with open("test_loss.txt", 'w') as f:
-        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f}\n".format(test_loss_m,test_loss_f,test_loss_avg))"""
+        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f}\n".format(test_loss_m,test_loss_f,test_loss_avg))
     del resnet_model
     del simulated_dataset
     del train_data_loader_sim
@@ -368,7 +346,7 @@ def main():
 
 if __name__=="__main__":
     # device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
-    main()
+    #main()
 
     """for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
         if "fecg" in filename:
@@ -429,6 +407,11 @@ if __name__=="__main__":
     validation_loss_f_list = np.load(path_losses)
     path_losses = os.path.join(LOSSES, "L1Avg.npy")
     validation_loss_average_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "CorrF.npy")
+    correlation_f_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "CorrM.npy")
+    correlation_m_list = np.load(path_losses)
+
 
     # plotting validation losses and saving them
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
@@ -441,6 +424,16 @@ if __name__=="__main__":
     ax3.plot(validation_loss_average_list)
     ax3.set_ylabel("L1 Avg")
     ax3.set_xlabel("Epoch")
+    plt.show()
+    plt.close()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(correlation_f_list)
+    ax1.set_ylabel("CorrF")
+    ax1.set_xlabel("Epoch")
+    ax2.plot(correlation_m_list)
+    ax2.set_ylabel("CorrM")
+    ax2.set_xlabel("Epoch")
     plt.show()
     plt.close()"""
 
