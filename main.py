@@ -1,10 +1,7 @@
 from ResnetNetwork import *
 import torch.optim as optim
 import torch.utils.data as data
-from torch.autograd import Variable
 from CenterLoss import *
-import numpy as np
-import os
 import matplotlib.pyplot as plt
 import pytorch_lightning as pl
 import math
