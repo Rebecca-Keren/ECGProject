@@ -118,13 +118,13 @@ def train(resnet_model,
         outputs_f, one_before_last_f, train_loss_mecg, train_loss_fecg = None, None, None, None, None, None, None, \
                                                                          None, None, None, None
 
-        # compute the epoch training loss
-        # if not real_epoch: #TODO add when real data
-        total_loss_m = total_loss_m / (len(train_data_loader_sim))
-        total_loss_f = total_loss_f / (len(train_data_loader_sim))
-        train_loss_f_list.append(total_loss_f)
-        train_loss_m_list.append(total_loss_m)
-        train_loss_average_list.append((total_loss_m+total_loss_f)/2)
+    # compute the epoch training loss
+    # if not real_epoch: #TODO add when real data
+    total_loss_m = total_loss_m / (len(train_data_loader_sim))
+    total_loss_f = total_loss_f / (len(train_data_loader_sim))
+    train_loss_f_list.append(total_loss_f)
+    train_loss_m_list.append(total_loss_m)
+    train_loss_average_list.append((total_loss_m+total_loss_f)/2)
 
     # else: #TODO add when real data
     #    total_loss_ecg = total_loss_ecg / (len(train_data_loader_sim))
@@ -238,6 +238,8 @@ def test(filename,test_data_loader_sim,dataset_size):
 
     test_loss_m = 0
     test_loss_f = 0
+    test_corr_m = 0
+    test_corr_f = 0
     with torch.no_grad():
         for i, batch_features in enumerate(test_data_loader_sim):
             batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
@@ -246,9 +248,17 @@ def test(filename,test_data_loader_sim,dataset_size):
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_test)
             test_loss_m += criterion(outputs_m_test, batch_for_m_test)
             test_loss_f += criterion(outputs_f_test, batch_for_f_test)
+            for i, elem in enumerate(outputs_m_test):
+                test_corr_m += \
+                np.corrcoef(outputs_m_test.cpu().detach().numpy()[i], batch_for_m_test.cpu().detach().numpy()[i])[0][1]
+                test_corr_f += \
+                np.corrcoef(outputs_f_test.cpu().detach().numpy()[i], batch_for_f_test.cpu().detach().numpy()[i])[0][1]
     test_loss_m /= len(test_data_loader_sim.dataset)
     test_loss_f /= len(test_data_loader_sim.dataset)
     test_loss_average = (test_loss_m + test_loss_f) / 2
+    test_corr_m /= len(test_data_loader_sim.dataset)
+    test_corr_f /= len(test_data_loader_sim.dataset)
+    test_corr_average = (test_corr_m + test_corr_f) / 2
 
     ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsTest" + str(dataset_size))
     if not os.path.exists(ECG_OUTPUTS_TEST):
@@ -263,4 +273,4 @@ def test(filename,test_data_loader_sim,dataset_size):
     np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
     path = os.path.join(ECG_OUTPUTS_TEST, "mecg" + str(i))
     np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
-    return test_loss_m,test_loss_f,test_loss_average
+    return test_loss_m, test_loss_f, test_loss_average, test_corr_m, test_corr_f, test_corr_average

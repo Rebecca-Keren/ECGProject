@@ -16,7 +16,7 @@ SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "s
 
 
 BATCH_SIZE = 32
-epochs = 4
+epochs = 200
 learning_rate = 1e-3
 
 
@@ -114,10 +114,12 @@ def main(dataset_size):
     np.save(path_losses, np.array(validation_corr_f_list))
 
     #Test
-    test_loss_m, test_loss_f, test_loss_avg = test(str(network_save_folder_orig + str(dataset_size) + network_file_name_best),test_data_loader_sim,dataset_size)
+    test_loss_m, test_loss_f, test_loss_avg, test_corr_m, test_corr_f, test_corr_average = test(str(network_save_folder + network_file_name_best),test_data_loader_sim)
 
-    with open("test_loss.txt" + str(dataset_size), 'w') as f:
-        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f}\n".format(test_loss_m,test_loss_f,test_loss_avg))
+    with open("test_loss.txt", 'w') as f:
+        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f},"
+                "test_corr_m = {:.4f},test_corr_f = {:.4f},test_corr_avg = {:.4f}\n".format(test_loss_m, test_loss_f, test_loss_avg,
+                                                                                            test_corr_m,test_corr_f,test_corr_average))
     del resnet_model
     del simulated_dataset
     del train_data_loader_sim
@@ -126,7 +128,7 @@ def main(dataset_size):
 
 if __name__=="__main__":
 
-    dataset_size = [50000,80000,100000,127750]
+    dataset_size = [50000,80000,100000,127000]
 
     for size in dataset_size:
         main(size)
