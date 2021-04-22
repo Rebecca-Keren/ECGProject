@@ -227,6 +227,8 @@ def test(filename,test_data_loader_sim):
 
     test_loss_m = 0
     test_loss_f = 0
+    test_corr_m = 0
+    test_corr_f = 0
     with torch.no_grad():
         for i, batch_features in enumerate(test_data_loader_sim):
             batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
@@ -235,9 +237,15 @@ def test(filename,test_data_loader_sim):
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_test)
             test_loss_m += criterion(outputs_m_test, batch_for_m_test)
             test_loss_f += criterion(outputs_f_test, batch_for_f_test)
+            for i, elem in enumerate(outputs_m_test):
+                test_corr_m += np.corrcoef(outputs_m_test.cpu().detach().numpy()[i], batch_for_m_test.cpu().detach().numpy()[i])[0][1]
+                test_corr_f += np.corrcoef(outputs_f_test.cpu().detach().numpy()[i], batch_for_f_test.cpu().detach().numpy()[i])[0][1]
     test_loss_m /= len(test_data_loader_sim.dataset)
     test_loss_f /= len(test_data_loader_sim.dataset)
     test_loss_average = (test_loss_m + test_loss_f) / 2
+    test_corr_m /= len(test_data_loader_sim.dataset)
+    test_corr_f /= len(test_data_loader_sim.dataset)
+    test_corr_average = (test_corr_m + test_corr_f) / 2
 
     path = os.path.join(ECG_OUTPUTS_TEST, "ecg_all" + str(i))
     np.save(path, batch_features[0][0].cpu().detach().numpy()[:, 0])
@@ -249,4 +257,4 @@ def test(filename,test_data_loader_sim):
     np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
     path = os.path.join(ECG_OUTPUTS_TEST, "mecg" + str(i))
     np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
-    return test_loss_m,test_loss_f,test_loss_average
+    return test_loss_m,test_loss_f,test_loss_average,test_corr_m,test_corr_f,test_corr_average

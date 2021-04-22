@@ -106,10 +106,13 @@ def main():
     np.save(path_losses, np.array(validation_corr_f_list))
 
     #Test
-    test_loss_m, test_loss_f, test_loss_avg = test(str(network_save_folder + network_file_name_best),test_data_loader_sim)
+    test_loss_m, test_loss_f, test_loss_avg, test_corr_m, test_corr_f, test_corr_average = test(str(network_save_folder + network_file_name_best),test_data_loader_sim)
 
     with open("test_loss.txt", 'w') as f:
-        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f}\n".format(test_loss_m,test_loss_f,test_loss_avg))
+        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f},"
+                "test_corr_m = {:.4f},test_corr_f = {:.4f},test_corr_avg = {:.4f}\n".format(test_loss_m, test_loss_f, test_loss_avg,
+                                                                                            test_corr_m,test_corr_f,test_corr_average))
+
     del resnet_model
     del simulated_dataset
     del train_data_loader_sim
@@ -119,7 +122,7 @@ def main():
 if __name__=="__main__":
     main()
 
-    for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
+    """for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
         if "fecg" in filename:
             path = os.path.join(ECG_OUTPUTS_TEST, filename)
             number_file = filename.index("g") + 1
@@ -213,4 +216,4 @@ if __name__=="__main__":
     ax2.set_ylabel("CorrM")
     ax2.set_xlabel("Epoch")
     plt.show()
-    plt.close()
+    plt.close()"""
