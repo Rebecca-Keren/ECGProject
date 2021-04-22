@@ -4,8 +4,8 @@ from ResnetNetwork import *
 from torch.autograd import Variable
 
 ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs")
-ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal")
-ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsTest")
+ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal50000")
+ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsTest50000")
 
 network_save_folder = "./Models"
 network_file_name_last = "/last_model"
@@ -115,13 +115,13 @@ def train(resnet_model,
         outputs_f, one_before_last_f, train_loss_mecg, train_loss_fecg = None, None, None, None, None, None, None, \
                                                                          None, None, None, None
 
-        # compute the epoch training loss
-        # if not real_epoch: #TODO add when real data
-        total_loss_m = total_loss_m / (len(train_data_loader_sim))
-        total_loss_f = total_loss_f / (len(train_data_loader_sim))
-        train_loss_f_list.append(total_loss_f)
-        train_loss_m_list.append(total_loss_m)
-        train_loss_average_list.append((total_loss_m+total_loss_f)/2)
+    # compute the epoch training loss
+    # if not real_epoch: #TODO add when real data
+    total_loss_m = total_loss_m / (len(train_data_loader_sim))
+    total_loss_f = total_loss_f / (len(train_data_loader_sim))
+    train_loss_f_list.append(total_loss_f)
+    train_loss_m_list.append(total_loss_m)
+    train_loss_average_list.append((total_loss_m+total_loss_f)/2)
 
     # else: #TODO add when real data
     #    total_loss_ecg = total_loss_ecg / (len(train_data_loader_sim))

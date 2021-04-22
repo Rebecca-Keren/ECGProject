@@ -7,10 +7,11 @@ import pytorch_lightning as pl
 import math
 from model import *
 import dataloader
+from scipy.io import loadmat
 
 
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
-LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
+LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses50000")
 MODELS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Models")
 
 BATCH_SIZE = 32
@@ -175,16 +176,22 @@ if __name__=="__main__":
             plt.close()
     path_losses = os.path.join(LOSSES, "TL1M.npy")
     train_loss_m_list = np.load(path_losses)
+    print(len(train_loss_m_list))
     path_losses = os.path.join(LOSSES, "TL1F.npy")
     train_loss_f_list = np.load(path_losses)
+    print(len(train_loss_f_list))
     path_losses = os.path.join(LOSSES, "TL1Avg.npy")
     train_loss_average_list = np.load(path_losses)
+    print(len(train_loss_average_list))
     path_losses = os.path.join(LOSSES, "VL1M.npy")
     validation_loss_m_list = np.load(path_losses)
+    print(len(validation_loss_m_list))
     path_losses = os.path.join(LOSSES, "VL1F.npy")
     validation_loss_f_list = np.load(path_losses)
+    print(len(validation_loss_f_list))
     path_losses = os.path.join(LOSSES, "VL1Avg.npy")
     validation_loss_average_list = np.load(path_losses)
+    print(len(validation_loss_average_list))
     path_losses = os.path.join(LOSSES, "CorrF.npy")
     correlation_f_list = np.load(path_losses)
     path_losses = os.path.join(LOSSES, "CorrM.npy")

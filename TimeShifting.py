@@ -31,7 +31,7 @@ def compute_time_shifting(original_signal, output_signal):
     max_amplitude_original = get_max_amplitude_in_signal(original_signal)
     max_amplitude_output = get_max_amplitude_in_signal(output_signal)
     original_threshold = max_amplitude_original / 2
-    output_threshold = max_amplitude_original / 2
+    output_threshold = max_amplitude_output / 2
     print(original_threshold)
     print(output_threshold)
     original_indices_above_threshold = get_values_above_threshold(original_signal, original_threshold)
