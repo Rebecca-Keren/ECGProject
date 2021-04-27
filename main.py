@@ -29,7 +29,7 @@ def main(dataset_size):
     pl.seed_everything(1234)
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
-    list_simulated_overfit = list_simulated[:dataset_size]  # TODO: put in comment after validating
+    list_simulated_overfit = list_simulated #[:dataset_size]  # TODO: put in comment after validating
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -151,15 +151,15 @@ def main(dataset_size):
 
 if __name__=="__main__":
     """list_simulated = simulated_database_list(SIMULATED_DATASET)
-
     for idx,elem in enumerate(list_simulated):
         path_mix = os.path.join(SIMULATED_DATASET, list_simulated[idx][0])
         mix = np.array(loadmat(path_mix)['data'])
         if(np.any(np.isnan(mix))):
             print(list_simulated[idx][0])"""
 
+
     #dataset_size = [50000,80000,100000]
-    dataset_size = [127000]
+    dataset_size = [10]
 
     for size in dataset_size:
         main(size)
