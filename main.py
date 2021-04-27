@@ -12,11 +12,11 @@ from model import *
 import dataloader
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
 
 
 BATCH_SIZE = 32
-epochs = 3
+epochs = 10
 learning_rate = 1e-3
 
 
