@@ -10,9 +10,10 @@ import pytorch_lightning as pl
 import math
 from model import *
 import dataloader
+from scipy.io import loadmat
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
 
 BATCH_SIZE = 32
@@ -148,12 +149,18 @@ def main(dataset_size):
 
 
 if __name__=="__main__":
+    list_simulated = simulated_database_list(SIMULATED_DATASET)
 
+    for idx,elem in enumerate(list_simulated):
+        path_mix = os.path.join(SIMULATED_DATASET, list_simulated[idx][0])
+        mix = np.array(loadmat(path_mix)['data'])
+        if(np.any(np.isnan(mix))):
+            print(list_simulated[idx][0])
     #dataset_size = [50000,80000,100000]
-    dataset_size = [127750]
+    #dataset_size = [2000]
 
-    for size in dataset_size:
-        main(size)
+    #for size in dataset_size:
+        #main(size)
         """print(size)
 
         ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
