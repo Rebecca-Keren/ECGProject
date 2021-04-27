@@ -258,11 +258,11 @@ def test(filename,test_data_loader_sim,dataset_size):
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_test)
             test_loss_m += criterion(outputs_m_test, batch_for_m_test)
             test_loss_f += criterion(outputs_f_test, batch_for_f_test)
-            for i, elem in enumerate(outputs_m_test):
+            for j, elem in enumerate(outputs_m_test):
                 test_corr_m += \
-                np.corrcoef(outputs_m_test.cpu().detach().numpy()[i], batch_for_m_test.cpu().detach().numpy()[i])[0][1]
+                np.corrcoef(outputs_m_test.cpu().detach().numpy()[j], batch_for_m_test.cpu().detach().numpy()[j])[0][1]
                 test_corr_f += \
-                np.corrcoef(outputs_f_test.cpu().detach().numpy()[i], batch_for_f_test.cpu().detach().numpy()[i])[0][1]
+                np.corrcoef(outputs_f_test.cpu().detach().numpy()[j], batch_for_f_test.cpu().detach().numpy()[j])[0][1]
 
             ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                             "ECGOutputsTest" + str(dataset_size))
