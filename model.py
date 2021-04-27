@@ -4,8 +4,8 @@ from ResnetNetwork import *
 from torch.autograd import Variable
 
 ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs")
-ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal50000")
-ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsTest50000")
+ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal")
+ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsTest")
 
 network_save_folder = "./Models"
 network_file_name_last = "/last_model"
@@ -171,11 +171,24 @@ def val(val_data_loader_sim,
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_val)
             val_loss_m += criterion(outputs_m_test, batch_for_m_val)
             val_loss_f += criterion(outputs_f_test, batch_for_f_val)
-            for i, elem in enumerate(outputs_m_test):
+            for j, elem in enumerate(outputs_m_test):
                 val_corr_m += \
-                np.corrcoef(outputs_m_test.cpu().detach().numpy()[i], batch_for_m_val.cpu().detach().numpy()[i])[0][1]
+                np.corrcoef(outputs_m_test.cpu().detach().numpy()[j], batch_for_m_val.cpu().detach().numpy()[j])[0][1]
                 val_corr_f += \
-                np.corrcoef(outputs_f_test.cpu().detach().numpy()[i], batch_for_f_val.cpu().detach().numpy()[i])[0][1]
+                np.corrcoef(outputs_f_test.cpu().detach().numpy()[j], batch_for_f_val.cpu().detach().numpy()[j])[0][1]
+            if epoch + 1 == epochs:
+                if not os.path.exists(ECG_OUTPUTS_VAL):
+                    os.mkdir(ECG_OUTPUTS_VAL)
+                path = os.path.join(ECG_OUTPUTS_VAL, "ecg_all" + str(i))
+                np.save(path, batch_features[0][0].cpu().detach().numpy()[:, 0])
+                path = os.path.join(ECG_OUTPUTS_VAL, "label_m" + str(i))
+                np.save(path, batch_features[1][0].cpu().detach().numpy()[:, 0])
+                path = os.path.join(ECG_OUTPUTS_VAL, "label_f" + str(i))
+                np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
+                path = os.path.join(ECG_OUTPUTS_VAL, "fecg" + str(i))
+                np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
+                path = os.path.join(ECG_OUTPUTS_VAL, "mecg" + str(i))
+                np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
     val_loss_m /= len(val_data_loader_sim.dataset)
     val_loss_f /= len(val_data_loader_sim.dataset)
     val_corr_m /= len(val_data_loader_sim.dataset)
@@ -202,19 +215,6 @@ def val(val_data_loader_sim,
         'Validation: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f}, Correlation M: {:.4f},Correlation F: {:.4f},Correlation Average: {:.4f})\n'.format(
             val_loss_m, val_loss_f, val_loss_average, val_corr_m, val_corr_f, val_corr_average))
 
-    if epoch + 1 == epochs:
-        if not os.path.exists(ECG_OUTPUTS_VAL):
-            os.mkdir(ECG_OUTPUTS_VAL)
-        path = os.path.join(ECG_OUTPUTS_VAL, "ecg_all" + str(i))
-        np.save(path, batch_features[0][0].cpu().detach().numpy()[:, 0])
-        path = os.path.join(ECG_OUTPUTS_VAL, "label_m" + str(i))
-        np.save(path, batch_features[1][0].cpu().detach().numpy()[:, 0])
-        path = os.path.join(ECG_OUTPUTS_VAL, "label_f" + str(i))
-        np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
-        path = os.path.join(ECG_OUTPUTS_VAL, "fecg" + str(i))
-        np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
-        path = os.path.join(ECG_OUTPUTS_VAL, "mecg" + str(i))
-        np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
 
 def test(filename,test_data_loader_sim):
     resnet_model = ResNet(1)
@@ -237,9 +237,20 @@ def test(filename,test_data_loader_sim):
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_test)
             test_loss_m += criterion(outputs_m_test, batch_for_m_test)
             test_loss_f += criterion(outputs_f_test, batch_for_f_test)
-            for i, elem in enumerate(outputs_m_test):
-                test_corr_m += np.corrcoef(outputs_m_test.cpu().detach().numpy()[i], batch_for_m_test.cpu().detach().numpy()[i])[0][1]
-                test_corr_f += np.corrcoef(outputs_f_test.cpu().detach().numpy()[i], batch_for_f_test.cpu().detach().numpy()[i])[0][1]
+            for j, elem in enumerate(outputs_m_test):
+                test_corr_m += np.corrcoef(outputs_m_test.cpu().detach().numpy()[j], batch_for_m_test.cpu().detach().numpy()[j])[0][1]
+                test_corr_f += np.corrcoef(outputs_f_test.cpu().detach().numpy()[j], batch_for_f_test.cpu().detach().numpy()[j])[0][1]
+            path = os.path.join(ECG_OUTPUTS_TEST, "ecg_all" + str(i))
+            np.save(path, batch_features[0][0].cpu().detach().numpy()[:, 0])
+            path = os.path.join(ECG_OUTPUTS_TEST, "label_m" + str(i))
+            np.save(path, batch_features[1][0].cpu().detach().numpy()[:, 0])
+            path = os.path.join(ECG_OUTPUTS_TEST, "label_f" + str(i))
+            np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
+            path = os.path.join(ECG_OUTPUTS_TEST, "fecg" + str(i))
+            np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
+            path = os.path.join(ECG_OUTPUTS_TEST, "mecg" + str(i))
+            np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
+
     test_loss_m /= len(test_data_loader_sim.dataset)
     test_loss_f /= len(test_data_loader_sim.dataset)
     test_loss_average = (test_loss_m + test_loss_f) / 2
@@ -247,14 +258,4 @@ def test(filename,test_data_loader_sim):
     test_corr_f /= len(test_data_loader_sim.dataset)
     test_corr_average = (test_corr_m + test_corr_f) / 2
 
-    path = os.path.join(ECG_OUTPUTS_TEST, "ecg_all" + str(i))
-    np.save(path, batch_features[0][0].cpu().detach().numpy()[:, 0])
-    path = os.path.join(ECG_OUTPUTS_TEST, "label_m" + str(i))
-    np.save(path, batch_features[1][0].cpu().detach().numpy()[:, 0])
-    path = os.path.join(ECG_OUTPUTS_TEST, "label_f" + str(i))
-    np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
-    path = os.path.join(ECG_OUTPUTS_TEST, "fecg" + str(i))
-    np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
-    path = os.path.join(ECG_OUTPUTS_TEST, "mecg" + str(i))
-    np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
     return test_loss_m,test_loss_f,test_loss_average,test_corr_m,test_corr_f,test_corr_average
