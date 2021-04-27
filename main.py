@@ -31,6 +31,8 @@ def main(dataset_size):
 
     list_simulated_overfit = list_simulated[:dataset_size]  # TODO: put in comment after validating
 
+    remove_nan_signals(list_simulated_overfit) # TODO: change to original list
+
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
     train_size_sim = int(0.6 * len(simulated_dataset))
@@ -134,6 +136,7 @@ if __name__=="__main__":
 
     for size in dataset_size:
         main(size)
+
         """ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
         ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         "ECGOutputsTest" + str(size))

@@ -3,6 +3,9 @@ import torch.nn as nn
 import os
 import numpy as np
 import scipy.stats
+from scipy.io import loadmat
+
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
 
 def check_correlation(orig_signal,changed_signal):
     orig = orig_signal
@@ -46,3 +49,16 @@ def simulated_database_list(sim_dir):
         number = filename[(filename.find("mix")) + 3:]
         list.append([name + 'mix' + str(number), name + 'mecg' + str(number), name + 'fecg1' + str(number)])
     return list
+
+def remove_nan_signals(list_signals):
+    for idx,signal_tuple in enumerate(list_signals):
+        is_nan = False
+        for signal_name in signal_tuple:
+            path = os.path.join(SIMULATED_DATASET,signal_name)
+            signal = loadmat(path)['data']
+            is_nan = np.any(np.isnan(signal))
+            if(is_nan):
+                print(list_signals[idx])
+                list_signals = np.delete(list_signals,idx)
+                break
+
