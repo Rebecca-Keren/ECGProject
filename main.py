@@ -41,6 +41,28 @@ def main(dataset_size):
     train_data_loader_sim = data.DataLoader(train_dataset_sim, batch_size=BATCH_SIZE, shuffle=True, num_workers=12)
     val_data_loader_sim = data.DataLoader(val_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
     test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
+    print("REBECCA")
+    print("train")
+    for i, batch_features in enumerate(train_data_loader_sim):
+        for elem in batch_features:
+            result = torch.any(torch.isnan(1000. * elem.transpose(1, 2).float()))
+            if(result):
+                print("True")
+                print(i)
+    print("val")
+    for i, batch_features in enumerate(val_data_loader_sim):
+        for elem in batch_features:
+            result = torch.any(torch.isnan(1000. * elem.transpose(1, 2).float()))
+            if(result):
+                print("True")
+                print(i)
+    print("test")
+    for i, batch_features in enumerate(test_data_loader_sim):
+        for elem in batch_features:
+            result = torch.any(torch.isnan(1000. * elem.transpose(1, 2).float()))
+            if (result):
+                print("True")
+                print(i)
 
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
@@ -128,7 +150,7 @@ def main(dataset_size):
 if __name__=="__main__":
 
     #dataset_size = [50000,80000,100000]
-    dataset_size = [127000]
+    dataset_size = [127750]
 
     for size in dataset_size:
         main(size)
