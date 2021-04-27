@@ -117,18 +117,18 @@ def train(resnet_model,
 
     # compute the epoch training loss
     # if not real_epoch: #TODO add when real data
-    total_loss_m = total_loss_m / (len(train_data_loader_sim))
-    total_loss_f = total_loss_f / (len(train_data_loader_sim))
+    total_loss_m = total_loss_m / (len(train_data_loader_sim.dataset))
+    total_loss_f = total_loss_f / (len(train_data_loader_sim.dataset))
     train_loss_f_list.append(total_loss_f)
     train_loss_m_list.append(total_loss_m)
     train_loss_average_list.append((total_loss_m+total_loss_f)/2)
 
     # else: #TODO add when real data
-    #    total_loss_ecg = total_loss_ecg / (len(train_data_loader_sim))
+    #    total_loss_ecg = total_loss_ecg / (len(train_data_loader_sim.dataset))
 
-    total_loss_cent = total_loss_cent / (len(train_data_loader_sim))
-    total_loss_hinge = total_loss_hinge / (len(train_data_loader_sim))
-    total_loss_epoch = total_loss_epoch / (len(train_data_loader_sim))
+    total_loss_cent = total_loss_cent / (len(train_data_loader_sim.dataset))
+    total_loss_hinge = total_loss_hinge / (len(train_data_loader_sim.dataset))
+    total_loss_epoch = total_loss_epoch / (len(train_data_loader_sim.dataset))
 
     # display the epoch training loss
     # if not real_epoch: #TODO add when real data
