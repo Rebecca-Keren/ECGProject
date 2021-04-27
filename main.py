@@ -47,12 +47,12 @@ def main(dataset_size):
     print(device)
 
     resnet_model = ResNet(1).cuda()
-
-    optimizer_model = optim.SGD(resnet_model.parameters(), lr=learning_rate, momentum=0.9)
     best_model_accuracy = math.inf
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
-    optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate,amsgrad= True)
+    params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
+    optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-4)
+    #optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate,amsgrad= True)
     train_loss_f_list = []
     train_loss_m_list = []
     train_loss_average_list = []
@@ -68,7 +68,6 @@ def main(dataset_size):
         train(resnet_model,
               train_data_loader_sim,
               optimizer_model,
-              optimizer_centloss,
               criterion,
               criterion_cent,
               epoch,

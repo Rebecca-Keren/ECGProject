@@ -26,7 +26,6 @@ include_hinge_loss = True
 def train(resnet_model,
               train_data_loader_sim,
               optimizer_model,
-              optimizer_centloss,
               criterion,
               criterion_cent,
               epoch,
@@ -50,7 +49,6 @@ def train(resnet_model,
     # real_epoch = False #TODO add when real data
     for i, batch_features in enumerate(train_data_loader_sim):
         optimizer_model.zero_grad()
-        optimizer_centloss.zero_grad()
 
         batch_for_model = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
         batch_for_m = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
@@ -101,7 +99,6 @@ def train(resnet_model,
 
         total_loss.backward()
         optimizer_model.step()
-        optimizer_centloss.step()
 
         # if not real_epoch: #TODO add when real data
         total_loss_m += mecg_weight * train_loss_mecg.item()
