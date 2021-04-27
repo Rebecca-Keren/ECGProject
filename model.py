@@ -173,6 +173,8 @@ def val(val_data_loader_sim,
             batch_for_m_val = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
             batch_for_f_val = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_val)
+            outputs_m_test = (outputs_m_test-outputs_m_test.min())/(outputs_m_test.max()-outputs_m_test.min())
+            batch_for_m_val = (batch_for_m_val - batch_for_m_val.min()) / (batch_for_m_val.max() - batch_for_m_val.min())
             val_loss_m += criterion(outputs_m_test, batch_for_m_val)
             val_loss_f += criterion(outputs_f_test, batch_for_f_val)
             for i, elem in enumerate(outputs_m_test):
