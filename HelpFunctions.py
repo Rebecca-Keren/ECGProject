@@ -39,17 +39,10 @@ def criterion_hinge_loss(m_feature,f_feature,delta):
 
 def simulated_database_list(sim_dir):
     list = []
-    #signal_given = []
     for filename in os.listdir(sim_dir):
         if 'mix' not in filename:
             continue
         name = filename[:(filename.find("mix"))]
         number = filename[(filename.find("mix")) + 3:]
         list.append([name + 'mix' + str(number), name + 'mecg' + str(number), name + 'fecg1' + str(number)])
-        """if name not in signal_given:
-            signal_given.append(name)
-            for i in range(73):
-                list.append([name + 'mix' + str(i), name + 'mecg' + str(i) , name + 'fecg1' + str(i)])
-        else:
-            continue"""
     return list

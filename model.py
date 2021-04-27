@@ -140,7 +140,14 @@ def train(resnet_model,
     if include_hinge_loss:
         print("loss_hinge = {:.8f} ".format(total_loss_hinge))
     print("\n")
-
+    if epoch + 1 == epochs:
+        with open("train_loss_last_epoch" + str(dataset_size) + ".txt", 'w') as f:
+            f.write("L1 M = {:.4f},L1 F= {:.4f},LCent = {:.4f},"
+                    "LHinge = {:.4f},LTot = {:.4f}\n".format(total_loss_m,
+                                                            total_loss_f,
+                                                            total_loss_cent,
+                                                            total_loss_hinge,
+                                                            total_loss_epoch))
     # else: #TODO add when real data
     #    print("epoch R : {}/{}, total_loss = {:.8f}, loss_ecg = {:.8f}, loss_cent = {:.8f}, loss_hinge = {:.8f}".format(
     #            epoch + 1, epochs, total_loss_epoch, total_loss_ecg, total_loss_cent, total_loss_hinge))
@@ -205,7 +212,15 @@ def val(val_data_loader_sim,
     validation_loss_average_list.append(val_loss_average.cpu().detach())
     validation_corr_m_list.append(val_corr_m)
     validation_corr_f_list.append(val_corr_f)
-
+    if epoch + 1 == epochs:
+        with open("val_loss_last_epoch" + str(dataset_size) + ".txt", 'w') as f:
+            f.write("L1 M = {:.4f},L1 F= {:.4f},LAvg = {:.4f},"
+                    "CorrM = {:.4f},CorrF = {:.4f}, CorrAvg = {:.4f}\n".format(val_loss_m,
+                                                            val_loss_f,
+                                                            val_loss_average,
+                                                            val_corr_m,
+                                                            val_corr_f,
+                                                            val_corr_average))
     # saving last model
     network_save_folder = network_save_folder_orig + str(dataset_size)
     if not os.path.exists(network_save_folder):

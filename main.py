@@ -17,7 +17,7 @@ SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "s
 
 
 BATCH_SIZE = 32
-epochs = 10
+epochs = 150
 learning_rate = 1e-3
 
 
@@ -29,7 +29,7 @@ def main(dataset_size):
     pl.seed_everything(1234)
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
-    list_simulated_overfit = list_simulated #[:dataset_size]  # TODO: put in comment after validating
+    list_simulated_overfit = list_simulated[:dataset_size]  # TODO: put in comment after validating
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -42,29 +42,6 @@ def main(dataset_size):
     train_data_loader_sim = data.DataLoader(train_dataset_sim, batch_size=BATCH_SIZE, shuffle=True, num_workers=12)
     val_data_loader_sim = data.DataLoader(val_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
     test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
-    """print("REBECCA")
-    print("train")
-    for i, batch_features in enumerate(train_data_loader_sim):
-        for elem in batch_features:
-            result = torch.any(torch.isnan(1000. * elem.transpose(1, 2).float()))
-            if(result):
-                print("True")
-                print(i)
-    print("val")
-    for i, batch_features in enumerate(val_data_loader_sim):
-        for elem in batch_features:
-            result = torch.any(torch.isnan(1000. * elem.transpose(1, 2).float()))
-            if(result):
-                print("True")
-                print(i)
-    print("test")
-    for i, batch_features in enumerate(test_data_loader_sim):
-        for elem in batch_features:
-            result = torch.any(torch.isnan(1000. * elem.transpose(1, 2).float()))
-            if (result):
-                print("True")
-                print(i)
-    """
 
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
@@ -76,7 +53,9 @@ def main(dataset_size):
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-4)
+
     #optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate,amsgrad= True)
+
     train_loss_f_list = []
     train_loss_m_list = []
     train_loss_average_list = []
@@ -150,21 +129,11 @@ def main(dataset_size):
 
 
 if __name__=="__main__":
-    """list_simulated = simulated_database_list(SIMULATED_DATASET)
-    for idx,elem in enumerate(list_simulated):
-        path_mix = os.path.join(SIMULATED_DATASET, list_simulated[idx][0])
-        mix = np.array(loadmat(path_mix)['data'])
-        if(np.any(np.isnan(mix))):
-            print(list_simulated[idx][0])"""
 
-
-    #dataset_size = [50000,80000,100000]
-    dataset_size = [10]
+    dataset_size = [50000,80000,100000,124740]
 
     for size in dataset_size:
         main(size)
-        print(size)
-
         """ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
         ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         "ECGOutputsTest" + str(size))
