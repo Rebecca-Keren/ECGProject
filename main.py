@@ -73,17 +73,17 @@ def main():
               train_loss_average_list)
         #Evaluation
         resnet_model.eval()
-        val(val_data_loader_sim,
-            resnet_model,
-            criterion,
-            epoch,
-            epochs,
-            validation_loss_m_list,
-            validation_loss_f_list,
-            validation_loss_average_list,
-            validation_corr_m_list,
-            validation_corr_f_list,
-            best_model_accuracy)
+        best_model_accuracy = val(val_data_loader_sim,
+                                    resnet_model,
+                                    criterion,
+                                    epoch,
+                                    epochs,
+                                    validation_loss_m_list,
+                                    validation_loss_f_list,
+                                    validation_loss_average_list,
+                                    validation_corr_m_list,
+                                    validation_corr_f_list,
+                                    best_model_accuracy)
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")

@@ -214,6 +214,7 @@ def val(val_data_loader_sim,
     print(
         'Validation: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f}, Correlation M: {:.4f},Correlation F: {:.4f},Correlation Average: {:.4f})\n'.format(
             val_loss_m, val_loss_f, val_loss_average, val_corr_m, val_corr_f, val_corr_average))
+    return best_model_accuracy
 
 
 def test(filename,test_data_loader_sim):
