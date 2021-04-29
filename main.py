@@ -138,11 +138,12 @@ if __name__=="__main__":
     #print(qrs.sample)
 
 
-    """dataset_size = [50000,80000,100000,124740]
-
+    #dataset_size = [50000,80000,100000,124740]
+    dataset_size = [124740]
     for size in dataset_size:
         main(size)
 
+        """print(size)
         ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
         ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         "ECGOutputsTest" + str(size))

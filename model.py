@@ -11,7 +11,7 @@ network_file_name_best = "/best_model"
 
 delta = 3
 
-fecg_lamda = 1.
+fecg_lamda = 10.
 cent_lamda = 0.01
 hinge_lamda = 0.5
 
@@ -179,11 +179,11 @@ def val(val_data_loader_sim,
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_val)
             val_loss_m += criterion(outputs_m_test, batch_for_m_val)
             val_loss_f += criterion(outputs_f_test, batch_for_f_val)
-            for i, elem in enumerate(outputs_m_test):
+            for j, elem in enumerate(outputs_m_test):
                 val_corr_m += \
-                np.corrcoef(outputs_m_test.cpu().detach().numpy()[i], batch_for_m_val.cpu().detach().numpy()[i])[0][1]
+                np.corrcoef(outputs_m_test.cpu().detach().numpy()[j], batch_for_m_val.cpu().detach().numpy()[j])[0][1]
                 val_corr_f += \
-                np.corrcoef(outputs_f_test.cpu().detach().numpy()[i], batch_for_f_val.cpu().detach().numpy()[i])[0][1]
+                np.corrcoef(outputs_f_test.cpu().detach().numpy()[j], batch_for_f_val.cpu().detach().numpy()[j])[0][1]
 
             ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                            "ECGOutputsVal" + str(dataset_size))
