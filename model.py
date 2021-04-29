@@ -2,6 +2,7 @@ import torch
 import os
 from ResnetNetwork import *
 from torch.autograd import Variable
+import math
 MODELS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Models")
 
 network_save_folder_orig = "./Models"
@@ -10,7 +11,7 @@ network_file_name_best = "/best_model"
 
 delta = 3
 
-fecg_lamda = 10.
+fecg_lamda = 1.
 cent_lamda = 0.01
 hinge_lamda = 0.5
 
@@ -103,6 +104,7 @@ def train(resnet_model,
         # if not real_epoch: #TODO add when real data
         total_loss_m += mecg_weight * train_loss_mecg.item()
         total_loss_f += fecg_weight * fecg_lamda * train_loss_fecg.item()
+
 
         # else: #TODO add when real data
         #   total_loss_ecg += train_loss_ecg.item()
@@ -235,6 +237,7 @@ def val(val_data_loader_sim,
     print(
         'Validation: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f}, Correlation M: {:.4f},Correlation F: {:.4f},Correlation Average: {:.4f})\n'.format(
             val_loss_m, val_loss_f, val_loss_average, val_corr_m, val_corr_f, val_corr_average))
+    return best_model_accuracy
 
 
 def test(filename,test_data_loader_sim,dataset_size):

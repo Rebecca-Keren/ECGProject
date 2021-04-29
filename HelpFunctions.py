@@ -5,7 +5,7 @@ import numpy as np
 import scipy.stats
 from scipy.io import loadmat
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
 def check_correlation(orig_signal,changed_signal):
     orig = orig_signal

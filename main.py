@@ -11,6 +11,7 @@ import math
 from model import *
 import dataloader
 from scipy.io import loadmat
+import wfdb
 
 
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
@@ -83,18 +84,18 @@ def main(dataset_size):
               dataset_size)
         #Evaluation
         resnet_model.eval()
-        val(val_data_loader_sim,
-            resnet_model,
-            criterion,
-            epoch,
-            epochs,
-            validation_loss_m_list,
-            validation_loss_f_list,
-            validation_loss_average_list,
-            validation_corr_m_list,
-            validation_corr_f_list,
-            best_model_accuracy,
-            dataset_size)
+        best_model_accuracy = val(val_data_loader_sim,
+                                    resnet_model,
+                                    criterion,
+                                    epoch,
+                                    epochs,
+                                    validation_loss_m_list,
+                                    validation_loss_f_list,
+                                    validation_loss_average_list,
+                                    validation_corr_m_list,
+                                    validation_corr_f_list,
+                                    best_model_accuracy,
+                                    dataset_size)
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")
@@ -132,12 +133,17 @@ def main(dataset_size):
 
 if __name__=="__main__":
 
-    dataset_size = [50000,80000,100000,124740]
+    #HOW TO OPEN QRS
+    #qrs = wfdb.io.rdann("sub01_snr00dB_l1_c0_fecg1", extension="qrs")
+    #print(qrs.sample)
+
+
+    """dataset_size = [50000,80000,100000,124740]
 
     for size in dataset_size:
         main(size)
 
-        """ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
+        ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
         ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         "ECGOutputsTest" + str(size))
         LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))
