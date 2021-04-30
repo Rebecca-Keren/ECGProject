@@ -30,6 +30,12 @@ class ResNetEncoder(nn.Module):
         self.block13 = ResNetBasicBlockEncoder(1024, 2048, downsampling=2)
         self.block14 = ResNetBasicBlockEncoder(2048, 2048)
 
+        self.block15 = ResNetBasicBlockEncoder(2048, 4096)
+        self.block16 = ResNetBasicBlockEncoder(4096, 4096)
+
+        self.block17 = ResNetBasicBlockEncoder(4096, 8192, downsampling=2)
+        self.block18 = ResNetBasicBlockEncoder(8192, 8192)
+
     def forward(self, x):
         x = self.conv1(x)
         x = self.batch(x)
@@ -49,6 +55,10 @@ class ResNetEncoder(nn.Module):
         x = self.block12(x)
         x = self.block13(x)
         x = self.block14(x)
+        x = self.block15(x)
+        x = self.block16(x)
+        x = self.block17(x)
+        x = self.block18(x)
 
         return x
 
@@ -60,6 +70,12 @@ class ResnetDecoder(nn.Module):
         self.conv_out = nn.ConvTranspose1d(16, out_channels, kernel_size=3, stride=2, padding=2, output_padding=0,
                                            bias=False)
         self.batch_norm = nn.BatchNorm1d(16)
+
+        self.block1_1 = ResNetBasicBlockDecoder(4096, 4096)
+        self.block2_1 = ResNetBasicBlockDecoder(4096, 2048, upsampling=2)
+
+        self.block1_2 = ResNetBasicBlockDecoder(2048, 2048)
+        self.block2_2 = ResNetBasicBlockDecoder(2048, 1024)
 
         self.block1 = ResNetBasicBlockDecoder(1024, 1024)
         self.block2 = ResNetBasicBlockDecoder(1024, 512, upsampling=2)
@@ -80,9 +96,13 @@ class ResnetDecoder(nn.Module):
         self.block12 = ResNetBasicBlockDecoder(32, 16)
 
     def forward(self, x):
+        x = self.block1_1(x)
+        x = self.block2_1(x)[:, :, :-1]
+        one_before_last = x
+        x = self.block1_2(x)
+        x = self.block2_2(x)
         x = self.block1(x)
         x = self.block2(x)[:, :, :-1]
-        one_before_last = x
         x = self.block3(x)
         x = self.block4(x)
         x = self.block5(x)

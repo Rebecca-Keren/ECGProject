@@ -18,7 +18,7 @@ SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "s
 
 
 BATCH_SIZE = 32
-epochs = 150
+epochs = 1
 learning_rate = 1e-3
 
 
@@ -56,6 +56,7 @@ def main(dataset_size):
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-4)
+    torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_model, 'min')
 
     #optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate,amsgrad= True)
 
@@ -139,12 +140,12 @@ if __name__=="__main__":
 
 
     #dataset_size = [50000,80000,100000,124740]
-    dataset_size = [124740]
+    dataset_size = [127740]
     for size in dataset_size:
         main(size)
 
-        """print(size)
-        ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
+        #print(size)
+        """ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
         ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         "ECGOutputsTest" + str(size))
         LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))
