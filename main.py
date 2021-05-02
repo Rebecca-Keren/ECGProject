@@ -1,6 +1,7 @@
 from ResnetNetwork import *
 import torch.optim as optim
 import torch.utils.data as data
+import torch.nn as nn
 from torch.autograd import Variable
 from CenterLoss import *
 import numpy as np
@@ -18,7 +19,7 @@ SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "s
 
 
 BATCH_SIZE = 32
-epochs = 1
+epochs = 150
 learning_rate = 1e-3
 
 
@@ -141,32 +142,48 @@ if __name__=="__main__":
 
     #dataset_size = [50000,80000,100000,124740]
     dataset_size = [127740]
+    correlation_f = 0
+    correlation_m = 0
+    num_of_f = 0
+    num_of_m = 0
     for size in dataset_size:
         main(size)
 
-        #print(size)
-        """ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
+        """print(size)
+        ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
         ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         "ECGOutputsTest" + str(size))
         LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))
         for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
             if "fecg" in filename:
+                num_of_f += 1
                 path = os.path.join(ECG_OUTPUTS_TEST, filename)
                 number_file = filename.index("g") + 1
                 end_path = filename[number_file:]
                 path_label = os.path.join(ECG_OUTPUTS_TEST,"label_f" + end_path)
+                real = np.load(path)
+                label = np.load(path_label)
+                correlation = check_correlation(real, label)
+                if(correlation < 0.70):
+                    correlation_f += 1
                 fig, (ax1, ax2) = plt.subplots(2, 1)
-                ax1.plot(np.load(path))
+                ax1.plot(real)
                 ax1.set_ylabel("FECG")
-                ax2.plot(np.load(path_label))
+                ax2.plot(label)
                 ax2.set_ylabel("LABEL")
                 plt.show()
                 plt.close()
             if "mecg" in filename:
+                num_of_m += 1
                 path = os.path.join(ECG_OUTPUTS_TEST, filename)
                 number_file = filename.index("g") + 1
                 end_path = filename[number_file:]
                 path_label = os.path.join(ECG_OUTPUTS_TEST, "label_m" + end_path)
+                real = np.load(path)
+                label = np.load(path_label)
+                correlation = check_correlation(real, label)
+                if (correlation < 0.70):
+                    correlation_m += 1
                 fig, (ax1, ax2) = plt.subplots(2, 1)
                 ax1.plot(np.load(path))
                 ax1.set_ylabel("MECG")
@@ -174,7 +191,10 @@ if __name__=="__main__":
                 ax2.set_ylabel("LABEL")
                 plt.show()
                 plt.close()
-
+        print(correlation_f)
+        print(num_of_f)
+        print(correlation_m)
+        print(num_of_m)
         print("VAL")
         for filename in os.listdir(ECG_OUTPUTS_VAL): #present the fecg outputs
             if "fecg" in filename:
@@ -248,10 +268,10 @@ if __name__=="__main__":
         ax2.set_ylabel("CorrM")
         ax2.set_xlabel("Epoch")
         plt.show()
-        plt.close()"""
+        plt.close()
 
     #Comparing Validation
-    """LOSSES1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(50000))
+    LOSSES1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(50000))
     LOSSES2 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(80000))
     LOSSES3 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(100000))
     #LOSSES4 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))

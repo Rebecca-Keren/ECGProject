@@ -11,7 +11,7 @@ network_file_name_best = "/best_model"
 
 delta = 3
 
-fecg_lamda = 10.
+fecg_lamda = 1.
 cent_lamda = 0.01
 hinge_lamda = 0.5
 
