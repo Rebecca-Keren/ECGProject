@@ -97,7 +97,6 @@ class ResnetDecoder(nn.Module):
         x = self.block1_2(x)
         x = self.block2_2(x)
         one_before_last = x
-        print(one_before_last.size())
         x = self.block1(x)
         x = self.block2(x)[:, :, :-1]
         x = self.block3(x)
