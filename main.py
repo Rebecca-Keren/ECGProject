@@ -57,7 +57,7 @@ def main(dataset_size):
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-4)
-    #scheduler = torch.optim.StepLR(optimizer_model, step_size=3, gamma=0.8)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer_model, step_size=6, gamma=0.8)
 
     #optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate,amsgrad= True)
 
@@ -98,7 +98,7 @@ def main(dataset_size):
                                     validation_corr_f_list,
                                     best_model_accuracy,
                                     dataset_size)
-        #scheduler.step()
+        scheduler.step()
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")
@@ -142,11 +142,11 @@ if __name__=="__main__":
 
 
     #dataset_size = [50000,80000,100000,127740]
-    dataset_size = [10]
-    #correlation_f = 0
-    #correlation_m = 0
-    #num_of_f = 0
-    #num_of_m = 0
+    dataset_size = [127740]
+    correlation_f = 0
+    correlation_m = 0
+    num_of_f = 0
+    num_of_m = 0
     for size in dataset_size:
         main(size)
         """print(size)
@@ -193,7 +193,42 @@ if __name__=="__main__":
 
 
 
-        for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
+        """
+
+        """fig, (ax1,ax2,ax3,ax4,ax5) = plt.subplots(5,1)
+        path = os.path.join(ECG_OUTPUTS_TEST, "fecg12.npy")
+        path1 = os.path.join(ECG_OUTPUTS_TEST, "label_f12.npy")
+        path2 = os.path.join(ECG_OUTPUTS_TEST, "mecg12.npy")
+        path3 = os.path.join(ECG_OUTPUTS_TEST, "label_m12.npy")
+        path4 = os.path.join(ECG_OUTPUTS_TEST, "ecg_all12.npy")
+
+        ax1.plot(np.load(path4))
+        ax1.set_ylabel("ECG")
+        ax1.set_xlabel("SAMPLES")
+        ax2.plot(np.load(path))
+        ax2.set_ylabel("FECG")
+        ax2.set_xlabel("SAMPLES")
+        ax3.plot(np.load(path1))
+        ax3.set_ylabel("LABEL")
+        ax3.set_xlabel("SAMPLES")
+        ax4.plot(np.load(path2))
+        ax4.set_ylabel("MECG")
+        ax4.set_xlabel("SAMPLES")
+        ax5.plot(np.load(path3))
+        ax5.set_ylabel("LABEL")
+        ax5.set_xlabel("SAMPLES")
+        plt.show()
+        plt.close()"""
+
+        """fig3, (ax1) = plt.subplots(1, 1)
+        ax1.plot(np.load(path4))
+        ax1.set_ylabel("ECG")
+        ax1.set_xlabel("SAMPLES")
+        plt.show()
+        plt.close()"""
+
+
+        """for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
             if "fecg" in filename:
                 num_of_f += 1
                 path = os.path.join(ECG_OUTPUTS_TEST, filename)
@@ -205,13 +240,14 @@ if __name__=="__main__":
                 correlation = check_correlation(real, label)
                 if(correlation < 0.70):
                     correlation_f += 1
-                    fig, (ax1, ax2) = plt.subplots(2, 1)
-                    ax1.plot(real)
-                    ax1.set_ylabel("FECG")
-                    ax2.plot(label)
-                    ax2.set_ylabel("LABEL")
-                    plt.show()
-                    plt.close()
+                fig, (ax1, ax2) = plt.subplots(2, 1)
+                ax1.plot(real)
+                ax1.set_ylabel("FECG")
+                ax2.plot(label)
+                ax2.set_ylabel("LABEL")
+                plt.show()
+                plt.close()
+                print(filename)
 
             if "mecg" in filename:
                 num_of_m += 1
@@ -224,20 +260,20 @@ if __name__=="__main__":
                 correlation = check_correlation(real, label)
                 if (correlation < 0.70):
                     correlation_m += 1
-                    fig, (ax1, ax2) = plt.subplots(2, 1)
-                    ax1.plot(np.load(path))
-                    ax1.set_ylabel("MECG")
-                    ax2.plot(np.load(path_label))
-                    ax2.set_ylabel("LABEL")
-                    plt.show()
-                    plt.close()
+                fig, (ax1, ax2) = plt.subplots(2, 1)
+                ax1.plot(np.load(path))
+                ax1.set_ylabel("MECG")
+                ax2.plot(np.load(path_label))
+                ax2.set_ylabel("LABEL")
+                plt.show()
+                plt.close()
 
         print(correlation_f)
         print(num_of_f)
         print(correlation_m)
         print(num_of_m)
 
-        print("VAL")
+      
         for filename in os.listdir(ECG_OUTPUTS_VAL): #present the fecg outputs
             if "fecg" in filename:
                 path = os.path.join(ECG_OUTPUTS_VAL, filename)
@@ -311,6 +347,7 @@ if __name__=="__main__":
         ax2.set_xlabel("Epoch")
         plt.show()
         plt.close()
+   
 
     #Comparing Validation
     LOSSES1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(50000))
@@ -318,25 +355,25 @@ if __name__=="__main__":
     LOSSES3 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(100000))
     LOSSES4 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
     path_losses = os.path.join(LOSSES1, "VL1M.npy")
-    m1 = np.load(path_losses)
+    m1 = np.load(path_losses)[:41]
     path_losses = os.path.join(LOSSES1, "VL1F.npy")
-    f1 = np.load(path_losses)
+    f1 = np.load(path_losses)[:41]
     path_losses = os.path.join(LOSSES1, "VL1Avg.npy")
-    a1 = np.load(path_losses)
+    a1 = np.load(path_losses)[:41]
 
     path_losses = os.path.join(LOSSES2, "VL1M.npy")
-    m2 = np.load(path_losses)
+    m2 = np.load(path_losses)[:41]
     path_losses = os.path.join(LOSSES2, "VL1F.npy")
-    f2 = np.load(path_losses)
+    f2 = np.load(path_losses)[:41]
     path_losses = os.path.join(LOSSES2, "VL1Avg.npy")
-    a2 = np.load(path_losses)
+    a2 = np.load(path_losses)[:41]
 
     path_losses = os.path.join(LOSSES3, "VL1M.npy")
-    m3 = np.load(path_losses)
+    m3 = np.load(path_losses)[:41]
     path_losses = os.path.join(LOSSES3, "VL1F.npy")
-    f3 = np.load(path_losses)
+    f3 = np.load(path_losses)[:41]
     path_losses = os.path.join(LOSSES3, "VL1Avg.npy")
-    a3 = np.load(path_losses)
+    a3 = np.load(path_losses)[:41]
 
     path_losses = os.path.join(LOSSES4, "VL1M.npy")
     m4 = np.load(path_losses)
@@ -345,29 +382,54 @@ if __name__=="__main__":
     path_losses = os.path.join(LOSSES4, "VL1Avg.npy")
     a4 = np.load(path_losses)
 
+    path_losses = os.path.join(LOSSES4, "TL1M.npy")
+    tm4 = np.load(path_losses)
+    path_losses = os.path.join(LOSSES4, "TL1F.npy")
+    tf4 = np.load(path_losses)
+    path_losses = os.path.join(LOSSES4, "TL1Avg.npy")
+    ta4 = np.load(path_losses)
 
-    # plotting validation and training losses and saving them
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
     ax1.plot(m1, label="50k")
     ax1.plot(m2, label="80k")
     ax1.plot(m3, label="100k")
-    ax1.plot(m4, label="127k + changes")
+    ax1.plot(m4, label="127k")
     ax1.set_ylabel("L1 M")
     ax1.set_xlabel("Epoch")
     ax2.plot(f1, label="50k")
     ax2.plot(f2, label="80k")
     ax2.plot(f3, label="100k")
-    ax2.plot(f4, label="127k + changes")
+    ax2.plot(f4, label="127k")
     ax2.set_ylabel("L1 F")
     ax2.set_xlabel("Epoch")
     ax3.plot(a1, label="50k")
     ax3.plot(a2, label="80k")
     ax3.plot(a3, label="100k")
-    ax3.plot(a4, label="127k + changes")
+    ax3.plot(a4, label="127k")
     ax3.set_ylabel("L1 Avg")
     ax3.set_xlabel("Epoch")
     ax1.legend()
     ax2.legend()
     ax3.legend()
     plt.show()
-    plt.close()"""
+    plt.close()
+
+
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    ax1.plot(tm4, label="train")
+    ax1.plot(m4, label="val")
+    ax1.set_ylabel("L1 M")
+    ax1.set_xlabel("Epoch")
+    ax2.plot(tf4, label="train")
+    ax2.plot(f4, label="val")
+    ax2.set_ylabel("L1 F")
+    ax2.set_xlabel("Epoch")
+    ax3.plot(ta4, label="train")
+    ax3.plot(a4, label="val")
+    ax3.set_ylabel("L1 Avg")
+    ax3.set_xlabel("Epoch")
+    ax1.legend()
+    ax2.legend()
+    ax3.legend()
+    plt.show()
+    plt.close() """
