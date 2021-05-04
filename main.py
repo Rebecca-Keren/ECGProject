@@ -47,7 +47,10 @@ def main(dataset_size):
     val_data_loader_sim = data.DataLoader(val_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
     test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
 
-    #  use gpu if available
+    for i, batch_features in enumerate(test_data_loader_sim):
+        print(batch_features[3][0])
+
+    """#  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     print(device)
 
@@ -130,7 +133,7 @@ def main(dataset_size):
     del resnet_model
     del simulated_dataset
     del train_data_loader_sim
-    torch.cuda.empty_cache()
+    torch.cuda.empty_cache()"""
 
 
 if __name__=="__main__":
@@ -140,7 +143,7 @@ if __name__=="__main__":
     #print(qrs.sample)
 
 
-    #dataset_size = [50000,80000,100000,124740]
+    #dataset_size = [50000,80000,100000,127740]
     dataset_size = [127740]
     correlation_f = 0
     correlation_m = 0
@@ -164,8 +167,10 @@ if __name__=="__main__":
                 real = np.load(path)
                 label = np.load(path_label)
                 correlation = check_correlation(real, label)
+                print(correlation)
                 if(correlation < 0.70):
                     correlation_f += 1
+                    #print(filename)
                 fig, (ax1, ax2) = plt.subplots(2, 1)
                 ax1.plot(real)
                 ax1.set_ylabel("FECG")
@@ -191,6 +196,7 @@ if __name__=="__main__":
                 ax2.set_ylabel("LABEL")
                 plt.show()
                 plt.close()
+
         print(correlation_f)
         print(num_of_f)
         print(correlation_m)
@@ -274,7 +280,7 @@ if __name__=="__main__":
     LOSSES1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(50000))
     LOSSES2 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(80000))
     LOSSES3 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(100000))
-    #LOSSES4 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))
+    LOSSES4 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
     path_losses = os.path.join(LOSSES1, "VL1M.npy")
     m1 = np.load(path_losses)
     path_losses = os.path.join(LOSSES1, "VL1F.npy")
@@ -309,19 +315,19 @@ if __name__=="__main__":
     ax1.plot(m1, label="50k")
     ax1.plot(m2, label="80k")
     ax1.plot(m3, label="100k")
-    #ax1.plot(m4, label="127k")
+    ax1.plot(m4, label="127k + changes")
     ax1.set_ylabel("L1 M")
     ax1.set_xlabel("Epoch")
     ax2.plot(f1, label="50k")
     ax2.plot(f2, label="80k")
     ax2.plot(f3, label="100k")
-    #ax2.plot(f4, label="127k")
+    ax2.plot(f4, label="127k + changes")
     ax2.set_ylabel("L1 F")
     ax2.set_xlabel("Epoch")
     ax3.plot(a1, label="50k")
     ax3.plot(a2, label="80k")
     ax3.plot(a3, label="100k")
-    #ax3.plot(a4, label="127k")
+    ax3.plot(a4, label="127k + changes")
     ax3.set_ylabel("L1 Avg")
     ax3.set_xlabel("Epoch")
     ax1.legend()
