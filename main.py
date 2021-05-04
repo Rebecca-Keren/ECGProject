@@ -33,7 +33,7 @@ def main(dataset_size):
 
     list_simulated_overfit = list_simulated[:dataset_size]  # TODO: put in comment after validating
 
-    #remove_nan_signals(list_simulated_overfit) # TODO: change to original list
+    remove_nan_signals(list_simulated_overfit) # TODO: change to original list
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -47,12 +47,7 @@ def main(dataset_size):
     val_data_loader_sim = data.DataLoader(val_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
     test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
 
-    for i, batch_features in enumerate(test_data_loader_sim):
-        print(i)
-        with open("trial" + ".txt", 'a') as f:
-            f.write(batch_features[3][0] + "\n")
-
-    """#  use gpu if available
+    #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     print(device)
 
@@ -135,7 +130,7 @@ def main(dataset_size):
     del resnet_model
     del simulated_dataset
     del train_data_loader_sim
-    torch.cuda.empty_cache()"""
+    torch.cuda.empty_cache()
 
 
 if __name__=="__main__":
@@ -152,9 +147,9 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
     for size in dataset_size:
-        main(size)
+         #main(size)
 
-        """print(size)
+        print(size)
         ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
         ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         "ECGOutputsTest" + str(size))
@@ -169,11 +164,13 @@ if __name__=="__main__":
                 real = np.load(path)
                 label = np.load(path_label)
                 correlation = check_correlation(real, label)
-                print(correlation)
                 if(correlation < 0.70):
                     correlation_f += 1
+                    with open("fecgbad" + ".txt", 'a') as f:
+                        f.write(filename + "\n")
+
                     #print(filename)
-                fig, (ax1, ax2) = plt.subplots(2, 1)
+                """fig, (ax1, ax2) = plt.subplots(2, 1)
                 ax1.plot(real)
                 ax1.set_ylabel("FECG")
                 ax2.plot(label)
