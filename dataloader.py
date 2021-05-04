@@ -32,4 +32,4 @@ class SimulatedDataset(Dataset):
         mix = torch.from_numpy(loadmat(path_mix)['data'])
         mecg = torch.from_numpy(loadmat(path_mecg)['data'])
         fecg = torch.from_numpy(loadmat(path_fecg)['data'])
-        return mix, mecg, fecg
+        return mix, mecg, fecg, path_mix,path_mecg,path_fecg

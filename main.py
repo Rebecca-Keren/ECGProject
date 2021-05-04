@@ -19,7 +19,7 @@ SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "s
 
 
 BATCH_SIZE = 32
-epochs = 10
+epochs = 40
 learning_rate = 1e-3
 
 
@@ -33,7 +33,7 @@ def main(dataset_size):
 
     list_simulated_overfit = list_simulated[:dataset_size]  # TODO: put in comment after validating
 
-    remove_nan_signals(list_simulated_overfit) # TODO: change to original list
+    #remove_nan_signals(list_simulated_overfit) # TODO: change to original list
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -57,7 +57,7 @@ def main(dataset_size):
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-4)
-    scheduler = torch.optim.StepLR(optimizer_model, step_size=3, gamma=0.8)
+    #scheduler = torch.optim.StepLR(optimizer_model, step_size=3, gamma=0.8)
 
     #optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate,amsgrad= True)
 
@@ -98,7 +98,7 @@ def main(dataset_size):
                                     validation_corr_f_list,
                                     best_model_accuracy,
                                     dataset_size)
-        scheduler.step()
+        #scheduler.step()
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")
@@ -142,11 +142,11 @@ if __name__=="__main__":
 
 
     #dataset_size = [50000,80000,100000,127740]
-    dataset_size = [127740]
-    correlation_f = 0
-    correlation_m = 0
-    num_of_f = 0
-    num_of_m = 0
+    dataset_size = [10]
+    #correlation_f = 0
+    #correlation_m = 0
+    #num_of_f = 0
+    #num_of_m = 0
     for size in dataset_size:
         main(size)
         """print(size)
