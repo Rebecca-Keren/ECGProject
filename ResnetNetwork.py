@@ -46,7 +46,7 @@ class ResNetEncoder(nn.Module):
         x = self.block4(x)
         x = self.block5(x)
         x = self.block6(x)
-        x = self.dropout(x)
+        #x = self.dropout(x)
         x = self.block7(x)
         x = self.block8(x)
         x = self.block9(x)
@@ -55,7 +55,7 @@ class ResNetEncoder(nn.Module):
         x = self.block12(x)
         x = self.block13(x)
         x = self.block14(x)
-        x = self.dropout(x)
+        #x = self.dropout(x)
         x = self.block15(x)
         x = self.block16(x)
 
@@ -103,12 +103,12 @@ class ResnetDecoder(nn.Module):
         x = self.block4(x)
         x = self.block5(x)
         x = self.block6(x)[:, :, :-1]
-        x = self.dropout(x)
+        #x = self.dropout(x)
         x = self.block7(x)
         x = self.block8(x)
         x = self.block9(x)
         x = self.block10(x)[:, :, :-1]
-        x = self.dropout(x)
+        #x = self.dropout(x)
         x = self.block11(x)
         x = self.block12(x)
         x = self.batch_norm(x)

@@ -19,7 +19,7 @@ SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "s
 
 
 BATCH_SIZE = 32
-epochs = 150
+epochs = 10
 learning_rate = 1e-3
 
 
@@ -57,7 +57,7 @@ def main(dataset_size):
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-4)
-    torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_model, 'min')
+    scheduler = torch.optim.StepLR(optimizer_model, step_size=3, gamma=0.8)
 
     #optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate,amsgrad= True)
 
@@ -98,6 +98,7 @@ def main(dataset_size):
                                     validation_corr_f_list,
                                     best_model_accuracy,
                                     dataset_size)
+        scheduler.step()
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")
@@ -147,13 +148,51 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
     for size in dataset_size:
-         #main(size)
-
-        print(size)
+        main(size)
+        """print(size)
         ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
         ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         "ECGOutputsTest" + str(size))
         LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))
+
+        LOSSESDROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
+        LOSSESNODROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + "127740nodrop")
+
+        path_losses = os.path.join(LOSSESDROP, "VL1M.npy")
+        m1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESDROP, "VL1F.npy")
+        f1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESDROP, "VL1Avg.npy")
+        a1 = np.load(path_losses)
+
+        path_losses = os.path.join(LOSSESNODROP, "VL1M.npy")
+        m2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESNODROP, "VL1F.npy")
+        f2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESNODROP, "VL1Avg.npy")
+        a2 = np.load(path_losses)
+
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+        ax1.plot(m1, label="drop")
+        ax1.plot(m2, label="nodrop")
+        ax1.set_ylabel("L1 M")
+        ax1.set_xlabel("Epoch")
+        ax2.plot(f1, label="drop")
+        ax2.plot(f2, label="nodrop")
+        ax2.set_ylabel("L1 F")
+        ax2.set_xlabel("Epoch")
+        ax3.plot(a1, label="drop")
+        ax3.plot(a2, label="nodrop")
+        ax3.set_ylabel("L1 Avg")
+        ax3.set_xlabel("Epoch")
+        ax1.legend()
+        ax2.legend()
+        ax3.legend()
+        plt.show()
+        plt.close()
+
+
+
         for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
             if "fecg" in filename:
                 num_of_f += 1
@@ -166,17 +205,14 @@ if __name__=="__main__":
                 correlation = check_correlation(real, label)
                 if(correlation < 0.70):
                     correlation_f += 1
-                    with open("fecgbad" + ".txt", 'a') as f:
-                        f.write(filename + "\n")
+                    fig, (ax1, ax2) = plt.subplots(2, 1)
+                    ax1.plot(real)
+                    ax1.set_ylabel("FECG")
+                    ax2.plot(label)
+                    ax2.set_ylabel("LABEL")
+                    plt.show()
+                    plt.close()
 
-                    #print(filename)
-                """fig, (ax1, ax2) = plt.subplots(2, 1)
-                ax1.plot(real)
-                ax1.set_ylabel("FECG")
-                ax2.plot(label)
-                ax2.set_ylabel("LABEL")
-                plt.show()
-                plt.close()
             if "mecg" in filename:
                 num_of_m += 1
                 path = os.path.join(ECG_OUTPUTS_TEST, filename)
@@ -188,18 +224,19 @@ if __name__=="__main__":
                 correlation = check_correlation(real, label)
                 if (correlation < 0.70):
                     correlation_m += 1
-                fig, (ax1, ax2) = plt.subplots(2, 1)
-                ax1.plot(np.load(path))
-                ax1.set_ylabel("MECG")
-                ax2.plot(np.load(path_label))
-                ax2.set_ylabel("LABEL")
-                plt.show()
-                plt.close()
+                    fig, (ax1, ax2) = plt.subplots(2, 1)
+                    ax1.plot(np.load(path))
+                    ax1.set_ylabel("MECG")
+                    ax2.plot(np.load(path_label))
+                    ax2.set_ylabel("LABEL")
+                    plt.show()
+                    plt.close()
 
         print(correlation_f)
         print(num_of_f)
         print(correlation_m)
         print(num_of_m)
+
         print("VAL")
         for filename in os.listdir(ECG_OUTPUTS_VAL): #present the fecg outputs
             if "fecg" in filename:
