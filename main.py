@@ -33,7 +33,7 @@ def main(dataset_size):
 
     list_simulated_overfit = list_simulated[:dataset_size]  # TODO: put in comment after validating
 
-    remove_nan_signals(list_simulated_overfit) # TODO: change to original list
+    #remove_nan_signals(list_simulated_overfit) # TODO: change to original list
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -48,7 +48,9 @@ def main(dataset_size):
     test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
 
     for i, batch_features in enumerate(test_data_loader_sim):
-        print(batch_features[3][0])
+        print(i)
+        with open("trial" + ".txt", 'a') as f:
+            f.write(batch_features[3][0] + "\n")
 
     """#  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
