@@ -57,7 +57,7 @@ def main(dataset_size):
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer_model, step_size=6, gamma=0.8)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer_model, step_size=6, gamma=0.1)
 
     #optimizer_centloss = optim.Adam(criterion_cent.parameters(), lr=learning_rate,amsgrad= True)
 
@@ -156,7 +156,7 @@ if __name__=="__main__":
         LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))
 
         LOSSESDROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
-        LOSSESNODROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + "127740nodrop")
+        LOSSESNODROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + "127740LR")
 
         path_losses = os.path.join(LOSSESDROP, "VL1M.npy")
         m1 = np.load(path_losses)
@@ -173,16 +173,16 @@ if __name__=="__main__":
         a2 = np.load(path_losses)
 
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-        ax1.plot(m1, label="drop")
-        ax1.plot(m2, label="nodrop")
+        ax1.plot(m1, label="noLR")
+        ax1.plot(m2, label="LR")
         ax1.set_ylabel("L1 M")
         ax1.set_xlabel("Epoch")
-        ax2.plot(f1, label="drop")
-        ax2.plot(f2, label="nodrop")
+        ax2.plot(f1, label="noLR")
+        ax2.plot(f2, label="LR")
         ax2.set_ylabel("L1 F")
         ax2.set_xlabel("Epoch")
-        ax3.plot(a1, label="drop")
-        ax3.plot(a2, label="nodrop")
+        ax3.plot(a1, label="noLR")
+        ax3.plot(a2, label="LR")
         ax3.set_ylabel("L1 Avg")
         ax3.set_xlabel("Epoch")
         ax1.legend()
@@ -191,9 +191,41 @@ if __name__=="__main__":
         plt.show()
         plt.close()
 
+        path_losses = os.path.join(LOSSESDROP, "TL1M.npy")
+        m1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESDROP, "TL1F.npy")
+        f1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESDROP, "TL1Avg.npy")
+        a1 = np.load(path_losses)
+
+        path_losses = os.path.join(LOSSESNODROP, "TL1M.npy")
+        m2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESNODROP, "TL1F.npy")
+        f2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESNODROP, "TL1Avg.npy")
+        a2 = np.load(path_losses)
+
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+        ax1.plot(m1, label="noLR")
+        ax1.plot(m2, label="LR")
+        ax1.set_ylabel("L1 M")
+        ax1.set_xlabel("Epoch")
+        ax2.plot(f1, label="noLR")
+        ax2.plot(f2, label="LR")
+        ax2.set_ylabel("L1 F")
+        ax2.set_xlabel("Epoch")
+        ax3.plot(a1, label="noLR")
+        ax3.plot(a2, label="LR")
+        ax3.set_ylabel("L1 Avg")
+        ax3.set_xlabel("Epoch")
+        ax1.legend()
+        ax2.legend()
+        ax3.legend()
+        plt.show()
+        plt.close()"""
 
 
-        """
+
 
         """fig, (ax1,ax2,ax3,ax4,ax5) = plt.subplots(5,1)
         path = os.path.join(ECG_OUTPUTS_TEST, "fecg12.npy")
@@ -247,7 +279,7 @@ if __name__=="__main__":
                 ax2.set_ylabel("LABEL")
                 plt.show()
                 plt.close()
-                print(filename)
+
 
             if "mecg" in filename:
                 num_of_m += 1
@@ -265,16 +297,16 @@ if __name__=="__main__":
                 ax1.set_ylabel("MECG")
                 ax2.plot(np.load(path_label))
                 ax2.set_ylabel("LABEL")
-                plt.show()
-                plt.close()
+                #plt.show()
+                plt.close()"""
 
-        print(correlation_f)
+        """print(correlation_f)
         print(num_of_f)
         print(correlation_m)
-        print(num_of_m)
+        print(num_of_m)"""
 
       
-        for filename in os.listdir(ECG_OUTPUTS_VAL): #present the fecg outputs
+        """for filename in os.listdir(ECG_OUTPUTS_VAL): #present the fecg outputs
             if "fecg" in filename:
                 path = os.path.join(ECG_OUTPUTS_VAL, filename)
                 number_file = filename.index("g") + 1
@@ -298,9 +330,9 @@ if __name__=="__main__":
                 ax2.plot(np.load(path_label))
                 ax2.set_ylabel("LABEL")
                 plt.show()
-                plt.close()
+                plt.close()"""
 
-        path_losses = os.path.join(LOSSES, "TL1M.npy")
+        """path_losses = os.path.join(LOSSES, "TL1M.npy")
         train_loss_m_list = np.load(path_losses)
         path_losses = os.path.join(LOSSES, "TL1F.npy")
         train_loss_f_list = np.load(path_losses)
@@ -346,10 +378,10 @@ if __name__=="__main__":
         ax2.set_ylabel("CorrM")
         ax2.set_xlabel("Epoch")
         plt.show()
-        plt.close()
+        plt.close()"""
    
 
-    #Comparing Validation
+    """#Comparing Validation
     LOSSES1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(50000))
     LOSSES2 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(80000))
     LOSSES3 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(100000))
