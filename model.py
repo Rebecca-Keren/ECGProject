@@ -229,10 +229,12 @@ def val(val_data_loader_sim,
         os.mkdir(network_save_folder)
     torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_last))
     # saving best model
-    if (val_loss_average < best_model_accuracy):
+    if (val_corr_average < best_model_accuracy):
         best_model_accuracy = val_loss_average
         torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_best))
         print("saving best model")
+        with open("best_model_epoch" + str(dataset_size) + ".txt", 'w') as f:
+            f.write(epoch)
 
     print(
         'Validation: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f}, Correlation M: {:.4f},Correlation F: {:.4f},Correlation Average: {:.4f})\n'.format(
