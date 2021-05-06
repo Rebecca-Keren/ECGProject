@@ -8,30 +8,35 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import pytorch_lightning as pl
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import EarlyStopping
 import math
 from model import *
 import dataloader
 from scipy.io import loadmat
-import wfdb
+from EarlyStopping import *
 
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
+LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
+if not os.path.exists(LOSSES):
+    os.mkdir(LOSSES)
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
-
+network_save_folder_orig = "./Models"
+network_file_name_last = "/last_model"
+network_file_name_best = "./best_model"
 
 BATCH_SIZE = 32
-epochs = 40
+epochs = 150
 learning_rate = 1e-3
 
 
-def main(dataset_size):
-    LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(dataset_size))
-    if not os.path.exists(LOSSES):
-        os.mkdir(LOSSES)
+def main(filename):
+
 
     pl.seed_everything(1234)
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
-    list_simulated_overfit = list_simulated[:dataset_size]  # TODO: put in comment after validating
+    list_simulated_overfit = list_simulated[:2040]  # TODO: put in comment after validating
 
     #remove_nan_signals(list_simulated_overfit) # TODO: change to original list
 
@@ -52,7 +57,10 @@ def main(dataset_size):
     print(device)
 
     resnet_model = ResNet(1).cuda()
+    resnet_model.load_state_dict(torch.load(filename))
     best_model_accuracy = math.inf
+    val_loss = 0
+    #early_stopping = EarlyStopping(delta_min=0.1, patience= 10, verbose=True)
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
@@ -82,11 +90,10 @@ def main(dataset_size):
               epochs,
               train_loss_f_list,
               train_loss_m_list,
-              train_loss_average_list,
-              dataset_size)
+              train_loss_average_list)
         #Evaluation
         resnet_model.eval()
-        best_model_accuracy = val(val_data_loader_sim,
+        best_model_accuracy, val_loss = val(val_data_loader_sim,
                                     resnet_model,
                                     criterion,
                                     epoch,
@@ -96,9 +103,14 @@ def main(dataset_size):
                                     validation_loss_average_list,
                                     validation_corr_m_list,
                                     validation_corr_f_list,
-                                    best_model_accuracy,
-                                    dataset_size)
+                                    best_model_accuracy)
         #scheduler.step()
+
+        """early_stopping(val_loss, resnet_model)
+
+        if early_stopping.early_stop:
+            print('Early stopping')
+            break"""
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")
@@ -122,9 +134,9 @@ def main(dataset_size):
     np.save(path_losses, np.array(validation_corr_f_list))
 
     #Test
-    test_loss_m, test_loss_f, test_loss_avg, test_corr_m, test_corr_f, test_corr_average = test(str(network_save_folder_orig + str(dataset_size) + network_file_name_best),test_data_loader_sim,dataset_size)
+    test_loss_m, test_loss_f, test_loss_avg, test_corr_m, test_corr_f, test_corr_average = test(str(network_save_folder_orig  + network_file_name_best),test_data_loader_sim)
 
-    with open("test_loss" + str(dataset_size) + ".txt", 'w') as f:
+    with open("test_loss.txt", 'w') as f:
         f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f},"
                 "test_corr_m = {:.4f},test_corr_f = {:.4f},test_corr_avg = {:.4f}\n".format(test_loss_m, test_loss_f, test_loss_avg,
                                                                                             test_corr_m,test_corr_f,test_corr_average))
@@ -135,333 +147,5 @@ def main(dataset_size):
 
 
 if __name__=="__main__":
+    main(str(network_file_name_best))
 
-    #HOW TO OPEN QRS
-    #qrs = wfdb.io.rdann("sub01_snr00dB_l1_c0_fecg1", extension="qrs")
-    #print(qrs.sample)
-
-
-    #dataset_size = [50000,80000,100000,127740]
-    dataset_size = [127740]
-    correlation_f = 0
-    correlation_m = 0
-    num_of_f = 0
-    num_of_m = 0
-    for size in dataset_size:
-        main(size)
-        print(size)
-        """ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
-        ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                        "ECGOutputsTest" + str(size))
-        LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))
-
-        LOSSESDROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
-        LOSSESNODROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + "127740LR")
-
-        path_losses = os.path.join(LOSSESDROP, "VL1M.npy")
-        m1 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESDROP, "VL1F.npy")
-        f1 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESDROP, "VL1Avg.npy")
-        a1 = np.load(path_losses)
-
-        path_losses = os.path.join(LOSSESNODROP, "VL1M.npy")
-        m2 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESNODROP, "VL1F.npy")
-        f2 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESNODROP, "VL1Avg.npy")
-        a2 = np.load(path_losses)
-
-        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-        ax1.plot(m1, label="noLR")
-        ax1.plot(m2, label="LR")
-        ax1.set_ylabel("L1 M")
-        ax1.set_xlabel("Epoch")
-        ax2.plot(f1, label="noLR")
-        ax2.plot(f2, label="LR")
-        ax2.set_ylabel("L1 F")
-        ax2.set_xlabel("Epoch")
-        ax3.plot(a1, label="noLR")
-        ax3.plot(a2, label="LR")
-        ax3.set_ylabel("L1 Avg")
-        ax3.set_xlabel("Epoch")
-        ax1.legend()
-        ax2.legend()
-        ax3.legend()
-        plt.show()
-        plt.close()
-
-        path_losses = os.path.join(LOSSESDROP, "TL1M.npy")
-        m1 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESDROP, "TL1F.npy")
-        f1 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESDROP, "TL1Avg.npy")
-        a1 = np.load(path_losses)
-
-        path_losses = os.path.join(LOSSESNODROP, "TL1M.npy")
-        m2 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESNODROP, "TL1F.npy")
-        f2 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESNODROP, "TL1Avg.npy")
-        a2 = np.load(path_losses)
-
-        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-        ax1.plot(m1, label="noLR")
-        ax1.plot(m2, label="LR")
-        ax1.set_ylabel("L1 M")
-        ax1.set_xlabel("Epoch")
-        ax2.plot(f1, label="noLR")
-        ax2.plot(f2, label="LR")
-        ax2.set_ylabel("L1 F")
-        ax2.set_xlabel("Epoch")
-        ax3.plot(a1, label="noLR")
-        ax3.plot(a2, label="LR")
-        ax3.set_ylabel("L1 Avg")
-        ax3.set_xlabel("Epoch")
-        ax1.legend()
-        ax2.legend()
-        ax3.legend()
-        plt.show()
-        plt.close()"""
-
-
-
-
-        """fig, (ax1,ax2,ax3,ax4,ax5) = plt.subplots(5,1)
-        path = os.path.join(ECG_OUTPUTS_TEST, "fecg12.npy")
-        path1 = os.path.join(ECG_OUTPUTS_TEST, "label_f12.npy")
-        path2 = os.path.join(ECG_OUTPUTS_TEST, "mecg12.npy")
-        path3 = os.path.join(ECG_OUTPUTS_TEST, "label_m12.npy")
-        path4 = os.path.join(ECG_OUTPUTS_TEST, "ecg_all12.npy")
-
-        ax1.plot(np.load(path4))
-        ax1.set_ylabel("ECG")
-        ax1.set_xlabel("SAMPLES")
-        ax2.plot(np.load(path))
-        ax2.set_ylabel("FECG")
-        ax2.set_xlabel("SAMPLES")
-        ax3.plot(np.load(path1))
-        ax3.set_ylabel("LABEL")
-        ax3.set_xlabel("SAMPLES")
-        ax4.plot(np.load(path2))
-        ax4.set_ylabel("MECG")
-        ax4.set_xlabel("SAMPLES")
-        ax5.plot(np.load(path3))
-        ax5.set_ylabel("LABEL")
-        ax5.set_xlabel("SAMPLES")
-        plt.show()
-        plt.close()"""
-
-        """fig3, (ax1) = plt.subplots(1, 1)
-        ax1.plot(np.load(path4))
-        ax1.set_ylabel("ECG")
-        ax1.set_xlabel("SAMPLES")
-        plt.show()
-        plt.close()"""
-
-
-        """for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
-            if "fecg" in filename:
-                num_of_f += 1
-                path = os.path.join(ECG_OUTPUTS_TEST, filename)
-                number_file = filename.index("g") + 1
-                end_path = filename[number_file:]
-                path_label = os.path.join(ECG_OUTPUTS_TEST,"label_f" + end_path)
-                real = np.load(path)
-                label = np.load(path_label)
-                correlation = check_correlation(real, label)
-                if(correlation < 0.70):
-                    correlation_f += 1
-                fig, (ax1, ax2) = plt.subplots(2, 1)
-                ax1.plot(real)
-                ax1.set_ylabel("FECG")
-                ax2.plot(label)
-                ax2.set_ylabel("LABEL")
-                plt.show()
-                plt.close()
-
-
-            if "mecg" in filename:
-                num_of_m += 1
-                path = os.path.join(ECG_OUTPUTS_TEST, filename)
-                number_file = filename.index("g") + 1
-                end_path = filename[number_file:]
-                path_label = os.path.join(ECG_OUTPUTS_TEST, "label_m" + end_path)
-                real = np.load(path)
-                label = np.load(path_label)
-                correlation = check_correlation(real, label)
-                if (correlation < 0.70):
-                    correlation_m += 1
-                fig, (ax1, ax2) = plt.subplots(2, 1)
-                ax1.plot(np.load(path))
-                ax1.set_ylabel("MECG")
-                ax2.plot(np.load(path_label))
-                ax2.set_ylabel("LABEL")
-                #plt.show()
-                plt.close()"""
-
-        """print(correlation_f)
-        print(num_of_f)
-        print(correlation_m)
-        print(num_of_m)"""
-
-      
-        """for filename in os.listdir(ECG_OUTPUTS_VAL): #present the fecg outputs
-            if "fecg" in filename:
-                path = os.path.join(ECG_OUTPUTS_VAL, filename)
-                number_file = filename.index("g") + 1
-                end_path = filename[number_file:]
-                path_label = os.path.join(ECG_OUTPUTS_VAL,"label_f" + end_path)
-                fig, (ax1, ax2) = plt.subplots(2, 1)
-                ax1.plot(np.load(path))
-                ax1.set_ylabel("FECG")
-                ax2.plot(np.load(path_label))
-                ax2.set_ylabel("LABEL")
-                plt.show()
-                plt.close()
-            if "mecg" in filename:
-                path = os.path.join(ECG_OUTPUTS_VAL, filename)
-                number_file = filename.index("g") + 1
-                end_path = filename[number_file:]
-                path_label = os.path.join(ECG_OUTPUTS_VAL, "label_m" + end_path)
-                fig, (ax1, ax2) = plt.subplots(2, 1)
-                ax1.plot(np.load(path))
-                ax1.set_ylabel("MECG")
-                ax2.plot(np.load(path_label))
-                ax2.set_ylabel("LABEL")
-                plt.show()
-                plt.close()"""
-
-        """path_losses = os.path.join(LOSSES, "TL1M.npy")
-        train_loss_m_list = np.load(path_losses)
-        path_losses = os.path.join(LOSSES, "TL1F.npy")
-        train_loss_f_list = np.load(path_losses)
-        path_losses = os.path.join(LOSSES, "TL1Avg.npy")
-        train_loss_average_list = np.load(path_losses)
-        path_losses = os.path.join(LOSSES, "VL1M.npy")
-        validation_loss_m_list = np.load(path_losses)
-        path_losses = os.path.join(LOSSES, "VL1F.npy")
-        validation_loss_f_list = np.load(path_losses)
-        path_losses = os.path.join(LOSSES, "VL1Avg.npy")
-        validation_loss_average_list = np.load(path_losses)
-
-        path_losses = os.path.join(LOSSES, "CorrF.npy")
-        correlation_f_list = np.load(path_losses)
-        path_losses = os.path.join(LOSSES, "CorrM.npy")
-        correlation_m_list = np.load(path_losses)
-
-        # plotting validation and training losses and saving them
-        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-        ax1.plot(train_loss_m_list, label="training")
-        ax1.plot(validation_loss_m_list, label="validation")
-        ax1.set_ylabel("L1 M")
-        ax1.set_xlabel("Epoch")
-        ax2.plot(train_loss_f_list, label="training")
-        ax2.plot(validation_loss_f_list, label="validation")
-        ax2.set_ylabel("L1 F")
-        ax2.set_xlabel("Epoch")
-        ax3.plot(train_loss_average_list, label="training")
-        ax3.plot(validation_loss_average_list, label="validation")
-        ax3.set_ylabel("L1 Avg")
-        ax3.set_xlabel("Epoch")
-        ax1.legend()
-        ax2.legend()
-        ax3.legend()
-        plt.show()
-        plt.close()
-
-        fig, (ax1, ax2) = plt.subplots(2, 1)
-        ax1.plot(correlation_f_list)
-        ax1.set_ylabel("CorrF")
-        ax1.set_xlabel("Epoch")
-        ax2.plot(correlation_m_list)
-        ax2.set_ylabel("CorrM")
-        ax2.set_xlabel("Epoch")
-        plt.show()
-        plt.close()"""
-   
-
-    """#Comparing Validation
-    LOSSES1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(50000))
-    LOSSES2 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(80000))
-    LOSSES3 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(100000))
-    LOSSES4 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
-    path_losses = os.path.join(LOSSES1, "VL1M.npy")
-    m1 = np.load(path_losses)[:41]
-    path_losses = os.path.join(LOSSES1, "VL1F.npy")
-    f1 = np.load(path_losses)[:41]
-    path_losses = os.path.join(LOSSES1, "VL1Avg.npy")
-    a1 = np.load(path_losses)[:41]
-
-    path_losses = os.path.join(LOSSES2, "VL1M.npy")
-    m2 = np.load(path_losses)[:41]
-    path_losses = os.path.join(LOSSES2, "VL1F.npy")
-    f2 = np.load(path_losses)[:41]
-    path_losses = os.path.join(LOSSES2, "VL1Avg.npy")
-    a2 = np.load(path_losses)[:41]
-
-    path_losses = os.path.join(LOSSES3, "VL1M.npy")
-    m3 = np.load(path_losses)[:41]
-    path_losses = os.path.join(LOSSES3, "VL1F.npy")
-    f3 = np.load(path_losses)[:41]
-    path_losses = os.path.join(LOSSES3, "VL1Avg.npy")
-    a3 = np.load(path_losses)[:41]
-
-    path_losses = os.path.join(LOSSES4, "VL1M.npy")
-    m4 = np.load(path_losses)
-    path_losses = os.path.join(LOSSES4, "VL1F.npy")
-    f4 = np.load(path_losses)
-    path_losses = os.path.join(LOSSES4, "VL1Avg.npy")
-    a4 = np.load(path_losses)
-
-    path_losses = os.path.join(LOSSES4, "TL1M.npy")
-    tm4 = np.load(path_losses)
-    path_losses = os.path.join(LOSSES4, "TL1F.npy")
-    tf4 = np.load(path_losses)
-    path_losses = os.path.join(LOSSES4, "TL1Avg.npy")
-    ta4 = np.load(path_losses)
-
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-    ax1.plot(m1, label="50k")
-    ax1.plot(m2, label="80k")
-    ax1.plot(m3, label="100k")
-    ax1.plot(m4, label="127k")
-    ax1.set_ylabel("L1 M")
-    ax1.set_xlabel("Epoch")
-    ax2.plot(f1, label="50k")
-    ax2.plot(f2, label="80k")
-    ax2.plot(f3, label="100k")
-    ax2.plot(f4, label="127k")
-    ax2.set_ylabel("L1 F")
-    ax2.set_xlabel("Epoch")
-    ax3.plot(a1, label="50k")
-    ax3.plot(a2, label="80k")
-    ax3.plot(a3, label="100k")
-    ax3.plot(a4, label="127k")
-    ax3.set_ylabel("L1 Avg")
-    ax3.set_xlabel("Epoch")
-    ax1.legend()
-    ax2.legend()
-    ax3.legend()
-    plt.show()
-    plt.close()
-
-
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-    ax1.plot(tm4, label="train")
-    ax1.plot(m4, label="val")
-    ax1.set_ylabel("L1 M")
-    ax1.set_xlabel("Epoch")
-    ax2.plot(tf4, label="train")
-    ax2.plot(f4, label="val")
-    ax2.set_ylabel("L1 F")
-    ax2.set_xlabel("Epoch")
-    ax3.plot(ta4, label="train")
-    ax3.plot(a4, label="val")
-    ax3.set_ylabel("L1 Avg")
-    ax3.set_xlabel("Epoch")
-    ax1.legend()
-    ax2.legend()
-    ax3.legend()
-    plt.show()
-    plt.close() """

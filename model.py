@@ -4,10 +4,19 @@ from ResnetNetwork import *
 from torch.autograd import Variable
 import math
 MODELS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Models")
+ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs")
+if not os.path.exists(ECG_OUTPUTS):
+    os.mkdir(ECG_OUTPUTS)
 
-network_save_folder_orig = "./Models"
-network_file_name_last = "/last_model"
-network_file_name_best = "/best_model"
+ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                               "ECGOutputsVal")
+if not os.path.exists(ECG_OUTPUTS):
+    os.mkdir(ECG_OUTPUTS)
+ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                "ECGOutputsTest")
+if not os.path.exists(ECG_OUTPUTS_TEST):
+    os.mkdir(ECG_OUTPUTS_TEST)
+
 
 delta = 3
 
@@ -33,12 +42,7 @@ def train(resnet_model,
               epochs,
               train_loss_f_list,
               train_loss_m_list,
-              train_loss_average_list,
-              dataset_size):
-
-    ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs" + str(dataset_size))
-    if not os.path.exists(ECG_OUTPUTS):
-        os.mkdir(ECG_OUTPUTS)
+              train_loss_average_list):
 
     total_loss_epoch = 0.
     total_loss_m = 0.
@@ -46,8 +50,9 @@ def train(resnet_model,
     #total_loss_ecg = 0. #TODO add when real data
     total_loss_cent = 0.
     total_loss_hinge = 0.
-
+    val_corr_f = 0
     # real_epoch = False #TODO add when real data
+    count = 0
     for i, batch_features in enumerate(train_data_loader_sim):
         optimizer_model.zero_grad()
 
@@ -85,9 +90,35 @@ def train(resnet_model,
         flatten_m, flatten_f = torch.flatten(one_before_last_m, start_dim=1), torch.flatten(one_before_last_f,
                                                                                             start_dim=1)
         hinge_loss = criterion_hinge_loss(one_before_last_m, one_before_last_f, delta)
+
         batch_size = one_before_last_m.size()[0]
         labels_center_loss = Variable(torch.cat((torch.zeros(batch_size), torch.ones(batch_size))).cuda())
         loss_cent = criterion_cent(torch.cat((flatten_f, flatten_m), 0), labels_center_loss)
+
+        if(epoch > 100):
+            for j, elem in enumerate(outputs_f):
+                val_corr_f = np.corrcoef(outputs_f.cpu().detach().numpy()[j], batch_for_f.cpu().detach().numpy()[j])[0][1]
+                if (val_corr_f < 0.7):
+                    print("ERROR")
+                    print("hinge" + str(criterion_hinge_loss(outputs_m[j],outputs_f[j],delta).item()))
+                    tmp = torch.reshape(one_before_last_f[j], (1,one_before_last_f[j].size()[0],one_before_last_f[j].size()[1]))
+                    flatten_f_error = torch.flatten(tmp, start_dim=1)
+                    labels_center_loss = Variable(torch.zeros(1))
+                    loss_cent_error = criterion_cent(flatten_f_error.cuda(), labels_center_loss.cuda())
+                    tmpm = torch.reshape(one_before_last_m[j],
+                                        (1, one_before_last_m[j].size()[0], one_before_last_m[j].size()[1]))
+                    flatten_m_error = torch.flatten(tmpm, start_dim=1)
+                    labels_center_lossm = Variable(torch.ones(1))
+                    loss_cent_errorm = criterion_cent(flatten_m_error.cuda(), labels_center_lossm.cuda())
+                    print("cent" + str(loss_cent_error.item()*0.01))
+                else:
+                    print("GOOD")
+                    print("hinge" + str(criterion_hinge_loss(outputs_m[j], outputs_f[j], delta).item()))
+                    tmp = torch.reshape(one_before_last_f[j],(1, one_before_last_f[j].size()[0], one_before_last_f[j].size()[1]))
+                    flatten_f_error = torch.flatten(tmp, start_dim=1)
+                    labels_center_loss = Variable(torch.zeros(1))
+                    loss_cent_error = criterion_cent(flatten_f_error.cuda(), labels_center_loss.cuda())
+                    print("cent" + str(loss_cent_error.item()*0.01))
 
         # if not real_epoch: #TODO add when real data
         total_loss = mecg_weight * train_loss_mecg + fecg_weight * fecg_lamda * train_loss_fecg
@@ -124,6 +155,8 @@ def train(resnet_model,
     train_loss_m_list.append(total_loss_m)
     train_loss_average_list.append((total_loss_m+total_loss_f)/2)
 
+    print("dataloader length" + str(len(train_data_loader_sim.dataset)))
+    print(total_loss_cent)
     # else: #TODO add when real data
     #    total_loss_ecg = total_loss_ecg / (len(train_data_loader_sim))
     total_loss_cent = total_loss_cent / (len(train_data_loader_sim.dataset))
@@ -143,7 +176,7 @@ def train(resnet_model,
         print("loss_hinge = {:.8f} ".format(total_loss_hinge))
     print("\n")
     if epoch + 1 == epochs:
-        with open("train_loss_last_epoch" + str(dataset_size) + ".txt", 'w') as f:
+        with open("train_loss_last_epoch.txt", 'w') as f:
             f.write("L1 M = {:.4f},L1 F= {:.4f},LCent = {:.4f},"
                     "LHinge = {:.4f},LTot = {:.4f}\n".format(total_loss_m,
                                                             total_loss_f,
@@ -165,8 +198,7 @@ def val(val_data_loader_sim,
         validation_loss_average_list,
         validation_corr_m_list,
         validation_corr_f_list,
-        best_model_accuracy,
-        dataset_size):
+        best_model_accuracy):
     val_loss_m = 0
     val_loss_f = 0
     val_corr_m = 0
@@ -185,8 +217,6 @@ def val(val_data_loader_sim,
                 val_corr_f += \
                 np.corrcoef(outputs_f_test.cpu().detach().numpy()[j], batch_for_f_val.cpu().detach().numpy()[j])[0][1]
 
-            ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                           "ECGOutputsVal" + str(dataset_size))
             if epoch + 1 == epochs:
                 if not os.path.exists(ECG_OUTPUTS_VAL):
                     os.mkdir(ECG_OUTPUTS_VAL)
@@ -215,7 +245,7 @@ def val(val_data_loader_sim,
     validation_corr_m_list.append(val_corr_m)
     validation_corr_f_list.append(val_corr_f)
     if epoch + 1 == epochs:
-        with open("val_loss_last_epoch" + str(dataset_size) + ".txt", 'w') as f:
+        with open("val_loss_last_epoch.txt", 'w') as f:
             f.write("L1 M = {:.4f},L1 F= {:.4f},LAvg = {:.4f},"
                     "CorrM = {:.4f},CorrF = {:.4f}, CorrAvg = {:.4f}\n".format(val_loss_m,
                                                             val_loss_f,
@@ -224,7 +254,7 @@ def val(val_data_loader_sim,
                                                             val_corr_f,
                                                             val_corr_average))
     # saving last model
-    network_save_folder = network_save_folder_orig + str(dataset_size)
+    """network_save_folder = network_save_folder_orig + str(dataset_size)
     if not os.path.exists(network_save_folder):
         os.mkdir(network_save_folder)
     torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_last))
@@ -234,15 +264,15 @@ def val(val_data_loader_sim,
         torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_best))
         print("saving best model")
         with open("best_model_epoch" + str(dataset_size) + ".txt", 'w') as f:
-            f.write(epoch)
+            f.write(str(epoch))"""
 
     print(
         'Validation: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f}, Correlation M: {:.4f},Correlation F: {:.4f},Correlation Average: {:.4f})\n'.format(
             val_loss_m, val_loss_f, val_loss_average, val_corr_m, val_corr_f, val_corr_average))
-    return best_model_accuracy
+    return best_model_accuracy, val_loss_average
 
 
-def test(filename,test_data_loader_sim,dataset_size):
+def test(filename,test_data_loader_sim):
     resnet_model = ResNet(1)
     resnet_model.load_state_dict(torch.load(filename))
     resnet_model.eval()
@@ -269,10 +299,6 @@ def test(filename,test_data_loader_sim,dataset_size):
                 test_corr_f += \
                 np.corrcoef(outputs_f_test.cpu().detach().numpy()[j], batch_for_f_test.cpu().detach().numpy()[j])[0][1]
 
-            ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                            "ECGOutputsTest" + str(dataset_size))
-            if not os.path.exists(ECG_OUTPUTS_TEST):
-                os.mkdir(ECG_OUTPUTS_TEST)
             path = os.path.join(ECG_OUTPUTS_TEST, "ecg_all" + str(i))
             np.save(path, batch_features[0][0].cpu().detach().numpy()[:, 0])
             path = os.path.join(ECG_OUTPUTS_TEST, "label_m" + str(i))
