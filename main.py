@@ -15,7 +15,7 @@ from scipy.io import loadmat
 import wfdb
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise1")
 
 
 BATCH_SIZE = 32
@@ -149,8 +149,8 @@ if __name__=="__main__":
     num_of_m = 0
     for size in dataset_size:
         main(size)
-        print(size)
-        """ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
+        """print(size)
+        ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
         ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         "ECGOutputsTest" + str(size))
         LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))

@@ -38,7 +38,7 @@ class ResNetEncoder(nn.Module):
 
     def forward(self, x):
 
-        x = self.dropout1(x)
+        #x = self.dropout1(x)
         x = self.conv1(x)
         x = self.batch(x)
         x = self.relu(x)
@@ -50,7 +50,7 @@ class ResNetEncoder(nn.Module):
         x = self.block6(x)
         x = self.block7(x)
         x = self.block8(x)
-        x = self.dropout2(x)
+        #x = self.dropout2(x)
         x = self.block9(x)
         x = self.block10(x)
         x = self.block11(x)
