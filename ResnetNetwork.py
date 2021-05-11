@@ -15,12 +15,14 @@ class ResNetEncoder(nn.Module):
         self.block2 = ResNetBasicBlockEncoder(32, 32)
 
         self.block3 = ResNetBasicBlockEncoder(32, 64)
+        drop
         self.block4 = ResNetBasicBlockEncoder(64, 64)
 
         self.block5 = ResNetBasicBlockEncoder(64, 128, downsampling=2)
         self.block6 = ResNetBasicBlockEncoder(128, 128)
 
         self.block7 = ResNetBasicBlockEncoder(128, 256)
+        dropout1
         self.block8 = ResNetBasicBlockEncoder(256, 256)
 
         self.block9 = ResNetBasicBlockEncoder(256, 512, downsampling=2)

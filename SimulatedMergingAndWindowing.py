@@ -6,8 +6,8 @@ import os
 import scipy.io as sio
 from HelpFunctions import *
 
-ALL_SIMULATED_DATA_MAT = "simulated_signals_mat"
-WINDOWED_SIMULATED_SIGNAL = "simulated_windows_noise1"
+ALL_SIMULATED_DATA_MAT = "SimulatedDatabaseMat"
+WINDOWED_SIMULATED_SIGNAL = "simulated_windows_noise3"
 
 if not os.path.exists(WINDOWED_SIMULATED_SIGNAL):
     os.mkdir(WINDOWED_SIMULATED_SIGNAL)
@@ -30,9 +30,9 @@ if __name__ == '__main__':
         for elem in files:
             tmp = '_'.join(str.split(elem,'_')[:-1])
             if tmp == name:
-                if "noise2" in elem:
+                if "noise1" in elem:
                     continue
-                elif "noise3" in elem:
+                elif "noise2" in elem:
                     continue
                 elif "fecg2" in elem:
                     continue

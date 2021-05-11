@@ -140,6 +140,12 @@ if __name__=="__main__":
     #qrs = wfdb.io.rdann("sub01_snr00dB_l1_c0_fecg1", extension="qrs")
     #print(qrs.sample)
 
+    """mixture = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
+    mecg = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
+    fecg = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
+    noise1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
+    noise2 =  os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))"""
+
 
     #dataset_size = [50000,80000,100000,127740]
     dataset_size = [127740]
@@ -148,28 +154,29 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
     for size in dataset_size:
-        main(size)
-        """print(size)
+        #main(size)
+        print(size)
         ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
         ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         "ECGOutputsTest" + str(size))
         LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))
 
-        LOSSESDROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
-        LOSSESNODROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + "127740LR")
+        #LR2
+        LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
+        LOSSESLR1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + "127740LR2")
 
-        path_losses = os.path.join(LOSSESDROP, "VL1M.npy")
+        path_losses = os.path.join(LOSSESBASE, "VL1M.npy")
         m1 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESDROP, "VL1F.npy")
+        path_losses = os.path.join(LOSSESBASE, "VL1F.npy")
         f1 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESDROP, "VL1Avg.npy")
+        path_losses = os.path.join(LOSSESBASE, "VL1Avg.npy")
         a1 = np.load(path_losses)
 
-        path_losses = os.path.join(LOSSESNODROP, "VL1M.npy")
+        path_losses = os.path.join(LOSSESLR1, "VL1M.npy")
         m2 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESNODROP, "VL1F.npy")
+        path_losses = os.path.join(LOSSESLR1, "VL1F.npy")
         f2 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESNODROP, "VL1Avg.npy")
+        path_losses = os.path.join(LOSSESLR1, "VL1Avg.npy")
         a2 = np.load(path_losses)
 
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
@@ -191,18 +198,18 @@ if __name__=="__main__":
         plt.show()
         plt.close()
 
-        path_losses = os.path.join(LOSSESDROP, "TL1M.npy")
+        path_losses = os.path.join(LOSSESBASE, "TL1M.npy")
         m1 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESDROP, "TL1F.npy")
+        path_losses = os.path.join(LOSSESBASE, "TL1F.npy")
         f1 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESDROP, "TL1Avg.npy")
+        path_losses = os.path.join(LOSSESBASE, "TL1Avg.npy")
         a1 = np.load(path_losses)
 
-        path_losses = os.path.join(LOSSESNODROP, "TL1M.npy")
+        path_losses = os.path.join(LOSSESLR1, "TL1M.npy")
         m2 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESNODROP, "TL1F.npy")
+        path_losses = os.path.join(LOSSESLR1, "TL1F.npy")
         f2 = np.load(path_losses)
-        path_losses = os.path.join(LOSSESNODROP, "TL1Avg.npy")
+        path_losses = os.path.join(LOSSESLR1, "TL1Avg.npy")
         a2 = np.load(path_losses)
 
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
@@ -222,9 +229,278 @@ if __name__=="__main__":
         ax2.legend()
         ax3.legend()
         plt.show()
-        plt.close()"""
+        plt.close()
+
+        # LR2
+        LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
+        LOSSESLR1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + "127740LR6")
+
+        path_losses = os.path.join(LOSSESBASE, "VL1M.npy")
+        m1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "VL1F.npy")
+        f1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "VL1Avg.npy")
+        a1 = np.load(path_losses)
+
+        path_losses = os.path.join(LOSSESLR1, "VL1M.npy")
+        m2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLR1, "VL1F.npy")
+        f2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLR1, "VL1Avg.npy")
+        a2 = np.load(path_losses)
+
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+        ax1.plot(m1, label="noLR")
+        ax1.plot(m2, label="LR")
+        ax1.set_ylabel("L1 M")
+        ax1.set_xlabel("Epoch")
+        ax2.plot(f1, label="noLR")
+        ax2.plot(f2, label="LR")
+        ax2.set_ylabel("L1 F")
+        ax2.set_xlabel("Epoch")
+        ax3.plot(a1, label="noLR")
+        ax3.plot(a2, label="LR")
+        ax3.set_ylabel("L1 Avg")
+        ax3.set_xlabel("Epoch")
+        ax1.legend()
+        ax2.legend()
+        ax3.legend()
+        plt.show()
+        plt.close()
+
+        path_losses = os.path.join(LOSSESBASE, "TL1M.npy")
+        m1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "TL1F.npy")
+        f1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "TL1Avg.npy")
+        a1 = np.load(path_losses)
+
+        path_losses = os.path.join(LOSSESLR1, "TL1M.npy")
+        m2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLR1, "TL1F.npy")
+        f2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLR1, "TL1Avg.npy")
+        a2 = np.load(path_losses)
+
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+        ax1.plot(m1, label="noLR")
+        ax1.plot(m2, label="LR")
+        ax1.set_ylabel("L1 M")
+        ax1.set_xlabel("Epoch")
+        ax2.plot(f1, label="noLR")
+        ax2.plot(f2, label="LR")
+        ax2.set_ylabel("L1 F")
+        ax2.set_xlabel("Epoch")
+        ax3.plot(a1, label="noLR")
+        ax3.plot(a2, label="LR")
+        ax3.set_ylabel("L1 Avg")
+        ax3.set_xlabel("Epoch")
+        ax1.legend()
+        ax2.legend()
+        ax3.legend()
+        plt.show()
+        plt.close()
+
+        #DROPOUT1
+        LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
+        LOSSESLDROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + "127740Drop1")
+
+        path_losses = os.path.join(LOSSESBASE, "VL1M.npy")
+        m1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "VL1F.npy")
+        f1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "VL1Avg.npy")
+        a1 = np.load(path_losses)
+
+        path_losses = os.path.join(LOSSESLDROP, "VL1M.npy")
+        m2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLDROP, "VL1F.npy")
+        f2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLDROP, "VL1Avg.npy")
+        a2 = np.load(path_losses)
+
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+        ax1.plot(m1, label="noDROP")
+        ax1.plot(m2, label="DROP")
+        ax1.set_ylabel("L1 M")
+        ax1.set_xlabel("Epoch")
+        ax2.plot(f1, label="noDROP")
+        ax2.plot(f2, label="DROP")
+        ax2.set_ylabel("L1 F")
+        ax2.set_xlabel("Epoch")
+        ax3.plot(a1, label="noDROP")
+        ax3.plot(a2, label="DROP")
+        ax3.set_ylabel("L1 Avg")
+        ax3.set_xlabel("Epoch")
+        ax1.legend()
+        ax2.legend()
+        ax3.legend()
+        plt.show()
+        plt.close()
+
+        path_losses = os.path.join(LOSSESBASE, "TL1M.npy")
+        m1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "TL1F.npy")
+        f1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "TL1Avg.npy")
+        a1 = np.load(path_losses)
+
+        path_losses = os.path.join(LOSSESLDROP, "TL1M.npy")
+        m2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLDROP, "TL1F.npy")
+        f2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLDROP, "TL1Avg.npy")
+        a2 = np.load(path_losses)
+
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+        ax1.plot(m1, label="noDROP")
+        ax1.plot(m2, label="DROP")
+        ax1.set_ylabel("L1 M")
+        ax1.set_xlabel("Epoch")
+        ax2.plot(f1, label="noDROP")
+        ax2.plot(f2, label="DROP")
+        ax2.set_ylabel("L1 F")
+        ax2.set_xlabel("Epoch")
+        ax3.plot(a1, label="noDROP")
+        ax3.plot(a2, label="DROP")
+        ax3.set_ylabel("L1 Avg")
+        ax3.set_xlabel("Epoch")
+        ax1.legend()
+        ax2.legend()
+        ax3.legend()
+        plt.show()
+        plt.close()
+
+        #DROPOUT1
+        LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
+        LOSSESLDROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + "127740Drop2")
+
+        path_losses = os.path.join(LOSSESBASE, "VL1M.npy")
+        m1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "VL1F.npy")
+        f1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "VL1Avg.npy")
+        a1 = np.load(path_losses)
+
+        path_losses = os.path.join(LOSSESLDROP, "VL1M.npy")
+        m2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLDROP, "VL1F.npy")
+        f2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLDROP, "VL1Avg.npy")
+        a2 = np.load(path_losses)
+
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+        ax1.plot(m1, label="noDROP")
+        ax1.plot(m2, label="DROP")
+        ax1.set_ylabel("L1 M")
+        ax1.set_xlabel("Epoch")
+        ax2.plot(f1, label="noDROP")
+        ax2.plot(f2, label="DROP")
+        ax2.set_ylabel("L1 F")
+        ax2.set_xlabel("Epoch")
+        ax3.plot(a1, label="noDROP")
+        ax3.plot(a2, label="DROP")
+        ax3.set_ylabel("L1 Avg")
+        ax3.set_xlabel("Epoch")
+        ax1.legend()
+        ax2.legend()
+        ax3.legend()
+        plt.show()
+        plt.close()
+
+        path_losses = os.path.join(LOSSESBASE, "TL1M.npy")
+        m1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "TL1F.npy")
+        f1 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESBASE, "TL1Avg.npy")
+        a1 = np.load(path_losses)
+
+        path_losses = os.path.join(LOSSESLDROP, "TL1M.npy")
+        m2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLDROP, "TL1F.npy")
+        f2 = np.load(path_losses)
+        path_losses = os.path.join(LOSSESLDROP, "TL1Avg.npy")
+        a2 = np.load(path_losses)
+
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+        ax1.plot(m1, label="noDROP")
+        ax1.plot(m2, label="DROP")
+        ax1.set_ylabel("L1 M")
+        ax1.set_xlabel("Epoch")
+        ax2.plot(f1, label="noDROP")
+        ax2.plot(f2, label="DROP")
+        ax2.set_ylabel("L1 F")
+        ax2.set_xlabel("Epoch")
+        ax3.plot(a1, label="noDROP")
+        ax3.plot(a2, label="DROP")
+        ax3.set_ylabel("L1 Avg")
+        ax3.set_xlabel("Epoch")
+        ax1.legend()
+        ax2.legend()
+        ax3.legend()
+        plt.show()
+        plt.close()
+
+        #NOISE1
+        """NOISE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                             "simulated_windows_noise1")
+             for filename in os.listdir(NOISE): #present the fecg outputs
+                 if "mix" in filename:
+                     path = os.path.join(NOISE, filename)
+                     plt.plot(loadmat(path)['data'])
+                     plt.show()
+                     plt.close()"""
 
 
+
+        LOSSESNOISE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses127740" + "Noise1")
+        path_losses = os.path.join(LOSSESNOISE, "TL1M.npy")
+        train_loss_m_list = np.load(path_losses)
+        path_losses = os.path.join(LOSSESNOISE, "TL1F.npy")
+        train_loss_f_list = np.load(path_losses)
+        path_losses = os.path.join(LOSSESNOISE, "TL1Avg.npy")
+        train_loss_average_list = np.load(path_losses)
+        path_losses = os.path.join(LOSSESNOISE, "VL1M.npy")
+        validation_loss_m_list = np.load(path_losses)
+        path_losses = os.path.join(LOSSESNOISE, "VL1F.npy")
+        validation_loss_f_list = np.load(path_losses)
+        path_losses = os.path.join(LOSSESNOISE, "VL1Avg.npy")
+        validation_loss_average_list = np.load(path_losses)
+
+        path_losses = os.path.join(LOSSESNOISE, "CorrF.npy")
+        correlation_f_list = np.load(path_losses)
+        path_losses = os.path.join(LOSSESNOISE, "CorrM.npy")
+        correlation_m_list = np.load(path_losses)
+
+        # plotting validation and training losses and saving them
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+        ax1.plot(train_loss_m_list, label="training")
+        ax1.plot(validation_loss_m_list, label="validation")
+        ax1.set_ylabel("L1 M")
+        ax1.set_xlabel("Epoch")
+        ax2.plot(train_loss_f_list, label="training")
+        ax2.plot(validation_loss_f_list, label="validation")
+        ax2.set_ylabel("L1 F")
+        ax2.set_xlabel("Epoch")
+        ax3.plot(train_loss_average_list, label="training")
+        ax3.plot(validation_loss_average_list, label="validation")
+        ax3.set_ylabel("L1 Avg")
+        ax3.set_xlabel("Epoch")
+        ax1.legend()
+        ax2.legend()
+        ax3.legend()
+        plt.show()
+        plt.close()
+
+        fig, (ax1, ax2) = plt.subplots(2, 1)
+        ax1.plot(correlation_f_list)
+        ax1.set_ylabel("CorrF")
+        ax1.set_xlabel("Epoch")
+        ax2.plot(correlation_m_list)
+        ax2.set_ylabel("CorrM")
+        ax2.set_xlabel("Epoch")
+        plt.show()
+        plt.close()
 
 
         """fig, (ax1,ax2,ax3,ax4,ax5) = plt.subplots(5,1)
@@ -270,7 +546,8 @@ if __name__=="__main__":
                 real = np.load(path)
                 label = np.load(path_label)
                 correlation = check_correlation(real, label)
-                if(correlation < 0.70):
+                print(correlation)
+                if(correlation < 0.40):
                     correlation_f += 1
                 fig, (ax1, ax2) = plt.subplots(2, 1)
                 ax1.plot(real)
@@ -278,10 +555,10 @@ if __name__=="__main__":
                 ax2.plot(label)
                 ax2.set_ylabel("LABEL")
                 plt.show()
-                plt.close()
+                plt.close()"""
 
 
-            if "mecg" in filename:
+        """if "mecg" in filename:
                 num_of_m += 1
                 path = os.path.join(ECG_OUTPUTS_TEST, filename)
                 number_file = filename.index("g") + 1
@@ -290,7 +567,8 @@ if __name__=="__main__":
                 real = np.load(path)
                 label = np.load(path_label)
                 correlation = check_correlation(real, label)
-                if (correlation < 0.70):
+                print(correlation)
+                if (correlation < 0.40):
                     correlation_m += 1
                 fig, (ax1, ax2) = plt.subplots(2, 1)
                 ax1.plot(np.load(path))
@@ -465,3 +743,4 @@ if __name__=="__main__":
     ax3.legend()
     plt.show()
     plt.close() """
+
