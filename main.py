@@ -13,6 +13,7 @@ from model import *
 import dataloader
 from scipy.io import loadmat
 import wfdb
+from EarlyStopping import *
 
 
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
@@ -32,7 +33,7 @@ def main():
 
     list_simulated_overfit = list_simulated[:127740]  # TODO: put in comment after validating
 
-    #remove_nan_signals(list_simulated_overfit) # TODO: change to original list
+    remove_nan_signals(list_simulated_overfit) # TODO: change to original list
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -52,6 +53,8 @@ def main():
 
     resnet_model = ResNet(1).cuda()
     best_model_accuracy = math.inf
+    val_loss = 0
+    early_stopping = EarlyStopping(delta_min=1000, patience= 10, verbose=True)
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
@@ -82,7 +85,7 @@ def main():
               train_loss_average_list)
         #Evaluation
         resnet_model.eval()
-        best_model_accuracy = val(val_data_loader_sim,
+        best_model_accuracy, val_loss = val(val_data_loader_sim,
                                     resnet_model,
                                     criterion,
                                     epoch,
@@ -94,6 +97,10 @@ def main():
                                     validation_corr_f_list,
                                     best_model_accuracy)
         scheduler.step()
+        early_stopping(val_loss, resnet_model)
+        if early_stopping.early_stop:
+            print('Early stopping')
+            break
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")
