@@ -17,23 +17,26 @@ from EarlyStopping import *
 
 
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
+LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
+if not os.path.exists(LOSSES):
+    os.mkdir(LOSSES)
+
+BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarList")
+if not os.path.exists(BAR_LIST):
+    os.mkdir(BAR_LIST)
 
 BATCH_SIZE = 32
 epochs = 20
 learning_rate = 1e-3
 
-
 def main():
-    LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
-    if not os.path.exists(LOSSES):
-        os.mkdir(LOSSES)
+
 
     pl.seed_everything(1234)
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
     list_simulated_overfit = list_simulated[:127740]  # TODO: put in comment after validating
-
-    remove_nan_signals(list_simulated_overfit) # TODO: change to original list
+    #remove_nan_signals(list_simulated_overfit) # TODO: change to original list
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -54,7 +57,7 @@ def main():
     resnet_model = ResNet(1).cuda()
     best_model_accuracy = math.inf
     val_loss = 0
-    early_stopping = EarlyStopping(delta_min=0.06, patience= 10, verbose=True)
+    early_stopping = EarlyStopping(delta_min=0.01, patience=6, verbose=True)
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
@@ -124,7 +127,13 @@ def main():
     np.save(path_losses, np.array(validation_corr_f_list))
 
     #Test
-    test_loss_m, test_loss_f, test_loss_avg, test_corr_m, test_corr_f, test_corr_average = test(str(network_save_folder_orig + network_file_name_best),test_data_loader_sim)
+    test_loss_m, test_loss_f, test_loss_avg, test_corr_m, test_corr_f, test_corr_average,\
+        list_bar_good_example, list_bar_bad_example = test(str(network_save_folder_orig + network_file_name_best),test_data_loader_sim)
+
+    path_bar = os.path.join(BAR_LIST, "list_bar_good_example")
+    np.save(path_bar, np.array(list_bar_good_example))
+    path_bar = os.path.join(BAR_LIST, "list_bar_bad_example")
+    np.save(path_bar, np.array(list_bar_bad_example))
 
     with open("test_loss.txt", 'w') as f:
         f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f},"
@@ -144,6 +153,77 @@ if __name__=="__main__":
     num_of_m = 0
 
     main()
+    # DROPOUT1
+    """LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
+    LOSSESLDROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
+    path_losses = os.path.join(LOSSESBASE, "VL1M.npy")
+    m1 = np.load(path_losses)[:20]
+    path_losses = os.path.join(LOSSESBASE, "VL1F.npy")
+    f1 = np.load(path_losses)[:20]
+    path_losses = os.path.join(LOSSESBASE, "VL1Avg.npy")
+    a1 = np.load(path_losses)[:20]
+    path_losses = os.path.join(LOSSESLDROP, "VL1M.npy")
+    m2 = np.load(path_losses)[:20]
+    path_losses = os.path.join(LOSSESLDROP, "VL1F.npy")
+    f2 = np.load(path_losses)[:20]
+    path_losses = os.path.join(LOSSESLDROP, "VL1Avg.npy")
+    a2 = np.load(path_losses)[:20]
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    ax1.plot(m1, label="noDROP")
+    ax1.plot(m2, label="DROP")
+    ax1.set_ylabel("L1 M")
+    ax1.set_xlabel("Epoch")
+    ax2.plot(f1, label="noDROP")
+    ax2.plot(f2, label="DROP")
+    ax2.set_ylabel("L1 F")
+    ax2.set_xlabel("Epoch")
+    ax3.plot(a1, label="noDROP")
+    ax3.plot(a2, label="DROP")
+    ax3.set_ylabel("L1 Avg")
+    ax3.set_xlabel("Epoch")
+    ax1.legend()
+    ax2.legend()
+    ax3.legend()
+    plt.show()
+    plt.close()
+    path_losses = os.path.join(LOSSESBASE, "TL1M.npy")
+    m1 = np.load(path_losses)[:20]
+    path_losses = os.path.join(LOSSESBASE, "TL1F.npy")
+    f1 = np.load(path_losses)[:20]
+    path_losses = os.path.join(LOSSESBASE, "TL1Avg.npy")
+    a1 = np.load(path_losses)[:20]
+    path_losses = os.path.join(LOSSESLDROP, "TL1M.npy")
+    m2 = np.load(path_losses)[:20]
+    path_losses = os.path.join(LOSSESLDROP, "TL1F.npy")
+    f2 = np.load(path_losses)[:20]
+    path_losses = os.path.join(LOSSESLDROP, "TL1Avg.npy")
+    a2 = np.load(path_losses)[:20]
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    ax1.plot(m1, label="noDROP")
+    ax1.plot(m2, label="DROP")
+    ax1.set_ylabel("L1 M")
+    ax1.set_xlabel("Epoch")
+    ax2.plot(f1, label="noDROP")
+    ax2.plot(f2, label="DROP")
+    ax2.set_ylabel("L1 F")
+    ax2.set_xlabel("Epoch")
+    ax3.plot(a1, label="noDROP")
+    ax3.plot(a2, label="DROP")
+    ax3.set_ylabel("L1 Avg")
+    ax3.set_xlabel("Epoch")
+    ax1.legend()
+    ax2.legend()
+    ax3.legend()
+    plt.show()
+    plt.close()
+
+    #BAR REPRESENTATION
+    ind = np.arange(4)
+    x_labels = ['NONE', 'MA', 'MA+EM', 'MA+EM+BW']
+    students = np.load(os.path.join(BAR_LIST,"list_bar_bad_example.npy"))
+    plt.bar(ind,students)
+    plt.xticks(ind,('NONE', 'MA', 'MA+EM', 'MA+EM+BW'))
+    plt.show()"""
 
     """ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                     "ECGOutputsTest")

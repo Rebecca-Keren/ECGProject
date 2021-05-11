@@ -45,7 +45,7 @@ if __name__ == '__main__':
             sig2 = loadmat(os.path.join(save_mat_dir, signals[1]))['data'][num_of_signal_to_remove:]
             for i in range(number_of_window):
                 record = [a + b  for a, b in zip(sig1[i*window_size:(i+1)*window_size], sig2[i*window_size:(i+1)*window_size])]
-                sio.savemat(os.path.join(window_sim_dir, name + '_noise0_' + '_mix' + str(i)), {'data': record})
+                sio.savemat(os.path.join(window_sim_dir, name + '_noise0' + '_mix' + str(i)), {'data': record})
                 for elem in signals:
                     if ('fecg1' in elem or 'mecg' in elem):
                         data = loadmat(os.path.join(save_mat_dir, elem))['data'][i*window_size:(i+1)*window_size]
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                 record = [a + b + c  for a, b, c in
                           zip(sig1[i * window_size:(i + 1) * window_size], sig2[i * window_size:(i + 1) * window_size],
                               sig3[i * window_size:(i + 1) * window_size])]
-                sio.savemat(os.path.join(window_sim_dir, name + '_noise1_' +'_mix' + str(i)), {'data': record})
+                sio.savemat(os.path.join(window_sim_dir, name + '_noise1' +'_mix' + str(i)), {'data': record})
                 for elem in signals:
                     if ('fecg1' in elem or 'mecg' in elem):
                         data = loadmat(os.path.join(save_mat_dir, elem))['data'][i * window_size:(i + 1) * window_size]
@@ -71,7 +71,7 @@ if __name__ == '__main__':
             sig4 = loadmat(os.path.join(save_mat_dir,signals[3]))['data'][num_of_signal_to_remove:]
             for i in range(number_of_window):
                 record = [a + b + c + d for a, b, c, d in zip(sig1[i*window_size:(i+1)*window_size], sig2[i*window_size:(i+1)*window_size], sig3[i*window_size:(i+1)*window_size], sig4[i*window_size:(i+1)*window_size])]
-                sio.savemat(os.path.join(window_sim_dir, name + '_noise2_' + '_mix' + str(i)), {'data': record})
+                sio.savemat(os.path.join(window_sim_dir, name + '_noise2' + '_mix' + str(i)), {'data': record})
                 for elem in signals:
                     if ('fecg1' in elem or 'mecg' in elem):
                         data = loadmat(os.path.join(save_mat_dir, elem))['data'][i * window_size:(i + 1) * window_size]
@@ -86,7 +86,7 @@ if __name__ == '__main__':
             for i in range(number_of_window):
                 record = [a + b + c + d + e for a, b, c, d, e in zip(sig1[i*window_size:(i+1)*window_size], sig2[i*window_size:(i+1)*window_size], sig3[i*window_size:(i+1)*window_size], sig4[i*window_size:(i+1)*window_size], sig5[i*window_size:(i+1)*window_size])]
                 # print(len(record))
-                sio.savemat(os.path.join(window_sim_dir, name + '_noise3_' + '_mix' + str(i)), {'data': record})
+                sio.savemat(os.path.join(window_sim_dir, name + '_noise3' + '_mix' + str(i)), {'data': record})
                 for elem in signals:
                     if ('fecg1' in elem or 'mecg' in elem):
                         data = loadmat(os.path.join(save_mat_dir, elem))['data'][i * window_size:(i + 1) * window_size]

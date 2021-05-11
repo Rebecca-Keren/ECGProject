@@ -17,7 +17,8 @@ fecg_lamda = 1.
 cent_lamda = 0.01
 hinge_lamda = 0.5
 
-mecg_weight = fecg_weight = 1.
+mecg_weight =  1.
+fecg_weight = 1.2
 cent_weight = 1.
 hinge_weight = 1.
 
@@ -190,7 +191,7 @@ def val(val_data_loader_sim,
             batch_for_f_val = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_val)
             val_loss_m += criterion(outputs_m_test, batch_for_m_val)
-            val_loss_f += criterion(outputs_f_test, batch_for_f_val)
+            val_loss_f += (criterion(outputs_f_test, batch_for_f_val)* fecg_weight)
             for j, elem in enumerate(outputs_m_test):
                 val_corr_m += \
                 np.corrcoef(outputs_m_test.cpu().detach().numpy()[j], batch_for_m_val.cpu().detach().numpy()[j])[0][1]
@@ -263,20 +264,28 @@ def test(filename,test_data_loader_sim):
     test_loss_f = 0
     test_corr_m = 0
     test_corr_f = 0
+
+    list_bar_bad_example = [0, 0, 0, 0]
+    list_bar_good_example = [0, 0, 0, 0]
+
     with torch.no_grad():
         for i, batch_features in enumerate(test_data_loader_sim):
             batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
             batch_for_m_test = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
             batch_for_f_test = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
+            batch_for_noise_test = batch_features[6].cpu().detach().numpy()
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_test)
             test_loss_m += criterion(outputs_m_test, batch_for_m_test)
             test_loss_f += criterion(outputs_f_test, batch_for_f_test)
             for j, elem in enumerate(outputs_m_test):
-                test_corr_m += \
-                np.corrcoef(outputs_m_test.cpu().detach().numpy()[j], batch_for_m_test.cpu().detach().numpy()[j])[0][1]
-                test_corr_f += \
-                np.corrcoef(outputs_f_test.cpu().detach().numpy()[j], batch_for_f_test.cpu().detach().numpy()[j])[0][1]
-
+                corr_m = np.corrcoef(outputs_m_test.cpu().detach().numpy()[j], batch_for_m_test.cpu().detach().numpy()[j])[0][1]
+                test_corr_m += corr_m
+                corr_f = np.corrcoef(outputs_f_test.cpu().detach().numpy()[j], batch_for_f_test.cpu().detach().numpy()[j])[0][1]
+                test_corr_f += corr_f
+                if(corr_f < 0.4):
+                    list_bar_bad_example[batch_for_noise_test[j]] += 1
+                else:
+                    list_bar_good_example_example[batch_for_noise_test[j]] +=1
 
             path = os.path.join(ECG_OUTPUTS_TEST, "ecg_all" + str(i))
             np.save(path, batch_features[0][0].cpu().detach().numpy()[:, 0])
@@ -296,4 +305,4 @@ def test(filename,test_data_loader_sim):
     test_corr_f /= len(test_data_loader_sim.dataset)
     test_corr_average = (test_corr_m + test_corr_f) / 2
 
-    return test_loss_m, test_loss_f, test_loss_average, test_corr_m, test_corr_f, test_corr_average
+    return test_loss_m, test_loss_f, test_loss_average, test_corr_m, test_corr_f, test_corr_average, list_bar_good_example,list_bar_bad_example

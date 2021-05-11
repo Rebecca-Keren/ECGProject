@@ -29,7 +29,8 @@ class SimulatedDataset(Dataset):
         path_mix = os.path.join(self.simulated_dir, self.simulated_signals[idx][0])
         path_mecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][1])
         path_fecg = os.path.join(self.simulated_dir, self.simulated_signals[idx][2])
+        number_of_noise = self.simulated_signals[idx][3]
         mix = torch.from_numpy(loadmat(path_mix)['data'])
         mecg = torch.from_numpy(loadmat(path_mecg)['data'])
         fecg = torch.from_numpy(loadmat(path_fecg)['data'])
-        return mix, mecg, fecg, path_mix,path_mecg,path_fecg
+        return mix, mecg, fecg, path_mix , path_mecg, path_fecg , number_of_noise
