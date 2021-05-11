@@ -46,8 +46,10 @@ def simulated_database_list(sim_dir):
         if 'mix' not in filename:
             continue
         name = filename[:(filename.find("mix"))]
+        index_noise = filename.find('noise') + 5
+        number_of_noise = int(filename[index_noise])
         number = filename[(filename.find("mix")) + 3:]
-        list.append([name + 'mix' + str(number), name + 'mecg' + str(number), name + 'fecg1' + str(number)])
+        list.append([name + 'mix' + str(number), name + 'mecg' + str(number), name + 'fecg1' + str(number), number_of_noise])
     return list
 
 def remove_nan_signals(list_signals):
