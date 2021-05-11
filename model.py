@@ -3,11 +3,13 @@ import os
 from ResnetNetwork import *
 from torch.autograd import Variable
 import math
-MODELS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Models")
 
 network_save_folder_orig = "./Models"
 network_file_name_last = "/last_model"
 network_file_name_best = "/best_model"
+
+if not os.path.exists(network_save_folder_orig):
+    os.mkdir(network_save_folder_orig)
 
 delta = 3
 
@@ -24,6 +26,20 @@ include_fecg_loss = True
 include_center_loss = True
 include_hinge_loss = True
 
+ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs")
+if not os.path.exists(ECG_OUTPUTS):
+    os.mkdir(ECG_OUTPUTS)
+
+ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                               "ECGOutputsVal")
+if not os.path.exists(ECG_OUTPUTS_VAL):
+    os.mkdir(ECG_OUTPUTS_VAL)
+
+ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                            "ECGOutputsTest")
+if not os.path.exists(ECG_OUTPUTS_TEST):
+    os.mkdir(ECG_OUTPUTS_TEST)
+
 def train(resnet_model,
               train_data_loader_sim,
               optimizer_model,
@@ -33,12 +49,9 @@ def train(resnet_model,
               epochs,
               train_loss_f_list,
               train_loss_m_list,
-              train_loss_average_list,
-              dataset_size):
+              train_loss_average_list):
 
-    ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs" + str(dataset_size))
-    if not os.path.exists(ECG_OUTPUTS):
-        os.mkdir(ECG_OUTPUTS)
+
 
     total_loss_epoch = 0.
     total_loss_m = 0.
@@ -143,7 +156,7 @@ def train(resnet_model,
         print("loss_hinge = {:.8f} ".format(total_loss_hinge))
     print("\n")
     if epoch + 1 == epochs:
-        with open("train_loss_last_epoch" + str(dataset_size) + ".txt", 'w') as f:
+        with open("train_loss_last_epoch.txt", 'w') as f:
             f.write("L1 M = {:.4f},L1 F= {:.4f},LCent = {:.4f},"
                     "LHinge = {:.4f},LTot = {:.4f}\n".format(total_loss_m,
                                                             total_loss_f,
@@ -165,8 +178,7 @@ def val(val_data_loader_sim,
         validation_loss_average_list,
         validation_corr_m_list,
         validation_corr_f_list,
-        best_model_accuracy,
-        dataset_size):
+        best_model_accuracy):
     val_loss_m = 0
     val_loss_f = 0
     val_corr_m = 0
@@ -185,8 +197,6 @@ def val(val_data_loader_sim,
                 val_corr_f += \
                 np.corrcoef(outputs_f_test.cpu().detach().numpy()[j], batch_for_f_val.cpu().detach().numpy()[j])[0][1]
 
-            ECG_OUTPUTS_VAL = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                           "ECGOutputsVal" + str(dataset_size))
             if epoch + 1 == epochs:
                 if not os.path.exists(ECG_OUTPUTS_VAL):
                     os.mkdir(ECG_OUTPUTS_VAL)
@@ -215,7 +225,7 @@ def val(val_data_loader_sim,
     validation_corr_m_list.append(val_corr_m)
     validation_corr_f_list.append(val_corr_f)
     if epoch + 1 == epochs:
-        with open("val_loss_last_epoch" + str(dataset_size) + ".txt", 'w') as f:
+        with open("val_loss_last_epoch.txt", 'w') as f:
             f.write("L1 M = {:.4f},L1 F= {:.4f},LAvg = {:.4f},"
                     "CorrM = {:.4f},CorrF = {:.4f}, CorrAvg = {:.4f}\n".format(val_loss_m,
                                                             val_loss_f,
@@ -224,17 +234,15 @@ def val(val_data_loader_sim,
                                                             val_corr_f,
                                                             val_corr_average))
     # saving last model
-    network_save_folder = network_save_folder_orig + str(dataset_size)
-    if not os.path.exists(network_save_folder):
-        os.mkdir(network_save_folder)
-    torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_last))
+
+    torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_last))
     # saving best model
     if (val_corr_average < best_model_accuracy):
         best_model_accuracy = val_loss_average
-        torch.save(resnet_model.state_dict(), str(network_save_folder + network_file_name_best))
+        torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_best))
         print("saving best model")
-        with open("best_model_epoch" + str(dataset_size) + ".txt", 'w') as f:
-            f.write(epoch)
+        with open("best_model_epoch.txt", 'w') as f:
+            f.write(str(epoch))
 
     print(
         'Validation: Average loss M: {:.4f}, Average Loss F: {:.4f}, Average Loss M+F: {:.4f}, Correlation M: {:.4f},Correlation F: {:.4f},Correlation Average: {:.4f})\n'.format(
@@ -242,7 +250,7 @@ def val(val_data_loader_sim,
     return best_model_accuracy
 
 
-def test(filename,test_data_loader_sim,dataset_size):
+def test(filename,test_data_loader_sim):
     resnet_model = ResNet(1)
     resnet_model.load_state_dict(torch.load(filename))
     resnet_model.eval()
@@ -269,10 +277,7 @@ def test(filename,test_data_loader_sim,dataset_size):
                 test_corr_f += \
                 np.corrcoef(outputs_f_test.cpu().detach().numpy()[j], batch_for_f_test.cpu().detach().numpy()[j])[0][1]
 
-            ECG_OUTPUTS_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                            "ECGOutputsTest" + str(dataset_size))
-            if not os.path.exists(ECG_OUTPUTS_TEST):
-                os.mkdir(ECG_OUTPUTS_TEST)
+
             path = os.path.join(ECG_OUTPUTS_TEST, "ecg_all" + str(i))
             np.save(path, batch_features[0][0].cpu().detach().numpy()[:, 0])
             path = os.path.join(ECG_OUTPUTS_TEST, "label_m" + str(i))
