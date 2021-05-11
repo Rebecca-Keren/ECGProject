@@ -54,7 +54,7 @@ def main():
     resnet_model = ResNet(1).cuda()
     best_model_accuracy = math.inf
     val_loss = 0
-    early_stopping = EarlyStopping(delta_min=1000, patience= 10, verbose=True)
+    early_stopping = EarlyStopping(delta_min=0.06, patience= 10, verbose=True)
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
