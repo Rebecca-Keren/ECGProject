@@ -140,15 +140,11 @@ if __name__=="__main__":
     #qrs = wfdb.io.rdann("sub01_snr00dB_l1_c0_fecg1", extension="qrs")
     #print(qrs.sample)
 
-    """mixture = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
-    mecg = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
-    fecg = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
-    noise1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))
-    noise2 =  os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsVal" + str(size))"""
-
-
     #dataset_size = [50000,80000,100000,127740]
-    dataset_size = [127740]
+
+    bad_signals = [0,112,118,121,129]
+    good_signals = [10,110,115,120,132]
+    dataset_size  = [127740]
     correlation_f = 0
     correlation_m = 0
     num_of_f = 0
@@ -161,8 +157,25 @@ if __name__=="__main__":
                                         "ECGOutputsTest" + str(size))
         LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(size))
 
+        for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
+            if "fecg" in filename:
+                path = os.path.join(ECG_OUTPUTS_TEST, filename)
+                number_file = filename.index("g") + 1
+                end_path = filename[number_file:]
+                path_label = os.path.join(ECG_OUTPUTS_TEST,"label_f" + end_path)
+                real = np.load(path)
+                label = np.load(path_label)
+                print(filename)
+                fig, (ax1, ax2) = plt.subplots(2, 1)
+                ax1.plot(real)
+                ax1.set_ylabel("FECG")
+                ax2.plot(label)
+                ax2.set_ylabel("LABEL")
+                plt.show()
+                plt.close()
+
         #LR2
-        LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
+        """LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
         LOSSESLR1 = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + "127740LR2")
 
         path_losses = os.path.join(LOSSESBASE, "VL1M.npy")
@@ -439,7 +452,7 @@ if __name__=="__main__":
         ax2.legend()
         ax3.legend()
         plt.show()
-        plt.close()
+        plt.close()"""
 
         #NOISE1
         """NOISE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -453,7 +466,7 @@ if __name__=="__main__":
 
 
 
-        LOSSESNOISE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses127740" + "Noise1")
+        """LOSSESNOISE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses127740" + "Noise1")
         path_losses = os.path.join(LOSSESNOISE, "TL1M.npy")
         train_loss_m_list = np.load(path_losses)
         path_losses = os.path.join(LOSSESNOISE, "TL1F.npy")
@@ -500,7 +513,7 @@ if __name__=="__main__":
         ax2.set_ylabel("CorrM")
         ax2.set_xlabel("Epoch")
         plt.show()
-        plt.close()
+        plt.close()"""
 
 
         """fig, (ax1,ax2,ax3,ax4,ax5) = plt.subplots(5,1)
