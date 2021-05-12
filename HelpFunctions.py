@@ -5,7 +5,19 @@ import numpy as np
 import scipy.stats
 from scipy.io import loadmat
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
+
+def get_index_snr(snr):
+    if snr == '00':
+        return 0
+    elif snr == '03':
+        return 1
+    elif snr == '06':
+        return 2
+    elif snr == '09':
+        return 3
+    else:
+        return 4
 
 def check_correlation(orig_signal,changed_signal):
     orig = orig_signal
@@ -49,8 +61,15 @@ def simulated_database_list(sim_dir):
         name_mix = filename[:(filename.find("mix"))]
         index_noise = filename.find('noise') + 5
         number_of_noise = int(filename[index_noise])
+        index_snr = filename.find('snr') + 3
+        string_of_snr = get_index_snr(filename[index_snr:index_snr+2])
         number = filename[(filename.find("mix")) + 3:]
-        list.append([name_mix + 'mix' + str(number), name + 'mecg' + str(number), name + 'fecg1' + str(number), number_of_noise])
+        index_case = filename.find('_c')
+        if(index_case == -1):
+            index_case = 6
+        else:
+            index_case = int(filename[index_case+2])
+        list.append([name_mix + 'mix' + str(number), name + 'mecg' + str(number), name + 'fecg1' + str(number), number_of_noise, string_of_snr,index_case])
     return list
 
 def remove_nan_signals(list_signals):
