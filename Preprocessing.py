@@ -27,6 +27,9 @@ both_path = os.path.join(dir_path,FREQUENCY_CLEAN_SIGNAL)
 if __name__ == '__main__':
     for filename in os.listdir(SIMULATED_DATASET):
         if "mix" not in filename:
+            sio.savemat(os.path.join(low_path, filename), {'data': loadmat(os.path.join(SIMULATED_DATASET,filename))['data']})
+            sio.savemat(os.path.join(high_path, filename), {'data': loadmat(os.path.join(SIMULATED_DATASET,filename))['data']})
+            sio.savemat(os.path.join(both_path, filename), {'data': loadmat(os.path.join(SIMULATED_DATASET,filename))['data']})
             continue
         print(filename)
         current_signal = loadmat(os.path.join(SIMULATED_DATASET,filename))['data']
