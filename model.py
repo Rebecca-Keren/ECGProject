@@ -277,7 +277,8 @@ def test(filename,test_data_loader_sim):
 
     with torch.no_grad():
         for i, batch_features in enumerate(test_data_loader_sim):
-            batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+           #batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+            batch_for_model_test = Variable(1000. * batch_features[0].float().cuda())
             batch_for_m_test = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
             batch_for_f_test = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
             batch_for_noise_test = batch_features[6].cpu().detach().numpy()

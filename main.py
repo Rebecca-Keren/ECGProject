@@ -36,7 +36,7 @@ def main():
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
     list_simulated_overfit = list_simulated[:127740]  # TODO: put in comment after validating
-    list_simulated_overfit = remove_nan_signals(list_simulated_overfit) # TODO: change to original list
+    #list_simulated_overfit = remove_nan_signals(list_simulated_overfit) # TODO: change to original list
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
