@@ -165,11 +165,15 @@ if __name__=="__main__":
 
     main()
 
+    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarList")
+    BAR_LIST_P = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListBeforePreprocess")
 
     #BAR REPRESENTATION
-    """ind = np.arange(4)
+    ind = np.arange(4)
     x_labels = ['NONE', 'MA', 'MA+EM', 'MA+EM+BW']
     results = np.load(os.path.join(BAR_LIST,"list_bar_bad_example_noisetype.npy"))
+    print(results)
+    print(np.load(os.path.join(BAR_LIST_P,"list_bar_bad_example_noisetype.npy")))
     plt.bar(ind,results)
     plt.title('Bad Example')
     plt.xticks(ind,('NONE', 'MA', 'MA+EM', 'MA+EM+BW'))
