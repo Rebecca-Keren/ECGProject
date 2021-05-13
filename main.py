@@ -162,7 +162,7 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    #main()
+    main()
 
 
     #BAR REPRESENTATION
