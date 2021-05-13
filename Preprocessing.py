@@ -35,14 +35,14 @@ if __name__ == '__main__':
 
         yf1 = frequency_removal(yf,freq,10000000,20)
         low_frequency_signal = function.ifft(yf1)
-        np.save(os.path.join(low_path,filename),low_frequency_signal)
+        sio.savemat(os.path.join(low_path,filename), {'data': low_frequency_signal})
 
         yf2 = frequency_removal(yf, freq, 220, 0)
         high_frequency_signal = function.ifft(yf2)
-        np.save(os.path.join(high_path,filename),high_frequency_signal)
+        sio.savemat(os.path.join(high_path,filename), {'data': high_frequency_signal})
 
         yf3 = frequency_removal(yf, freq, 220, 20)
         both_frequency_signal = function.ifft(yf3)
-        np.save(os.path.join(both_path,filename),both_frequency_signal)
+        sio.savemat(os.path.join(both_path,filename), {'data': both_frequency_signal})
 
 
