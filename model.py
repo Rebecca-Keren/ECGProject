@@ -64,7 +64,8 @@ def train(resnet_model,
     for i, batch_features in enumerate(train_data_loader_sim):
         optimizer_model.zero_grad()
 
-        batch_for_model = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+        #batch_for_model = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+        batch_for_model = Variable(1000. * batch_features[0].float().cuda())
         batch_for_m = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
         batch_for_f = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
 
@@ -185,7 +186,8 @@ def val(val_data_loader_sim,
     val_corr_f = 0
     with torch.no_grad():
         for i, batch_features in enumerate(val_data_loader_sim):
-            batch_for_model_val = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+            #batch_for_model_val = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+            batch_for_model_val = Variable(1000. * batch_features[0].float().cuda())
             batch_for_m_val = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
             batch_for_f_val = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_val)
