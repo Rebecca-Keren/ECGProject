@@ -16,26 +16,27 @@ import wfdb
 from EarlyStopping import *
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "low_frequency_signals")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
+#SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
+
 LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
 if not os.path.exists(LOSSES):
     os.mkdir(LOSSES)
 
-BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarList")
-if not os.path.exists(BAR_LIST):
-    os.mkdir(BAR_LIST)
+BAR_LIST_TEST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
+if not os.path.exists(BAR_LIST_TEST):
+    os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 25
+epochs = 40
 learning_rate = 1e-3
 
 def main():
 
-
     pl.seed_everything(1234)
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
-    list_simulated_overfit = list_simulated[:127740]  # TODO: put in comment after validating
+    list_simulated_overfit = list_simulated[:122740]  # TODO: put in comment after validating
     #list_simulated_overfit = remove_nan_signals(list_simulated_overfit) # TODO: change to original list
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
@@ -132,17 +133,17 @@ def main():
         list_bar_good_example_snr,list_bar_bad_example_snr, \
         list_bar_good_example_snrcase, list_bar_bad_example_snrcase = test(str(network_save_folder_orig + network_file_name_best),test_data_loader_sim)
 
-    path_bar = os.path.join(BAR_LIST, "list_bar_good_example_noisetype")
+    path_bar = os.path.join(BAR_LIST_TEST, "list_bar_good_example_noisetype")
     np.save(path_bar, np.array(list_bar_good_example_noisetype))
-    path_bar = os.path.join(BAR_LIST, "list_bar_bad_example_noisetype")
+    path_bar = os.path.join(BAR_LIST_TEST, "list_bar_bad_example_noisetype")
     np.save(path_bar, np.array(list_bar_bad_example_noisetype))
-    path_bar = os.path.join(BAR_LIST, "list_bar_good_example_snr")
+    path_bar = os.path.join(BAR_LIST_TEST, "list_bar_good_example_snr")
     np.save(path_bar, np.array(list_bar_good_example_snr))
-    path_bar = os.path.join(BAR_LIST, "list_bar_bad_example_snr")
+    path_bar = os.path.join(BAR_LIST_TEST, "list_bar_bad_example_snr")
     np.save(path_bar, np.array(list_bar_bad_example_snr))
-    path_bar = os.path.join(BAR_LIST, "list_bar_good_example_snrcase")
+    path_bar = os.path.join(BAR_LIST_TEST, "list_bar_good_example_snrcase")
     np.save(path_bar, np.array(list_bar_good_example_snrcase))
-    path_bar = os.path.join(BAR_LIST, "list_bar_bad_example_snrcase")
+    path_bar = os.path.join(BAR_LIST_TEST, "list_bar_bad_example_snrcase")
     np.save(path_bar, np.array(list_bar_bad_example_snrcase))
 
     with open("test_loss.txt", 'w') as f:
@@ -212,11 +213,11 @@ if __name__=="__main__":
     d = plt.bar(X + 0.3, data[3], color='c', width=0.1)
     e = plt.bar(X + 0.4, data[4], color='y', width=0.1)
     plt.legend((a, b, c, d, e), ('00', '03', '06', '09', '12'))
-    plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
+    plt.xticks(X, ('CO', 'C1', 'C2', 'C3','C5', 'C4', 'BASELINE'))
     plt.title('Bad Example')
     plt.show()
     plt.close()
-
+   
     X = np.arange(7)
     data = np.load(os.path.join(BAR_LIST, "list_bar_good_example_snrcase.npy"))
     a = plt.bar(X, data[0], color='b', width=0.1)
@@ -228,13 +229,12 @@ if __name__=="__main__":
     plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
     plt.title('Good Example')
     plt.show()
-    plt.close()"""
+    plt.close()
+    
+    
+    #DROPOUT1
 
-
-
-
-    # DROPOUT1
-    """LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
+    LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
     LOSSESLDROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
     path_losses = os.path.join(LOSSESBASE, "VL1M.npy")
     m1 = np.load(path_losses)[:20]

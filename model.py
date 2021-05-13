@@ -9,6 +9,10 @@ network_save_folder_orig = "./Models"
 network_file_name_last = "/last_model"
 network_file_name_best = "/best_model"
 
+BAR_LIST_TRAIN = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
+if not os.path.exists(BAR_LIST_TRAIN):
+    os.mkdir(BAR_LIST_TRAIN)
+
 if not os.path.exists(network_save_folder_orig):
     os.mkdir(network_save_folder_orig)
 
@@ -60,6 +64,17 @@ def train(resnet_model,
     total_loss_cent = 0.
     total_loss_hinge = 0.
 
+    list_bar_bad_example_noisetype = [0, 0, 0, 0]
+    list_bar_good_example_noisetype = [0, 0, 0, 0]
+    list_bar_bad_example_snr = [0, 0, 0, 0, 0]
+    list_bar_good_example_snr = [0, 0, 0, 0, 0]
+    list_bar_bad_example_snrcase = [[0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0, 0, 0]]
+    list_bar_good_example_snrcase = [[0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0, 0, 0]]
+
     # real_epoch = False #TODO add when real data
     for i, batch_features in enumerate(train_data_loader_sim):
         optimizer_model.zero_grad()
@@ -68,10 +83,38 @@ def train(resnet_model,
         batch_for_model = Variable(1000. * batch_features[0].float().cuda())
         batch_for_m = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
         batch_for_f = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
+        batch_for_noise_test = batch_features[6].cpu().detach().numpy()
+        batch_for_snr_test = batch_features[7].cpu().detach().numpy()
+        batch_for_case_test = batch_features[8].cpu().detach().numpy()
 
         outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model)
 
         if epoch + 1 == epochs:
+            for j, elem in enumerate(outputs_f):
+                corr_f = \
+                np.corrcoef(outputs_f.cpu().detach().numpy()[j], batch_for_f.cpu().detach().numpy()[j])[0][1]
+                if (corr_f < 0.4):
+                    list_bar_bad_example_noisetype[batch_for_noise_test[j]] += 1
+                    list_bar_bad_example_snr[batch_for_snr_test[j]] += 1
+                    list_bar_bad_example_snrcase[batch_for_snr_test[j]][batch_for_case_test[j]] += 1
+                else:
+                    list_bar_good_example_noisetype[batch_for_noise_test[j]] += 1
+                    list_bar_good_example_snr[batch_for_snr_test[j]] += 1
+                    list_bar_good_example_snrcase[batch_for_snr_test[j]][batch_for_case_test[j]] += 1
+
+            path_bar = os.path.join(BAR_LIST_TRAIN, "list_bar_good_example_noisetype")
+            np.save(path_bar, np.array(list_bar_good_example_noisetype))
+            path_bar = os.path.join(BAR_LIST_TRAIN, "list_bar_bad_example_noisetype")
+            np.save(path_bar, np.array(list_bar_bad_example_noisetype))
+            path_bar = os.path.join(BAR_LIST_TRAIN, "list_bar_good_example_snr")
+            np.save(path_bar, np.array(list_bar_good_example_snr))
+            path_bar = os.path.join(BAR_LIST_TRAIN, "list_bar_bad_example_snr")
+            np.save(path_bar, np.array(list_bar_bad_example_snr))
+            path_bar = os.path.join(BAR_LIST_TRAIN, "list_bar_good_example_snrcase")
+            np.save(path_bar, np.array(list_bar_good_example_snrcase))
+            path_bar = os.path.join(BAR_LIST_TRAIN, "list_bar_bad_example_snrcase")
+            np.save(path_bar, np.array(list_bar_bad_example_snrcase))
+
             if not os.path.exists(ECG_OUTPUTS):
                 os.mkdir(ECG_OUTPUTS)
             path = os.path.join(ECG_OUTPUTS, "ecg_all" + str(i))
@@ -279,7 +322,7 @@ def test(filename,test_data_loader_sim):
 
     with torch.no_grad():
         for i, batch_features in enumerate(test_data_loader_sim):
-           #batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+            #batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
             batch_for_model_test = Variable(1000. * batch_features[0].float().cuda())
             batch_for_m_test = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
             batch_for_f_test = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
