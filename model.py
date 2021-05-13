@@ -296,7 +296,7 @@ def test(filename,test_data_loader_sim):
                     list_bar_bad_example_snr[batch_for_snr_test[j]] += 1
                     list_bar_bad_example_snrcase[batch_for_snr_test[j]][batch_for_case_test[j]] += 1
                 else:
-                    list_bar_good_example_example_noisetype[batch_for_noise_test[j]] += 1
+                    list_bar_good_example_noisetype[batch_for_noise_test[j]] += 1
                     list_bar_good_example_snr[batch_for_snr_test[j]] += 1
                     list_bar_good_example_snrcase[batch_for_snr_test[j]][batch_for_case_test[j]] += 1
 

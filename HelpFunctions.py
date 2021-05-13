@@ -75,7 +75,9 @@ def simulated_database_list(sim_dir):
 def remove_nan_signals(list_signals):
     for idx,signal_tuple in enumerate(list_signals):
         is_nan = False
+        i = 0
         for signal_name in signal_tuple:
+            i += 1
             path = os.path.join(SIMULATED_DATASET,signal_name)
             signal = loadmat(path)['data']
             is_nan = np.any(np.isnan(signal))
@@ -83,4 +85,8 @@ def remove_nan_signals(list_signals):
                 print(list_signals[idx])
                 list_signals = np.delete(list_signals,idx)
                 break
+            if(i == 3):
+                break
+    return list_signals
+
 

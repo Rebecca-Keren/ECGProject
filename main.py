@@ -26,7 +26,7 @@ if not os.path.exists(BAR_LIST):
     os.mkdir(BAR_LIST)
 
 BATCH_SIZE = 32
-epochs = 1
+epochs = 25
 learning_rate = 1e-3
 
 def main():
@@ -35,8 +35,8 @@ def main():
     pl.seed_everything(1234)
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
-    list_simulated_overfit = list_simulated[:20]  # TODO: put in comment after validating
-    #remove_nan_signals(list_simulated_overfit) # TODO: change to original list
+    list_simulated_overfit = list_simulated[:127740]  # TODO: put in comment after validating
+    list_simulated_overfit = remove_nan_signals(list_simulated_overfit) # TODO: change to original list
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -162,7 +162,7 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    main()
+    #main()
 
 
     #BAR REPRESENTATION
@@ -170,28 +170,65 @@ if __name__=="__main__":
     x_labels = ['NONE', 'MA', 'MA+EM', 'MA+EM+BW']
     results = np.load(os.path.join(BAR_LIST,"list_bar_bad_example_noisetype.npy"))
     plt.bar(ind,results)
+    plt.title('Bad Example')
     plt.xticks(ind,('NONE', 'MA', 'MA+EM', 'MA+EM+BW'))
     plt.show()
+    plt.close()
+
+
+    ind = np.arange(4)
+    x_labels = ['NONE', 'MA', 'MA+EM', 'MA+EM+BW']
+    results = np.load(os.path.join(BAR_LIST,"list_bar_good_example_noisetype.npy"))
+    plt.bar(ind,results)
+    plt.title('Good Example')
+    plt.xticks(ind,('NONE', 'MA', 'MA+EM', 'MA+EM+BW'))
+    plt.show()
+    plt.close()
 
     ind = np.arange(5)
     x_labels = ['00', '03', '06', '09', '12']
     results = np.load(os.path.join(BAR_LIST,"list_bar_bad_example_snr.npy"))
     plt.bar(ind,results)
+    plt.title('Bad Example')
     plt.xticks(ind,('00', '03', '06', '09', '12'))
     plt.show()
+    plt.close()
+
+    ind = np.arange(5)
+    x_labels = ['00', '03', '06', '09', '12']
+    results = np.load(os.path.join(BAR_LIST, "list_bar_good_example_snr.npy"))
+    plt.bar(ind, results)
+    plt.title('Good Example')
+    plt.xticks(ind, ('00', '03', '06', '09', '12'))
+    plt.show()
+    plt.close()
 
 
     X = np.arange(7)
     data = np.load(os.path.join(BAR_LIST, "list_bar_bad_example_snrcase.npy"))
-    print(data)
-    a = plt.bar(X + 0.00, data[0], color='b', width=0.25)
-    b = plt.bar(X + 0.25, data[1], color='g', width=0.25)
-    c = plt.bar(X + 0.50, data[2], color='r', width=0.25)
-    d = plt.bar(X + 0.75, data[3], color='c', width=0.25)
-    e = plt.bar(X + 1, data[4], color='y', width=0.25)
+    a = plt.bar(X, data[0], color='b', width=0.1)
+    b = plt.bar(X + 0.1 , data[1], color='g', width=0.1)
+    c = plt.bar(X + 0.2, data[2], color='r', width=0.1)
+    d = plt.bar(X + 0.3, data[3], color='c', width=0.1)
+    e = plt.bar(X + 0.4, data[4], color='y', width=0.1)
     plt.legend((a, b, c, d, e), ('00', '03', '06', '09', '12'))
     plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
-    plt.show()"""
+    plt.title('Bad Example')
+    plt.show()
+    plt.close()
+
+    X = np.arange(7)
+    data = np.load(os.path.join(BAR_LIST, "list_bar_good_example_snrcase.npy"))
+    a = plt.bar(X, data[0], color='b', width=0.1)
+    b = plt.bar(X + 0.1, data[1], color='g', width=0.1)
+    c = plt.bar(X + 0.2, data[2], color='r', width=0.1)
+    d = plt.bar(X + 0.3, data[3], color='c', width=0.1)
+    e = plt.bar(X + 0.4, data[4], color='y', width=0.1)
+    plt.legend((a, b, c, d, e), ('00', '03', '06', '09', '12'))
+    plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
+    plt.title('Good Example')
+    plt.show()
+    plt.close()"""
 
 
 
@@ -258,10 +295,11 @@ if __name__=="__main__":
     ax2.legend()
     ax3.legend()
     plt.show()
-    plt.close()
+    plt.close()"""
+
 
     #BAR REPRESENTATION
-    ind = np.arange(4)
+    """ind = np.arange(4)
     x_labels = ['NONE', 'MA', 'MA+EM', 'MA+EM+BW']
     students = np.load(os.path.join(BAR_LIST,"list_bar_bad_example.npy"))
     plt.bar(ind,students)
