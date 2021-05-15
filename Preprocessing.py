@@ -7,7 +7,7 @@ import scipy.io as sio
 import scipy.fftpack as function
 from SignalPreprocessing.data_preprocess_function import *
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 LOW_FREQUENCY_SIGNAL = "low_frequency_signals"
 HIGH_FREQUENCY_SIGNAL = "high_frequency_signals"
 FREQUENCY_CLEAN_SIGNAL = "both_frequency_signals"
@@ -36,16 +36,31 @@ if __name__ == '__main__':
 
         yf, freq, t = transformation('fft', current_signal)
 
-        yf1 = frequency_removal(yf,freq,10000000,20)
+        yf1 = frequency_removal(yf,freq,10000000,15)
         low_frequency_signal = function.ifft(yf1)
+        """fig, (ax1, ax2) = plt.subplots(2, 1)
+        ax1.plot(current_signal, label="BeforePreprocess")
+        ax2.plot(low_frequency_signal, label="AfterPreprocess")
+        plt.show()
+        plt.close()"""
         sio.savemat(os.path.join(low_path,filename), {'data': low_frequency_signal})
 
-        yf2 = frequency_removal(yf, freq, 220, 0)
-        high_frequency_signal = function.ifft(yf2)
+        yf2 = frequency_removal(yf, freq, 160, 0)
+        """high_frequency_signal = function.ifft(yf2)
+        fig, (ax1, ax2) = plt.subplots(2, 1)
+        ax1.plot(current_signal, label="BeforePreprocess")
+        ax2.plot(high_frequency_signal, label="AfterPreprocess")
+        plt.show()
+        plt.close()"""
         sio.savemat(os.path.join(high_path,filename), {'data': high_frequency_signal})
 
-        yf3 = frequency_removal(yf, freq, 220, 20)
+        yf3 = frequency_removal(yf, freq, 160, 15)
         both_frequency_signal = function.ifft(yf3)
+        """fig, (ax1, ax2) = plt.subplots(2, 1)
+        ax1.plot(current_signal, label="BeforePreprocess")
+        ax2.plot(both_frequency_signal, label="AfterPreprocess")
+        plt.show()
+        plt.close()"""
         sio.savemat(os.path.join(both_path,filename), {'data': both_frequency_signal})
 
 

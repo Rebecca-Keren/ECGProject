@@ -163,19 +163,18 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    main()
+    #main()
 
-    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarList")
-    BAR_LIST_P = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListBeforePreprocess")
+    BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
+
 
     #BAR REPRESENTATION
     ind = np.arange(4)
     x_labels = ['NONE', 'MA', 'MA+EM', 'MA+EM+BW']
     results = np.load(os.path.join(BAR_LIST,"list_bar_bad_example_noisetype.npy"))
-    print(results)
-    print(np.load(os.path.join(BAR_LIST_P,"list_bar_bad_example_noisetype.npy")))
+    sum = np.sum(np.matrix(results))
     plt.bar(ind,results)
-    plt.title('Bad Example')
+    plt.title('Failing signals according to noise type. Total: {}'.format(sum))
     plt.xticks(ind,('NONE', 'MA', 'MA+EM', 'MA+EM+BW'))
     plt.show()
     plt.close()
@@ -184,8 +183,9 @@ if __name__=="__main__":
     ind = np.arange(4)
     x_labels = ['NONE', 'MA', 'MA+EM', 'MA+EM+BW']
     results = np.load(os.path.join(BAR_LIST,"list_bar_good_example_noisetype.npy"))
+    sum = np.sum(np.matrix(results))
     plt.bar(ind,results)
-    plt.title('Good Example')
+    plt.title('Successful signals according to noise type. Total: {}'.format(sum))
     plt.xticks(ind,('NONE', 'MA', 'MA+EM', 'MA+EM+BW'))
     plt.show()
     plt.close()
@@ -193,8 +193,9 @@ if __name__=="__main__":
     ind = np.arange(5)
     x_labels = ['00', '03', '06', '09', '12']
     results = np.load(os.path.join(BAR_LIST,"list_bar_bad_example_snr.npy"))
+    sum = np.sum(np.matrix(results))
     plt.bar(ind,results)
-    plt.title('Bad Example')
+    plt.title('Failing signals according to SNR [dB]. Total: {}'.format(sum))
     plt.xticks(ind,('00', '03', '06', '09', '12'))
     plt.show()
     plt.close()
@@ -202,8 +203,9 @@ if __name__=="__main__":
     ind = np.arange(5)
     x_labels = ['00', '03', '06', '09', '12']
     results = np.load(os.path.join(BAR_LIST, "list_bar_good_example_snr.npy"))
+    sum = np.sum(np.matrix(results))
     plt.bar(ind, results)
-    plt.title('Good Example')
+    plt.title('Successful signals according to SNR [dB]. Total: {}'.format(sum))
     plt.xticks(ind, ('00', '03', '06', '09', '12'))
     plt.show()
     plt.close()
@@ -211,6 +213,8 @@ if __name__=="__main__":
 
     X = np.arange(7)
     data = np.load(os.path.join(BAR_LIST, "list_bar_bad_example_snrcase.npy"))
+    print(np.sum(data, axis=0))
+    sum = np.sum(np.matrix(data))
     a = plt.bar(X, data[0], color='b', width=0.1)
     b = plt.bar(X + 0.1 , data[1], color='g', width=0.1)
     c = plt.bar(X + 0.2, data[2], color='r', width=0.1)
@@ -218,12 +222,14 @@ if __name__=="__main__":
     e = plt.bar(X + 0.4, data[4], color='y', width=0.1)
     plt.legend((a, b, c, d, e), ('00', '03', '06', '09', '12'))
     plt.xticks(X, ('CO', 'C1', 'C2', 'C3','C5', 'C4', 'BASELINE'))
-    plt.title('Bad Example')
+    plt.title('Failing signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
     plt.show()
     plt.close()
    
     X = np.arange(7)
     data = np.load(os.path.join(BAR_LIST, "list_bar_good_example_snrcase.npy"))
+    print(np.sum(data,axis=0))
+    sum = np.sum(np.matrix(data))
     a = plt.bar(X, data[0], color='b', width=0.1)
     b = plt.bar(X + 0.1, data[1], color='g', width=0.1)
     c = plt.bar(X + 0.2, data[2], color='r', width=0.1)
@@ -231,14 +237,14 @@ if __name__=="__main__":
     e = plt.bar(X + 0.4, data[4], color='y', width=0.1)
     plt.legend((a, b, c, d, e), ('00', '03', '06', '09', '12'))
     plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
-    plt.title('Good Example')
+    plt.title('Successful signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
     plt.show()
     plt.close()
     
     
     #DROPOUT1
 
-    LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
+    """LOSSESBASE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses" + str(127740))
     LOSSESLDROP = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
     path_losses = os.path.join(LOSSESBASE, "VL1M.npy")
     m1 = np.load(path_losses)[:20]
