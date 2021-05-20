@@ -28,7 +28,7 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 40
+epochs = 30
 learning_rate = 1e-3
 
 def main():
@@ -37,7 +37,7 @@ def main():
     list_simulated = simulated_database_list(SIMULATED_DATASET)
 
     list_simulated_overfit = list_simulated[:122740]  # TODO: put in comment after validating
-    #list_simulated_overfit = remove_nan_signals(list_simulated_overfit) # TODO: change to original list
+    list_simulated_overfit = remove_nan_signals(list_simulated_overfit) # TODO: change to original list
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
 
@@ -163,9 +163,9 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    #main()
+    main()
 
-    BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
+    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
 
 
     #BAR REPRESENTATION
@@ -239,7 +239,7 @@ if __name__=="__main__":
     plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
     plt.title('Successful signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
     plt.show()
-    plt.close()
+    plt.close()"""
     
     
     #DROPOUT1

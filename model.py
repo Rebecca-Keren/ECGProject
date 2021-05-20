@@ -22,8 +22,8 @@ fecg_lamda = 1.
 cent_lamda = 0.01
 hinge_lamda = 0.5
 
-mecg_weight =  1.
-fecg_weight = 1.2
+mecg_weight = 1.
+fecg_weight = 1.
 cent_weight = 1.
 hinge_weight = 1.
 
@@ -32,7 +32,7 @@ include_fecg_loss = True
 include_center_loss = True
 include_hinge_loss = True
 
-ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputs")
+ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsTrain")
 if not os.path.exists(ECG_OUTPUTS):
     os.mkdir(ECG_OUTPUTS)
 
@@ -79,8 +79,8 @@ def train(resnet_model,
     for i, batch_features in enumerate(train_data_loader_sim):
         optimizer_model.zero_grad()
 
-        #batch_for_model = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
-        batch_for_model = Variable(1000. * batch_features[0].float().cuda())
+        batch_for_model = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+        #batch_for_model = Variable(1000. * batch_features[0].float().cuda())
         batch_for_m = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
         batch_for_f = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
         batch_for_noise_test = batch_features[6].cpu().detach().numpy()
@@ -229,8 +229,8 @@ def val(val_data_loader_sim,
     val_corr_f = 0
     with torch.no_grad():
         for i, batch_features in enumerate(val_data_loader_sim):
-            #batch_for_model_val = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
-            batch_for_model_val = Variable(1000. * batch_features[0].float().cuda())
+            batch_for_model_val = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+            #batch_for_model_val = Variable(1000. * batch_features[0].float().cuda())
             batch_for_m_val = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
             batch_for_f_val = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_val)
@@ -283,7 +283,7 @@ def val(val_data_loader_sim,
     torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_last))
     # saving best model
     if (val_corr_average < best_model_accuracy):
-        best_model_accuracy = val_loss_average
+        best_model_accuracy = val_corr_average
         torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_best))
         print("saving best model")
         with open("best_model_epoch.txt", 'w') as f:
@@ -322,8 +322,8 @@ def test(filename,test_data_loader_sim):
 
     with torch.no_grad():
         for i, batch_features in enumerate(test_data_loader_sim):
-            #batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
-            batch_for_model_test = Variable(1000. * batch_features[0].float().cuda())
+            batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+            #batch_for_model_test = Variable(1000. * batch_features[0].float().cuda())
             batch_for_m_test = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
             batch_for_f_test = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
             batch_for_noise_test = batch_features[6].cpu().detach().numpy()

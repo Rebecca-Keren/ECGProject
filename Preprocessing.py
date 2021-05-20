@@ -36,23 +36,26 @@ if __name__ == '__main__':
 
         yf, freq, t = transformation('fft', current_signal)
 
-        yf1 = frequency_removal(yf,freq,10000000,15)
+        yf1 = frequency_removal(yf,freq,0,10)
+        plt.plot(freq,yf1)
+        plt.show()
+        plt.close()
         low_frequency_signal = function.ifft(yf1)
-        """fig, (ax1, ax2) = plt.subplots(2, 1)
+        fig, (ax1, ax2) = plt.subplots(2, 1)
         ax1.plot(current_signal, label="BeforePreprocess")
         ax2.plot(low_frequency_signal, label="AfterPreprocess")
         plt.show()
-        plt.close()"""
-        sio.savemat(os.path.join(low_path,filename), {'data': low_frequency_signal})
+        plt.close()
+        #sio.savemat(os.path.join(low_path,filename), {'data': low_frequency_signal})
 
         yf2 = frequency_removal(yf, freq, 160, 0)
-        """high_frequency_signal = function.ifft(yf2)
-        fig, (ax1, ax2) = plt.subplots(2, 1)
+        high_frequency_signal = function.ifft(yf2)
+        """fig, (ax1, ax2) = plt.subplots(2, 1)
         ax1.plot(current_signal, label="BeforePreprocess")
         ax2.plot(high_frequency_signal, label="AfterPreprocess")
         plt.show()
         plt.close()"""
-        sio.savemat(os.path.join(high_path,filename), {'data': high_frequency_signal})
+        #sio.savemat(os.path.join(high_path,filename), {'data': high_frequency_signal})
 
         yf3 = frequency_removal(yf, freq, 160, 15)
         both_frequency_signal = function.ifft(yf3)
@@ -61,6 +64,6 @@ if __name__ == '__main__':
         ax2.plot(both_frequency_signal, label="AfterPreprocess")
         plt.show()
         plt.close()"""
-        sio.savemat(os.path.join(both_path,filename), {'data': both_frequency_signal})
+        #sio.savemat(os.path.join(both_path,filename), {'data': both_frequency_signal})
 
 

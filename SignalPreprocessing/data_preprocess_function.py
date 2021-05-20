@@ -54,7 +54,8 @@ def windowing_dc_one_sample(array,w_size):
 
 def frequency_removal(yf,freq,high_frequency,low_frequency):
     cut_f_signal = yf.copy()
-    cut_f_signal[(np.abs(freq) > high_frequency)] = 0
+    if(high_frequency != 0):
+        cut_f_signal[(np.abs(freq) > high_frequency)] = 0
     if (low_frequency > 0):
         cut_f_signal[(np.abs(freq) < low_frequency)] = 0
     return cut_f_signal
