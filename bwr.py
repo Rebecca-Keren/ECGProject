@@ -2,6 +2,7 @@ from math import sqrt
 from scipy.io import loadmat
 import os
 import matplotlib.pyplot as plt
+import scipy.io as sio
 
 # Daubechies 4 Constant
 c0 = (1+sqrt(3))/(4*sqrt(2))
