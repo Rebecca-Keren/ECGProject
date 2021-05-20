@@ -116,7 +116,9 @@ def bwr(raw):
     curlp = raw[:]
     num_dec = 0
     last_lp = []
+    count = 0
     while True:
+        count +=1
         #print('Iterasi ke' + str(num_dec+1))
         #print(len(curlp))
 
@@ -130,7 +132,7 @@ def bwr(raw):
         #print(en2)
 
         # Check if we are in the local minimum of energy function of high-pass signal
-        if en0 > en1 and en1 < en2:
+        if ((en0 > en1 and en1 < en2) or (count > 16)):
             last_lp = curlp
             break
 
@@ -150,7 +152,7 @@ def bwr(raw):
     return (base, ecg_out)
 
 if __name__ == '__main__':
-    SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
+    SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
     BWR_SIGNALS = "bwr_signals"
     dir_path = os.path.dirname(os.path.realpath(__file__))
