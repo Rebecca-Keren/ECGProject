@@ -152,6 +152,7 @@ if __name__ == '__main__':
     SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_signals_noise")
 
     BWR_SIGNALS = "bwr_signals"
+    dir_path = os.path.dirname(os.path.realpath(__file__))
     bwr_path = os.path.join(dir_path, BWR_SIGNALS)
 
     if not os.path.exists(BWR_SIGNALS):
