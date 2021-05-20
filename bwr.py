@@ -149,7 +149,7 @@ def bwr(raw):
     return (base, ecg_out)
 
 if __name__ == '__main__':
-    SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_signals_noise")
+    SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
 
     BWR_SIGNALS = "bwr_signals"
     dir_path = os.path.dirname(os.path.realpath(__file__))
