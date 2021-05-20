@@ -6,32 +6,38 @@ from scipy import signal
 import scipy.io as sio
 import scipy.fftpack as function
 from SignalPreprocessing.data_agumentation_function import *
+from SignalPreprocessing.data_preprocess_function import *
 
 REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RealSignals")
-#LOW_FREQUENCY_SIGNAL = "low_frequency_signals"
+REAL_WINDOWS = "real_windows"
 
 
-#if not os.path.exists(LOW_FREQUENCY_SIGNAL):
-#    os.mkdir(LOW_FREQUENCY_SIGNAL)
+if not os.path.exists(REAL_WINDOWS):
+    os.mkdir(REAL_WINDOWS)
 
-#dir_path = os.path.dirname(os.path.realpath(__file__))
-#low_path = os.path.join(dir_path,LOW_FREQUENCY_SIGNAL)
+dir_path = os.path.dirname(os.path.realpath(__file__))
+window_path = os.path.join(dir_path,REAL_WINDOWS)
+
 if __name__ == '__main__':
     for filename in os.listdir(REAL_DATASET):
         print(filename)
         current_signal = np.ravel(loadmat(os.path.join(REAL_DATASET, filename))['data'])
-        resampled_signal = increase_sampling_rate(current_signal,0.25)
-        #plt.plot(current_signal, label="before")
-        plt.plot(resampled_signal, label="AfterPreprocess")
-        plt.show()
-        plt.close()
-        """fig, (ax1, ax2) = plt.subplots(2, 1)
-        ax1.plot(current_signal, label="BeforePreprocess")
-        ax2.plot(resampled_signal, label="AfterPreprocess")
-        plt.show()
-        plt.close()"""
 
-        """plt.plot(current_signal)
-        plt.show()
-        plt.close()
-        print(len(current_signal))"""
+        #Preprocess
+        signal = remove_beginning_end(current_signal)
+        yf, freq, t = transformation('fft', signal)
+        yf = [0 if (np.abs(elem) > 0.005 and np.abs(elem) < 0.2) else yf for elem, yf in zip(freq, yf)]
+        yf = [0 if np.abs(elem) > 30 else yf for elem, yf in zip(freq, yf)]
+        new_signal = function.ifft(yf)
+        #Resampling
+        resampled_signal = increase_sampling_rate(new_signal,0.25)
+        #Windowing
+        number_of_window = int(len(resampled_signal) / 1024)
+        window_size = 1024
+        for i in range(number_of_window):
+            record = resampled_signal[i * window_size:(i + 1) * window_size]
+            sio.savemat(os.path.join(window_path, filename + '_mix' + str(i)), {'data': record})
+
+
+
+

@@ -16,7 +16,8 @@ import wfdb
 from EarlyStopping import *
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "bwr_signals")
+REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "real_windows")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
 LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
@@ -34,22 +35,32 @@ learning_rate = 1e-3
 def main():
 
     pl.seed_everything(1234)
-    list_simulated = simulated_database_list(SIMULATED_DATASET)
+    list_simulated = simulated_database_list(SIMULATED_DATASET)[:122740]
+    list_simulated = remove_nan_signals(list_simulated)
 
-    list_simulated_overfit = list_simulated[:122740]  # TODO: put in comment after validating
-    list_simulated_overfit = remove_nan_signals(list_simulated_overfit) # TODO: change to original list
-
-    simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
+    simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated)
+    real_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET)
 
     train_size_sim = int(0.6 * len(simulated_dataset))
     val_size_sim = int(0.2 * len(simulated_dataset))
     test_size_sim = int(0.2 * len(simulated_dataset))
 
+    train_size_real = int(0.6 * len(real_dataset))
+    val_size_real = int(0.2 * len(real_dataset))
+    test_size_real = int(0.2 * len(real_dataset))
+
     train_dataset_sim, val_dataset_sim, test_dataset_sim = torch.utils.data.random_split(simulated_dataset, [train_size_sim, val_size_sim,test_size_sim])
+    train_dataset_real, val_dataset_real, test_dataset_real = torch.utils.data.random_split(real_dataset, [train_size_real, val_size_real,test_size_real])
 
     train_data_loader_sim = data.DataLoader(train_dataset_sim, batch_size=BATCH_SIZE, shuffle=True, num_workers=12)
     val_data_loader_sim = data.DataLoader(val_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
     test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
+
+    train_data_loader_real = data.DataLoader(train_dataset_real, batch_size=BATCH_SIZE, shuffle=True, num_workers=12)
+    val_data_loader_real = data.DataLoader(val_dataset_real, batch_size=BATCH_SIZE, shuffle=False)
+    test_data_loader_real = data.DataLoader(test_dataset_real, batch_size=BATCH_SIZE, shuffle=False)
+
+
 
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
@@ -67,18 +78,21 @@ def main():
 
     train_loss_f_list = []
     train_loss_m_list = []
+    train_loss_ecg_list = []
     train_loss_average_list = []
     validation_loss_f_list = []
     validation_loss_m_list = []
     validation_loss_average_list = []
     validation_corr_m_list = []
     validation_corr_f_list = []
+    validation_loss_ecg_list = []
 
     for epoch in range(epochs):
         #Train
         resnet_model.train()
         train(resnet_model,
               train_data_loader_sim,
+              train_data_loader_real,
               optimizer_model,
               criterion,
               criterion_cent,
@@ -86,25 +100,30 @@ def main():
               epochs,
               train_loss_f_list,
               train_loss_m_list,
+              train_loss_ecg_list,
               train_loss_average_list)
         #Evaluation
         resnet_model.eval()
         best_model_accuracy, val_loss = val(val_data_loader_sim,
-                                    resnet_model,
-                                    criterion,
-                                    epoch,
-                                    epochs,
-                                    validation_loss_m_list,
-                                    validation_loss_f_list,
-                                    validation_loss_average_list,
-                                    validation_corr_m_list,
-                                    validation_corr_f_list,
-                                    best_model_accuracy)
+                                            val_data_loader_real,
+                                            resnet_model,
+                                            criterion,
+                                            epoch,
+                                            epochs,
+                                            validation_loss_m_list,
+                                            validation_loss_f_list,
+                                            validation_loss_average_list,
+                                            validation_corr_m_list,
+                                            validation_corr_f_list,
+                                            validation_loss_ecg_list,
+                                            best_model_accuracy)
         scheduler.step()
-        early_stopping(val_loss, resnet_model)
-        if early_stopping.early_stop:
-            print('Early stopping')
-            break
+
+        if(epoch % 4 != 0):
+            early_stopping(val_loss, resnet_model)
+            if early_stopping.early_stop:
+                print('Early stopping')
+                break
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")
@@ -128,10 +147,10 @@ def main():
     np.save(path_losses, np.array(validation_corr_f_list))
 
     #Test
-    test_loss_m, test_loss_f, test_loss_avg, test_corr_m, test_corr_f, test_corr_average,\
+    test_loss_m, test_loss_f, test_loss_ecg,test_loss_avg, test_corr_m, test_corr_f, test_corr_average,\
         list_bar_good_example_noisetype, list_bar_bad_example_noisetype,\
         list_bar_good_example_snr,list_bar_bad_example_snr, \
-        list_bar_good_example_snrcase, list_bar_bad_example_snrcase = test(str(network_save_folder_orig + network_file_name_best),test_data_loader_sim)
+        list_bar_good_example_snrcase, list_bar_bad_example_snrcase = test(str(network_save_folder_orig + network_file_name_best),test_data_loader_sim,test_data_loader_real)
 
     path_bar = os.path.join(BAR_LIST_TEST, "list_bar_good_example_noisetype")
     np.save(path_bar, np.array(list_bar_good_example_noisetype))
@@ -147,8 +166,8 @@ def main():
     np.save(path_bar, np.array(list_bar_bad_example_snrcase))
 
     with open("test_loss.txt", 'w') as f:
-        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_avg = {:.4f},"
-                "test_corr_m = {:.4f},test_corr_f = {:.4f},test_corr_avg = {:.4f}\n".format(test_loss_m, test_loss_f, test_loss_avg,
+        f.write("test_loss_m = {:.4f},test_loss_f = {:.4f},test_loss_ecg = {:.4f},test_loss_avg = {:.4f},"
+                "test_corr_m = {:.4f},test_corr_f = {:.4f},test_corr_avg = {:.4f}\n".format(test_loss_m, test_loss_f, test_loss_ecg,test_loss_avg,
                                                                                             test_corr_m,test_corr_f,test_corr_average))
     del resnet_model
     del simulated_dataset
