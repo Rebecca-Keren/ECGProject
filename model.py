@@ -81,7 +81,7 @@ def train(resnet_model,
     total_loss_hinge = 0.
 
     real_epoch = False
-    train_data_loader_real = train_data_loader_sim
+    train_data_loader = train_data_loader_sim
     list_bar_bad_example_noisetype = [0, 0, 0, 0]
     list_bar_good_example_noisetype = [0, 0, 0, 0]
     list_bar_bad_example_snr = [0, 0, 0, 0, 0]
@@ -204,7 +204,7 @@ def train(resnet_model,
                                                                          None, None, None, None
 
     # compute the epoch training loss
-    if not real_epoch: #TODO add when real data
+    if not real_epoch:
         total_loss_m = total_loss_m / (len(train_data_loader.dataset))
         total_loss_f = total_loss_f / (len(train_data_loader.dataset))
         train_loss_f_list.append(total_loss_f)

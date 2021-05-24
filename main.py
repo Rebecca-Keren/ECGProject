@@ -60,8 +60,6 @@ def main():
     val_data_loader_real = data.DataLoader(val_dataset_real, batch_size=BATCH_SIZE, shuffle=False)
     test_data_loader_real = data.DataLoader(test_dataset_real, batch_size=BATCH_SIZE, shuffle=False)
 
-
-
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     print(device)
@@ -184,7 +182,7 @@ if __name__=="__main__":
 
     main()
 
-    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
+    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
 
 
     #BAR REPRESENTATION

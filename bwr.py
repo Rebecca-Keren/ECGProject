@@ -3,6 +3,7 @@ from scipy.io import loadmat
 import os
 import matplotlib.pyplot as plt
 import scipy.io as sio
+from heartpy.filtering import remove_baseline_wander
 
 # Daubechies 4 Constant
 c0 = (1+sqrt(3))/(4*sqrt(2))
@@ -168,15 +169,16 @@ if __name__ == '__main__':
             continue
         print(filename)
         current_signal = loadmat(os.path.join(SIMULATED_DATASET,filename))['data']
-        baseline,ecg_out = bwr(current_signal)
-        sio.savemat(os.path.join(bwr_path,filename), {'data': ecg_out})
+        print(len(current_signal))
+        ecg_out = remove_baseline_wander(current_signal,1000)
+        #sio.savemat(os.path.join(bwr_path,filename), {'data': ecg_out})
 
-        """fig, (ax1, ax2,ax3) = plt.subplots(3, 1)
+        fig, (ax1, ax2,ax3) = plt.subplots(3, 1)
         ax1.plot(current_signal, label="BeforePreprocess")
         ax2.plot(ecg_out, label="AfterPreprocess")
-        ax3.plot(baseline, label="Baseline")
         plt.show()
         plt.close()
+        """
 
         plt.subplot(2, 1, 1)
         plt.plot(current_signal, 'b-')
