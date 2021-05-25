@@ -57,13 +57,13 @@ def inference(filename, test_data_loader_real):
 
             for j, elem in enumerate(outputs_f_test_real):
                 test_corr_ecg += np.corrcoef((outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy(), batch_for_model_test.cpu().detach().numpy()[j])[0][1]
-                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + str(j))
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + str(j) + str(i))
                 np.save(path, batch_features[j].cpu().detach().numpy())
-                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + str(j))
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + str(j) + str(i))
                 np.save(path, (outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy() / 1000.)
-                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + str(j))
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + str(j) + str(i))
                 np.save(path, (outputs_m_test_real[j]).cpu().detach().numpy() / 1000.)
-                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "fecg" + str(j))
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "fecg" + str(j) + str(i))
                 np.save(path, (outputs_f_test_real[j]).cpu().detach().numpy() / 1000.)
 
         test_loss_ecg /= len(test_data_loader_real.dataset)
