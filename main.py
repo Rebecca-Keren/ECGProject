@@ -28,18 +28,17 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 30
+epochs = 20
 learning_rate = 1e-3
 
 def main():
 
     pl.seed_everything(1234)
-    list_simulated = simulated_database_list(SIMULATED_DATASET)
+    list_simulated = simulated_database_list(SIMULATED_DATASET)[:122740]
 
-    list_simulated_overfit = list_simulated[:122740]  # TODO: put in comment after validating
-    list_simulated_overfit = remove_nan_signals(list_simulated_overfit) # TODO: change to original list
+    list_simulated = remove_nan_signals(list_simulated)
 
-    simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated_overfit) # TODO: change to original list size after validating
+    simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated)
 
     train_size_sim = int(0.6 * len(simulated_dataset))
     val_size_sim = int(0.2 * len(simulated_dataset))
