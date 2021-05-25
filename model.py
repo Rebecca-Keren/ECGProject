@@ -280,7 +280,7 @@ def val(val_data_loader_sim,
 
     torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_last))
     # saving best model
-    if (val_corr_average < best_model_accuracy):
+    if (val_corr_average > best_model_accuracy):
         best_model_accuracy = val_corr_average
         torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_best))
         print("saving best model")

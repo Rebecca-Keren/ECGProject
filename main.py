@@ -22,7 +22,7 @@ if not os.path.exists(ECG_OUTPUTS_TEST_REAL):
 
 network_save_folder_orig = "./Models/best_model"
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise_without_bw")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "real_windows")
 
