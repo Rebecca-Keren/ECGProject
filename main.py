@@ -58,17 +58,17 @@ def inference(filename, test_data_loader_real):
             for j, elem in enumerate(outputs_f_test_real):
                 test_corr_ecg += np.corrcoef((outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy(), batch_for_model_test.cpu().detach().numpy()[j])[0][1]
                 path = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + str(j))
-                np.save(path, batch_features[j].cpu().detach().numpy()[:, 0])
+                np.save(path, batch_features[j].cpu().detach().numpy())
                 path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + str(j))
                 np.save(path, (outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy() / 1000.)
                 path = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + str(j))
                 np.save(path, (outputs_m_test_real[j]).cpu().detach().numpy() / 1000.)
-                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + str(j))
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "fecg" + str(j))
                 np.save(path, (outputs_f_test_real[j]).cpu().detach().numpy() / 1000.)
 
         test_loss_ecg /= len(test_data_loader_real.dataset)
         test_corr_ecg /= len(test_data_loader_real.dataset)
-        print('L1: ' + str(test_loss_ecg))
+        print('L1: ' + str(test_loss_ecg.item()))
         print('Corr: ' + str(test_corr_ecg))
 
 
@@ -207,6 +207,28 @@ if __name__=="__main__":
     real_dataset = dataloader.RealDataset(REAL_DATASET)
     test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
     inference(network_save_folder_orig,test_data_loader_real)
+
+    for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
+        if "ecg" in filename:
+            path = os.path.join(ECG_OUTPUTS_TEST_REAL, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + end_path)
+            mecg_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + end_path)
+            fecg_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "fecg" + end_path)
+            fig, (ax1, ax2,ax3,ax4) = plt.subplots(4, 1)
+            ax1.plot(np.load(path)[0])
+            ax1.set_ylabel("ECG")
+            ax2.plot(np.load(path_label)[0])
+            ax2.set_ylabel("LABEL ECG")
+            ax3.plot(np.load(mecg_label)[0])
+            ax3.set_ylabel("MECG")
+            ax4.plot(np.load(fecg_label)[0])
+            ax4.set_ylabel("FECG")
+            plt.show()
+            plt.close()
+
+
     """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
 
 

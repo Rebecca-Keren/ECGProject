@@ -26,7 +26,7 @@ if __name__ == '__main__':
         #Preprocess
         signal = remove_beginning_end(current_signal)
         yf, freq, t = transformation('fft', signal)
-        yf_new = [0 if (np.abs(elem) >= 0 and np.abs(elem) < 0.6) else yf for elem, yf in zip(freq, yf)]
+        yf_new = [0 if (np.abs(elem) >= 0 and np.abs(elem) < 0.2) else yf for elem, yf in zip(freq, yf)]
         yf_new = [0 if np.abs(elem) > 30 else yf_new for elem, yf_new in zip(freq, yf_new)]
         new_signal = function.ifft(yf_new)
         #Resampling
