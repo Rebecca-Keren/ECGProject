@@ -203,10 +203,10 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    #main()
-    real_dataset = dataloader.RealDataset(REAL_DATASET)
-    test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    inference(network_save_folder_orig,test_data_loader_real)
+    main()
+    #real_dataset = dataloader.RealDataset(REAL_DATASET)
+    #test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    #inference(network_save_folder_orig,test_data_loader_real)
 
     """for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
         if "ecg" in filename:
