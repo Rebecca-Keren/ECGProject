@@ -208,7 +208,7 @@ if __name__=="__main__":
     test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
     inference(network_save_folder_orig,test_data_loader_real)
 
-    for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
+    """for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
         if "ecg" in filename:
             path = os.path.join(ECG_OUTPUTS_TEST_REAL, filename)
             number_file = filename.index("g") + 1
@@ -226,7 +226,7 @@ if __name__=="__main__":
             ax4.plot(np.load(fecg_label)[0])
             ax4.set_ylabel("FECG")
             plt.show()
-            plt.close()
+            plt.close()"""
 
 
     """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")

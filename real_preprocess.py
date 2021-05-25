@@ -24,13 +24,20 @@ if __name__ == '__main__':
         current_signal = np.ravel(loadmat(os.path.join(REAL_DATASET, filename))['data'])
 
         #Preprocess
-        signal = remove_beginning_end(current_signal)
+        """signal = remove_beginning_end(current_signal)
         yf, freq, t = transformation('fft', signal)
         yf_new = [0 if (np.abs(elem) >= 0 and np.abs(elem) < 0.2) else yf for elem, yf in zip(freq, yf)]
         yf_new = [0 if np.abs(elem) > 30 else yf_new for elem, yf_new in zip(freq, yf_new)]
         new_signal = function.ifft(yf_new)
+        fig, (ax1, ax2) = plt.subplots(2, 1)
+        ax1.plot(signal)
+        ax1.set_ylabel("before")
+        ax2.plot(new_signal)
+        ax2.set_ylabel("after")
+        plt.show()
+        plt.close()"""
         #Resampling
-        resampled_signal = increase_sampling_rate(new_signal,0.25)
+        resampled_signal = increase_sampling_rate(current_signal,0.25)
         #Windowing
         number_of_window = int(len(resampled_signal) / 1024)
         window_size = 1024
