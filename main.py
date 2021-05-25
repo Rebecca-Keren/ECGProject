@@ -16,7 +16,7 @@ import wfdb
 from EarlyStopping import *
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise_without_bw")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
 LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")

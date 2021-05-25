@@ -6,8 +6,8 @@ import os
 import scipy.io as sio
 from HelpFunctions import *
 
-ALL_SIMULATED_DATA_MAT = "simulated_windows_mat"
-WINDOWED_SIMULATED_SIGNAL = "simulated_windows_noise"
+ALL_SIMULATED_DATA_MAT = "simulated_windows_noise"
+WINDOWED_SIMULATED_SIGNAL = "simulated_windows_noise_without_bw"
 
 if not os.path.exists(WINDOWED_SIMULATED_SIGNAL):
     os.mkdir(WINDOWED_SIMULATED_SIGNAL)
@@ -30,6 +30,8 @@ if __name__ == '__main__':
             tmp = '_'.join(str.split(elem,'_')[:-1])
             if tmp == name:
                 if 'fecg2' in elem:
+                    continue
+                if 'noise3' in elem:
                     continue
                 else:
                     signals.append(elem)
