@@ -60,9 +60,19 @@ ECG_OUTPUTS_TEST_REAL = os.path.join(os.path.dirname(os.path.realpath(__file__))
 if not os.path.exists(ECG_OUTPUTS_TEST_REAL):
     os.mkdir(ECG_OUTPUTS_TEST_REAL)
 
+def train_real(resnet_model,
+              train_data_loader_real,
+              optimizer_model,
+              criterion,
+              criterion_cent,
+              epoch,
+              epochs,
+              train_loss_ecg_list):
+    total_loss_ecg = 0.
+
+
 def train(resnet_model,
               train_data_loader_sim,
-              train_data_loader_real,
               optimizer_model,
               criterion,
               criterion_cent,
@@ -70,17 +80,14 @@ def train(resnet_model,
               epochs,
               train_loss_f_list,
               train_loss_m_list,
-              train_loss_ecg_list,
               train_loss_average_list):
 
     total_loss_epoch = 0.
     total_loss_m = 0.
     total_loss_f = 0.
-    total_loss_ecg = 0.
     total_loss_cent = 0.
     total_loss_hinge = 0.
 
-    real_epoch = False
     train_data_loader = train_data_loader_sim
     list_bar_bad_example_noisetype = [0, 0, 0, 0]
     list_bar_good_example_noisetype = [0, 0, 0, 0]
