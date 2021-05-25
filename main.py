@@ -29,7 +29,7 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 2
+epochs = 25
 learning_rate = 1e-3
 
 def main():
@@ -65,7 +65,7 @@ def main():
     print(device)
 
     resnet_model = ResNet(1).cuda()
-    best_model_accuracy = math.inf
+    best_model_accuracy = 0
     val_loss = 0
     early_stopping = EarlyStopping(delta_min=0.01, patience=6, verbose=True)
     criterion = nn.L1Loss().cuda()
