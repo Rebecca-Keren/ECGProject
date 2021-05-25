@@ -5,8 +5,6 @@ import numpy as np
 import scipy.stats
 from scipy.io import loadmat
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "bwr_signals")
-
 def get_index_snr(snr):
     if snr == '00':
         return 0
@@ -72,13 +70,13 @@ def simulated_database_list(sim_dir):
         list.append([name_mix + 'mix' + str(number), name + 'mecg' + str(number), name + 'fecg1' + str(number), number_of_noise, string_of_snr,index_case])
     return list
 
-def remove_nan_signals(list_signals):
+def remove_nan_signals(list_signals, path_dir):
     for idx,signal_tuple in enumerate(list_signals):
         is_nan = False
         i = 0
         for signal_name in signal_tuple:
             i += 1
-            path = os.path.join(SIMULATED_DATASET,signal_name)
+            path = os.path.join(path_dir,signal_name)
             signal = loadmat(path)['data']
             is_nan = np.any(np.isnan(signal))
             if(is_nan):

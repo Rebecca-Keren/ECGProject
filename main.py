@@ -16,7 +16,7 @@ import wfdb
 from EarlyStopping import *
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "bwr_signals")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "real_windows")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
@@ -29,17 +29,17 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 30
+epochs = 2
 learning_rate = 1e-3
 
 def main():
 
     pl.seed_everything(1234)
-    list_simulated = simulated_database_list(SIMULATED_DATASET)[:122740]
-    list_simulated = remove_nan_signals(list_simulated)
+    list_simulated = simulated_database_list(SIMULATED_DATASET)[:10] #[:122740]
+    list_simulated = remove_nan_signals(list_simulated,SIMULATED_DATASET)
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated)
-    real_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET)
+    real_dataset = dataloader.RealDataset(REAL_DATASET)
 
     train_size_sim = int(0.6 * len(simulated_dataset))
     val_size_sim = int(0.2 * len(simulated_dataset))
@@ -117,7 +117,7 @@ def main():
                                             best_model_accuracy)
         scheduler.step()
 
-        if(epoch % 4 != 0):
+        if(epoch % 4 != 1):
             early_stopping(val_loss, resnet_model)
             if early_stopping.early_stop:
                 print('Early stopping')

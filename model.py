@@ -93,14 +93,14 @@ def train(resnet_model,
                                      [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0, 0, 0]]
 
-    if (epoch % 4 == 0):
+    if (epoch % 4 == 1):
         real_epoch = True
         train_data_loader = train_data_loader_real
     for i, batch_features in enumerate(train_data_loader):
         optimizer_model.zero_grad()
 
         if real_epoch:
-            batch_for_model = Variable(1000. * batch_features.transpose(1, 2).float().cuda())
+            batch_for_model = Variable(1000. * batch_features.float().cuda())
         else:
             batch_for_model = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
             batch_for_m = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
@@ -173,7 +173,7 @@ def train(resnet_model,
         labels_center_loss = Variable(torch.cat((torch.zeros(batch_size), torch.ones(batch_size))).cuda())
         loss_cent = criterion_cent(torch.cat((flatten_f, flatten_m), 0), labels_center_loss)
 
-        if not real_epoch: #TODO add when real data
+        if not real_epoch:
             total_loss = mecg_weight * train_loss_mecg + fecg_weight * fecg_lamda * train_loss_fecg
             if include_center_loss:
                 total_loss += cent_weight * cent_lamda * loss_cent
@@ -271,16 +271,18 @@ def val(val_data_loader_sim,
     val_loss_ecg = 0
     val_corr_m = 0
     val_corr_f = 0
+    val_loss_average = 0
+    val_corr_average = 0
     real_epoch = False
     val_data_loader = val_data_loader_sim
 
-    if(epoch % 4 == 0):
+    if(epoch % 4 == 1):
         real_epoch = True
         val_data_loader = val_data_loader_real
     with torch.no_grad():
         for i, batch_features in enumerate(val_data_loader):
             if real_epoch:
-                batch_for_model_val = Variable(1000. * batch_features.transpose(1, 2).float().cuda())
+                batch_for_model_val = Variable(1000. * batch_features.float().cuda())
             else:
                 batch_for_model_val = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
                 batch_for_m_val = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
@@ -423,20 +425,19 @@ def test(filename,test_data_loader_sim, test_data_loader_real):
             path = os.path.join(ECG_OUTPUTS_TEST, "label_f" + str(i))
             np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
             path = os.path.join(ECG_OUTPUTS_TEST, "fecg" + str(i))
-            np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
+            np.save(path, outputs_f_test_sim[0][0].cpu().detach().numpy() / 1000.)
             path = os.path.join(ECG_OUTPUTS_TEST, "mecg" + str(i))
-            np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
+            np.save(path, outputs_m_test_sim[0][0].cpu().detach().numpy() / 1000.)
 
         for i, batch_features in enumerate(test_data_loader_real):
-            batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
+            batch_for_model_test = Variable(1000. * batch_features.float().cuda())
             outputs_m_test_real, _, outputs_f_test_real, _ = resnet_model(batch_for_model_test)
-            test_loss_m += criterion(outputs_m_test_real, batch_for_m_test)
-            test_loss_f += criterion(outputs_f_test_real, batch_for_f_test)
+            test_loss_m += criterion(outputs_m_test_real + outputs_f_test_real, batch_for_model_test)
 
             path = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + str(i))
             np.save(path, batch_features[0].cpu().detach().numpy()[:, 0])
             path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + str(i))
-            np.save(path, (outputs_m_test_real[0] + outputs_f_val[0]).cpu().detach().numpy() / 1000.)
+            np.save(path, (outputs_m_test_real[0] + outputs_f_test_real[0]).cpu().detach().numpy() / 1000.)
 
     test_loss_m /= len(test_data_loader_sim.dataset)
     test_loss_f /= len(test_data_loader_sim.dataset)
