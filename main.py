@@ -15,9 +15,16 @@ from scipy.io import loadmat
 import wfdb
 from EarlyStopping import *
 
+ECG_OUTPUTS_TEST_REAL = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                            "ECGOutputsTestReal")
+if not os.path.exists(ECG_OUTPUTS_TEST_REAL):
+    os.mkdir(ECG_OUTPUTS_TEST_REAL)
+
+network_save_folder_orig = "./Models/best_model"
 
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise_without_bw")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
+REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "real_windows")
 
 LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
 if not os.path.exists(LOSSES):
@@ -30,6 +37,40 @@ if not os.path.exists(BAR_LIST_TEST):
 BATCH_SIZE = 32
 epochs = 20
 learning_rate = 1e-3
+
+def inference(filename, test_data_loader_real):
+    resnet_model = ResNet(1)
+    resnet_model.load_state_dict(torch.load(filename))
+    resnet_model.eval()
+
+    resnet_model.cuda()
+
+    criterion = nn.L1Loss().cuda()
+
+    test_loss_ecg = 0
+    test_corr_ecg = 0
+    with torch.no_grad():
+        for i, batch_features in enumerate(test_data_loader_real):
+            batch_for_model_test = Variable(1000. * batch_features.float().cuda())
+            outputs_m_test_real, _, outputs_f_test_real, _ = resnet_model(batch_for_model_test)
+            test_loss_ecg += criterion(outputs_m_test_real + outputs_f_test_real, batch_for_model_test)
+
+            for j, elem in enumerate(outputs_f_test_real):
+                test_corr_ecg += np.corrcoef((outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy(), batch_for_model_test.cpu().detach().numpy()[j])[0][1]
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + str(j))
+                np.save(path, batch_features[j].cpu().detach().numpy()[:, 0])
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + str(j))
+                np.save(path, (outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy() / 1000.)
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + str(j))
+                np.save(path, (outputs_m_test_real[j]).cpu().detach().numpy() / 1000.)
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + str(j))
+                np.save(path, (outputs_f_test_real[j]).cpu().detach().numpy() / 1000.)
+
+        test_loss_ecg /= len(test_data_loader_real.dataset)
+        test_corr_ecg /= len(test_data_loader_real.dataset)
+        print('L1: ' + str(test_loss_ecg))
+        print('Corr: ' + str(test_corr_ecg))
+
 
 def main():
 
@@ -162,8 +203,9 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    main()
-
+    #main()
+    test_data_loader_real = data.DataLoader(REAL_DATASET, batch_size=BATCH_SIZE, shuffle=False)
+    inference(network_save_folder_orig,test_data_loader_real)
     """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
 
 
