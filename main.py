@@ -29,7 +29,7 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 25
+epochs = 14
 learning_rate_sim = 1e-3
 learning_rate_real = 1e-5
 
@@ -92,62 +92,65 @@ def main():
     validation_loss_ecg_list = []
 
     for epoch in range(epochs):
+        if (epoch == 13):
+            resnet_model.load_state_dict(torch.load(str(network_save_folder_orig + network_file_name_best_sim)))
         #Train Sim
-        resnet_model.train()
-        train_sim(resnet_model,
-                  train_data_loader_sim,
-                  optimizer_model_sim,
-                  criterion,
-                  criterion_cent,
-                  epoch,
-                  epochs,
-                  train_loss_f_list,
-                  train_loss_m_list,
-                  train_loss_average_list)
-        #Validation Sim
-        resnet_model.eval()
-        best_model_accuracy_sim,val_loss_sim =val_sim(val_data_loader_sim,
+        if (epoch <= 12):
+            resnet_model.train()
+            train_sim(resnet_model,
+                      train_data_loader_sim,
+                      optimizer_model_sim,
+                      criterion,
+                      criterion_cent,
+                      epoch,
+                      epochs,
+                      train_loss_f_list,
+                      train_loss_m_list,
+                      train_loss_average_list)
+            #Validation Sim
+            resnet_model.eval()
+            best_model_accuracy_sim,val_loss_sim =val_sim(val_data_loader_sim,
+                    resnet_model,
+                    criterion,
+                    epoch,
+                    epochs,
+                    validation_loss_m_list,
+                    validation_loss_f_list,
+                    validation_loss_average_list,
+                    validation_corr_m_list,
+                    validation_corr_f_list,
+                    best_model_accuracy_sim)
+            scheduler_sim.step()
+            early_stopping_sim(val_loss_sim.cpu(), resnet_model)
+            if early_stopping_sim.early_stop:
+                print('Early stopping')
+                break
+        else:
+            # Train Real
+            resnet_model.train()
+            train_real(resnet_model,
+                   train_data_loader_real,
+                   optimizer_model_real,
+                   epoch,
+                   epochs,
+                   criterion,
+                   criterion_cent,
+                   train_loss_ecg_list)
+            # Validation Real
+            resnet_model.eval()
+            best_model_accuracy_real, val_loss_real = val_real(
+                val_data_loader_real,
                 resnet_model,
                 criterion,
                 epoch,
                 epochs,
-                validation_loss_m_list,
-                validation_loss_f_list,
-                validation_loss_average_list,
-                validation_corr_m_list,
-                validation_corr_f_list,
-                best_model_accuracy)
-        scheduler_sim.step()
-        early_stopping_sim(val_loss_sim, resnet_model)
-        if early_stopping_sim.early_stop:
-            print('Early stopping')
-            break
+                validation_loss_ecg_list,
+                best_model_accuracy_real)
 
-        # Train Real
-        resnet_model.train()
-        train_real(resnet_model,
-               train_data_loader_real,
-               optimizer_model_real,
-               epoch,
-               epochs,
-               criterion,
-               criterion_cent,
-               train_loss_ecg_list)
-        # Validation Real
-        resnet_model.eval()
-        best_model_accuracy_real, val_loss_real = val_train(
-            val_data_loader_real,
-            resnet_model,
-            criterion,
-            epoch,
-            epochs,
-            validation_loss_ecg_list,
-            best_model_accuracy)
-
-        early_stopping_real(val_loss_real, resnet_model)
-        if early_stopping_real.early_stop:
-            print('Early stopping')
-            break
+            early_stopping_real(val_loss_real.cpu(), resnet_model)
+            if early_stopping_real.early_stop:
+                print('Early stopping')
+                break
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")
@@ -174,7 +177,7 @@ def main():
     test_loss_m, test_loss_f, test_loss_ecg,test_loss_avg, test_corr_m, test_corr_f, test_corr_average,\
         list_bar_good_example_noisetype, list_bar_bad_example_noisetype,\
         list_bar_good_example_snr,list_bar_bad_example_snr, \
-        list_bar_good_example_snrcase, list_bar_bad_example_snrcase = test(str(network_save_folder_orig + network_file_name_best),test_data_loader_sim,test_data_loader_real)
+        list_bar_good_example_snrcase, list_bar_bad_example_snrcase = test(str(network_save_folder_orig + network_file_name_best_sim),str(network_save_folder_orig + network_file_name_best_real),test_data_loader_sim,test_data_loader_real)
 
     path_bar = os.path.join(BAR_LIST_TEST, "list_bar_good_example_noisetype")
     np.save(path_bar, np.array(list_bar_good_example_noisetype))
@@ -206,9 +209,9 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    #main()
+    main()
 
-    BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
+    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
 
 
     #BAR REPRESENTATION
@@ -282,7 +285,7 @@ if __name__=="__main__":
     plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
     plt.title('Successful signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
     plt.show()
-    plt.close()
+    plt.close()"""
     
     
     #DROPOUT1

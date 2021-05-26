@@ -7,7 +7,8 @@ from HelpFunctions import *
 
 network_save_folder_orig = "./Models"
 network_file_name_last = "/last_model"
-network_file_name_best = "/best_model"
+network_file_name_best_sim = "/best_model_sim"
+network_file_name_best_real = "/best_model_real"
 
 BAR_LIST_TRAIN = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
 if not os.path.exists(BAR_LIST_TRAIN):
@@ -287,7 +288,7 @@ def train_sim(resnet_model,
                                                             total_loss_hinge,
                                                             total_loss_epoch))
 
-def val_train(
+def val_real(
         val_data_loader_real,
         resnet_model,
         criterion,
@@ -323,7 +324,7 @@ def val_train(
 
     if (val_corr_average > best_model_accuracy):
         best_model_accuracy = val_corr_average
-        torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_best))
+        torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_best_real))
         print("saving best model")
         with open("best_model_epoch_real.txt", 'w') as f:
             f.write(str(epoch))
@@ -409,7 +410,7 @@ def val_sim(val_data_loader_sim,
     # saving best model
     if (val_corr_average > best_model_accuracy):
         best_model_accuracy = val_corr_average
-        torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_best))
+        torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_best_sim))
         print("saving best model")
         with open("best_model_epoch_sim.txt", 'w') as f:
             f.write(str(epoch))
@@ -419,12 +420,16 @@ def val_sim(val_data_loader_sim,
     return best_model_accuracy,val_loss_average
 
 
-def test(filename,test_data_loader_sim, test_data_loader_real):
-    resnet_model = ResNet(1)
-    resnet_model.load_state_dict(torch.load(filename))
-    resnet_model.eval()
+def test(filename_sim,filename_real,test_data_loader_sim, test_data_loader_real):
+    resnet_model_sim = ResNet(1)
+    resnet_model_sim.load_state_dict(torch.load(filename_sim))
+    resnet_model_sim.eval()
+    resnet_model_sim.cuda()
 
-    resnet_model.cuda()
+    resnet_model_real = ResNet(1)
+    resnet_model_real.load_state_dict(torch.load(filename_real))
+    resnet_model_real.eval()
+    resnet_model_real.cuda()
 
     criterion = nn.L1Loss().cuda()
 
@@ -453,7 +458,7 @@ def test(filename,test_data_loader_sim, test_data_loader_real):
             batch_for_noise_test = batch_features[6].cpu().detach().numpy()
             batch_for_snr_test = batch_features[7].cpu().detach().numpy()
             batch_for_case_test = batch_features[8].cpu().detach().numpy()
-            outputs_m_test_sim, _, outputs_f_test_sim, _ = resnet_model(batch_for_model_test)
+            outputs_m_test_sim, _, outputs_f_test_sim, _ = resnet_model_sim(batch_for_model_test)
             test_loss_m += criterion(outputs_m_test_sim, batch_for_m_test)
             test_loss_f += criterion(outputs_f_test_sim, batch_for_f_test)
             for j, elem in enumerate(outputs_m_test_sim):
@@ -483,7 +488,7 @@ def test(filename,test_data_loader_sim, test_data_loader_real):
 
         for i, batch_features in enumerate(test_data_loader_real):
             batch_for_model_test = Variable(1000. * batch_features.float().cuda())
-            outputs_m_test_real, _, outputs_f_test_real, _ = resnet_model(batch_for_model_test)
+            outputs_m_test_real, _, outputs_f_test_real, _ = resnet_model_real(batch_for_model_test)
             test_loss_ecg += criterion(outputs_m_test_real + outputs_f_test_real, batch_for_model_test)
 
             for j, elem in enumerate(outputs_f_test_real):
