@@ -29,14 +29,14 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 14
+epochs = 30
 learning_rate_sim = 1e-3
 learning_rate_real = 1e-5
 
 def main():
 
     pl.seed_everything(1234)
-    list_simulated = simulated_database_list(SIMULATED_DATASET)[:10] #[:122740]
+    list_simulated = simulated_database_list(SIMULATED_DATASET)[:122740]
     list_simulated = remove_nan_signals(list_simulated,SIMULATED_DATASET)
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated)
