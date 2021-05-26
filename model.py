@@ -320,7 +320,7 @@ def val_real(
 
     if epoch + 1 == epochs:
         with open("val_loss_last_epoch.txt", 'w') as f:
-            f.write("LECG = {:.4f},CorrECG = {:.4f}\n".format(val_loss_ecg))
+            f.write("LECG = {:.4f},CorrECG = {:.4f}\n".format(val_loss_ecg,val_corr_average))
 
     if (val_corr_average > best_model_accuracy):
         best_model_accuracy = val_corr_average
