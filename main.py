@@ -65,7 +65,7 @@ def main():
     print(device)
 
     resnet_model = ResNet(1).cuda()
-    best_model_accuracy = 0
+    best_model_accuracy = - math.inf
     val_loss = 0
     early_stopping = EarlyStopping(delta_min=0.01, patience=6, verbose=True)
     criterion = nn.L1Loss().cuda()
