@@ -30,7 +30,8 @@ if not os.path.exists(BAR_LIST_TEST):
 
 BATCH_SIZE = 32
 epochs = 25
-learning_rate = 1e-3
+learning_rate_sim = 1e-3
+learning_rate_real = 1e-5
 
 def main():
 
@@ -65,14 +66,19 @@ def main():
     print(device)
 
     resnet_model = ResNet(1).cuda()
-    best_model_accuracy = - math.inf
-    val_loss = 0
-    early_stopping = EarlyStopping(delta_min=0.01, patience=6, verbose=True)
+    best_model_accuracy_real = - math.inf
+    best_model_accuracy_sim = - math.inf
+    val_loss_sim = 0
+    val_loss_real = 0
+    early_stopping_sim = EarlyStopping(delta_min=0.01, patience=6, verbose=True)
+    early_stopping_real = EarlyStopping(delta_min=0.01, patience=6, verbose=True)
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
-    optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_model, milestones=[6, 12, 18], gamma=0.1)
+    optimizer_model_sim = optim.SGD(params, lr=learning_rate_sim, momentum=0.9,weight_decay=1e-4)
+    scheduler_sim = torch.optim.lr_scheduler.MultiStepLR(optimizer_model_sim, milestones=[4, 6, 8, 12], gamma=0.1)
+    optimizer_model_real = optim.SGD(params, lr=learning_rate_real, momentum=0.9, weight_decay=1e-4)
+    scheduler_real = torch.optim.lr_scheduler.StepLR(optimizer_model_real, 4, gamma=0.1)
 
     train_loss_f_list = []
     train_loss_m_list = []
@@ -86,42 +92,62 @@ def main():
     validation_loss_ecg_list = []
 
     for epoch in range(epochs):
-        #Train
+        #Train Sim
         resnet_model.train()
-        train(resnet_model,
-              train_data_loader_sim,
-              train_data_loader_real,
-              optimizer_model,
-              criterion,
-              criterion_cent,
-              epoch,
-              epochs,
-              train_loss_f_list,
-              train_loss_m_list,
-              train_loss_ecg_list,
-              train_loss_average_list)
-        #Evaluation
+        train_sim(resnet_model,
+                  train_data_loader_sim,
+                  optimizer_model_sim,
+                  criterion,
+                  criterion_cent,
+                  epoch,
+                  epochs,
+                  train_loss_f_list,
+                  train_loss_m_list,
+                  train_loss_average_list)
+        #Validation Sim
         resnet_model.eval()
-        best_model_accuracy, val_loss = val(val_data_loader_sim,
-                                            val_data_loader_real,
-                                            resnet_model,
-                                            criterion,
-                                            epoch,
-                                            epochs,
-                                            validation_loss_m_list,
-                                            validation_loss_f_list,
-                                            validation_loss_average_list,
-                                            validation_corr_m_list,
-                                            validation_corr_f_list,
-                                            validation_loss_ecg_list,
-                                            best_model_accuracy)
-        scheduler.step()
+        best_model_accuracy_sim,val_loss_sim =val_sim(val_data_loader_sim,
+                resnet_model,
+                criterion,
+                epoch,
+                epochs,
+                validation_loss_m_list,
+                validation_loss_f_list,
+                validation_loss_average_list,
+                validation_corr_m_list,
+                validation_corr_f_list,
+                best_model_accuracy)
+        scheduler_sim.step()
+        early_stopping_sim(val_loss_sim, resnet_model)
+        if early_stopping_sim.early_stop:
+            print('Early stopping')
+            break
 
-        if(epoch % 4 != 1):
-            early_stopping(val_loss, resnet_model)
-            if early_stopping.early_stop:
-                print('Early stopping')
-                break
+        # Train Real
+        resnet_model.train()
+        train_real(resnet_model,
+               train_data_loader_real,
+               optimizer_model_real,
+               epoch,
+               epochs,
+               criterion,
+               criterion_cent,
+               train_loss_ecg_list)
+        # Validation Real
+        resnet_model.eval()
+        best_model_accuracy_real, val_loss_real = val_train(
+            val_data_loader_real,
+            resnet_model,
+            criterion,
+            epoch,
+            epochs,
+            validation_loss_ecg_list,
+            best_model_accuracy)
+
+        early_stopping_real(val_loss_real, resnet_model)
+        if early_stopping_real.early_stop:
+            print('Early stopping')
+            break
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")
@@ -180,9 +206,9 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    main()
+    #main()
 
-    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
+    BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
 
 
     #BAR REPRESENTATION
@@ -238,7 +264,7 @@ if __name__=="__main__":
     d = plt.bar(X + 0.3, data[3], color='c', width=0.1)
     e = plt.bar(X + 0.4, data[4], color='y', width=0.1)
     plt.legend((a, b, c, d, e), ('00', '03', '06', '09', '12'))
-    plt.xticks(X, ('CO', 'C1', 'C2', 'C3','C5', 'C4', 'BASELINE'))
+    plt.xticks(X, ('CO', 'C1', 'C2', 'C3','C4', 'C5', 'BASELINE'))
     plt.title('Failing signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
     plt.show()
     plt.close()
@@ -256,7 +282,7 @@ if __name__=="__main__":
     plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
     plt.title('Successful signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
     plt.show()
-    plt.close()"""
+    plt.close()
     
     
     #DROPOUT1
