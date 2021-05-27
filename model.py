@@ -79,7 +79,6 @@ def train_real(resnet_model,
         optimizer_model.zero_grad()
         batch_for_model = Variable(1000. * batch_features.float().cuda())
         outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model)
-        print(outputs_m)
         for j, elem in enumerate(outputs_f):
             path = os.path.join(ECG_OUTPUTS_REAL, "label_ecg" + str(j) + str(i) + str(epoch))
             np.save(path, batch_features[j].cpu().detach().numpy())

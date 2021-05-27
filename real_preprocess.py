@@ -29,7 +29,18 @@ if __name__ == '__main__':
             print(filename_sim)
             real = np.ravel(loadmat(os.path.join(REAL_BEST_WINDOWS, filename_real))['data'])
             sim = np.ravel(loadmat(os.path.join(SIM_BEST_WINDOWS, filename_sim))['data'])
-
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.plot(real)
+            ax2.plot(sim)
+            plt.show()
+            plt.close()
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.specgram(np.array(real).flatten(), sides='onesided', NFFT=2048, Fs=1000,
+                                                noverlap=256, window=np.bartlett(2048))
+            ax2.specgram(np.array(sim).flatten(), sides='onesided', NFFT=2048, Fs=1000,
+                                                noverlap=256, window=np.bartlett(2048))
+            plt.show()
+            plt.close()
     """for filename in os.listdir(REAL_DATASET):
         print(filename)
         current_signal = np.ravel(loadmat(os.path.join(REAL_DATASET, filename))['data'])
