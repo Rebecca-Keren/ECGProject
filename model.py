@@ -81,13 +81,13 @@ def train_real(resnet_model,
         outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model)
         print(outputs_m)
         for j, elem in enumerate(outputs_f):
-            path = os.path.join(ECG_OUTPUTS_REAL, "label_ecg" + str(j) + str(i))
+            path = os.path.join(ECG_OUTPUTS_REAL, "label_ecg" + str(j) + str(i) + str(epoch))
             np.save(path, batch_features[j].cpu().detach().numpy())
-            path = os.path.join(ECG_OUTPUTS_REAL, "ecg" + str(j) + str(i))
+            path = os.path.join(ECG_OUTPUTS_REAL, "ecg" + str(j) + str(i) + str(epoch))
             np.save(path, (outputs_m[j] + outputs_f[j]).cpu().detach().numpy() / 1000.)
-            path = os.path.join(ECG_OUTPUTS_REAL, "mecg" + str(j) + str(i))
+            path = os.path.join(ECG_OUTPUTS_REAL, "mecg" + str(j) + str(i) + str(epoch))
             np.save(path, (outputs_m[j]).cpu().detach().numpy() / 1000.)
-            path = os.path.join(ECG_OUTPUTS_REAL, "fecg" + str(j) + str(i))
+            path = os.path.join(ECG_OUTPUTS_REAL, "fecg" + str(j) + str(i) + str(epoch))
             np.save(path, (outputs_f[j]).cpu().detach().numpy() / 1000.)
 
         outputs_ecg = outputs_m + outputs_f
@@ -305,13 +305,13 @@ def val_real(
         val_loss_ecg += criterion(outputs_m_val + outputs_f_val, batch_for_model_val)
         for j, elem in enumerate(outputs_f_val):
             val_corr_average += np.corrcoef((outputs_m_val[j] + outputs_f_val[j]).cpu().detach().numpy(), batch_for_model_val.cpu().detach().numpy()[j])[0][1]
-            path = os.path.join(ECG_OUTPUTS_VAL_REAL, "label_ecg" + str(j) + str(i))
+            path = os.path.join(ECG_OUTPUTS_VAL_REAL, "label_ecg" + str(j) + str(i) + str(epoch))
             np.save(path, batch_features[j].cpu().detach().numpy())
-            path = os.path.join(ECG_OUTPUTS_VAL_REAL, "ecg" + str(j) + str(i))
+            path = os.path.join(ECG_OUTPUTS_VAL_REAL, "ecg" + str(j) + str(i) + str(epoch))
             np.save(path, (outputs_m_val[j] + outputs_f_val[j]).cpu().detach().numpy() / 1000.)
-            path = os.path.join(ECG_OUTPUTS_VAL_REAL, "mecg" + str(j) + str(i))
+            path = os.path.join(ECG_OUTPUTS_VAL_REAL, "mecg" + str(j) + str(i) + str(epoch))
             np.save(path, (outputs_m_val[j]).cpu().detach().numpy() / 1000.)
-            path = os.path.join(ECG_OUTPUTS_VAL_REAL, "fecg" + str(j) + str(i))
+            path = os.path.join(ECG_OUTPUTS_VAL_REAL, "fecg" + str(j) + str(i) + str(epoch))
             np.save(path, (outputs_f_val[j]).cpu().detach().numpy() / 1000.)
 
     val_loss_ecg /= len(val_data_loader_real.dataset)

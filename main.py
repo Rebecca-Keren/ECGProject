@@ -17,7 +17,7 @@ from EarlyStopping import *
 
 
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulate_windows_noise")
-REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "real_windows")
+REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "best_windows")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
 LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
@@ -29,7 +29,7 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 30
+epochs = 20
 learning_rate_sim = 1e-3
 learning_rate_real = 1e-5
 
@@ -210,6 +210,26 @@ if __name__=="__main__":
     num_of_m = 0
 
     main()
+
+    """for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
+        if "ecg" in filename:
+            path = os.path.join(ECG_OUTPUTS_TEST_REAL, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + end_path)
+            mecg_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + end_path)
+            fecg_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "fecg" + end_path)
+            fig, (ax1, ax2,ax3,ax4) = plt.subplots(4, 1)
+            ax1.plot(np.load(path)[0])
+            ax1.set_ylabel("ECG")
+            ax2.plot(np.load(path_label)[0])
+            ax2.set_ylabel("LABEL ECG")
+            ax3.plot(np.load(mecg_label)[0])
+            ax3.set_ylabel("MECG")
+            ax4.plot(np.load(fecg_label)[0])
+            ax4.set_ylabel("FECG")
+            plt.show()
+            plt.close()"""
 
     """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
 
