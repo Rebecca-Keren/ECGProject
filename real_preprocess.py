@@ -12,6 +12,10 @@ REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BestSi
 REAL_WINDOWS = "best_windows"
 SIM_WINDOWS = "SimulatedDatabase"
 
+
+REAL_BEST_WINDOWS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "best_real_signals")
+SIM_BEST_WINDOWS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "best_simulated_signals")
+
 if not os.path.exists(REAL_WINDOWS):
     os.mkdir(REAL_WINDOWS)
 
@@ -20,7 +24,13 @@ window_path = os.path.join(dir_path,REAL_WINDOWS)
 sim_path = os.path.join(dir_path,SIM_WINDOWS)
 
 if __name__ == '__main__':
-    for filename in os.listdir(REAL_DATASET):
+    for filename_real,filename_sim in zip(os.listdir(REAL_BEST_WINDOWS),os.listdir(SIM_BEST_WINDOWS)):
+            print(filename_real)
+            print(filename_sim)
+            real = np.ravel(loadmat(os.path.join(REAL_BEST_WINDOWS, filename_real))['data'])
+            sim = np.ravel(loadmat(os.path.join(SIM_BEST_WINDOWS, filename_sim))['data'])
+
+    """for filename in os.listdir(REAL_DATASET):
         print(filename)
         current_signal = np.ravel(loadmat(os.path.join(REAL_DATASET, filename))['data'])
         current_signal = current_signal - np.mean(current_signal)
@@ -32,7 +42,7 @@ if __name__ == '__main__':
         window_size = 1024
         for i in range(number_of_window):
             record = resampled_signal[i * window_size:(i + 1) * window_size]
-            sio.savemat(os.path.join(window_path, filename[:(len(filename) - 4)] + '_mix' + str(i)), {'data': record})
+            sio.savemat(os.path.join(window_path, filename[:(len(filename) - 4)] + '_mix' + str(i)), {'data': record})"""
 
     """for filename in os.listdir(REAL_DATASET):
         print(filename)
