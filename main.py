@@ -16,7 +16,7 @@ import wfdb
 from EarlyStopping import *
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulate_windows_noise")
 REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "real_windows")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
@@ -36,7 +36,7 @@ learning_rate_real = 1e-5
 def main():
 
     pl.seed_everything(1234)
-    list_simulated = simulated_database_list(SIMULATED_DATASET)[:122740]
+    list_simulated = simulated_database_list(SIMULATED_DATASET)[:10]#[:122740]
     list_simulated = remove_nan_signals(list_simulated,SIMULATED_DATASET)
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated)
@@ -121,7 +121,7 @@ def main():
                     validation_corr_f_list,
                     best_model_accuracy_sim)
             scheduler_sim.step()
-            early_stopping_sim(val_loss_sim.cpu(), resnet_model)
+            early_stopping_sim(val_loss_sim.cpu().detach().numpy(), resnet_model)
             if early_stopping_sim.early_stop:
                 print('Early stopping')
                 break
@@ -147,7 +147,7 @@ def main():
                 validation_loss_ecg_list,
                 best_model_accuracy_real)
 
-            early_stopping_real(val_loss_real.cpu(), resnet_model)
+            early_stopping_real(val_loss_real.cpu().detach().numpy(), resnet_model)
             if early_stopping_real.early_stop:
                 print('Early stopping')
                 break

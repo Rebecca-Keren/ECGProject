@@ -10,19 +10,28 @@ from SignalPreprocessing.data_preprocess_function import *
 
 REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RealSignals")
 REAL_WINDOWS = "real_windows"
-
+SIM_WINDOWS = "SimulatedDatabase"
 
 if not os.path.exists(REAL_WINDOWS):
     os.mkdir(REAL_WINDOWS)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 window_path = os.path.join(dir_path,REAL_WINDOWS)
+sim_path = os.path.join(dir_path,SIM_WINDOWS)
 
 if __name__ == '__main__':
-    for filename in os.listdir(REAL_DATASET):
+    for filename in os.listdir(window_path):
+        if 'pt14_posLAT-orig' not in filename:
+            continue
+        current_signal = np.ravel(loadmat(os.path.join(window_path, filename))['data'])
+        print(filename)
+        plt.plot(current_signal)
+        plt.show()
+        plt.close()
+
+    """for filename in os.listdir(REAL_DATASET):
         print(filename)
         current_signal = np.ravel(loadmat(os.path.join(REAL_DATASET, filename))['data'])
-
         #Preprocess
         signal = remove_beginning_end(current_signal)
         yf, freq, t = transformation('fft', signal)
@@ -30,13 +39,13 @@ if __name__ == '__main__':
         yf = [0 if np.abs(elem) > 30 else yf for elem, yf in zip(freq, yf)]
         new_signal = function.ifft(yf)
         #Resampling
-        resampled_signal = increase_sampling_rate(new_signal,0.25)
+        resampled_signal = increase_sampling_rate(signal,0.25)
         #Windowing
         number_of_window = int(len(resampled_signal) / 1024)
         window_size = 1024
         for i in range(number_of_window):
             record = resampled_signal[i * window_size:(i + 1) * window_size]
-            sio.savemat(os.path.join(window_path, filename + '_mix' + str(i)), {'data': record})
+            sio.savemat(os.path.join(window_path, filename[:(len(filename)-4)] + '_mix' + str(i)), {'data': record})"""
 
 
 
