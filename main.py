@@ -21,7 +21,7 @@ if not os.path.exists(ECG_OUTPUTS_TEST_REAL):
     os.mkdir(ECG_OUTPUTS_TEST_REAL)
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise_without_c3")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "real_windows")
 
@@ -34,7 +34,7 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 1
+epochs = 20
 learning_rate = 1e-3
 
 def inference(filename, test_data_loader_real):

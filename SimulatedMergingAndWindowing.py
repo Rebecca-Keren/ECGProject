@@ -7,7 +7,7 @@ import scipy.io as sio
 from HelpFunctions import *
 
 ALL_SIMULATED_DATA_MAT = "simulated_signals_mat"
-WINDOWED_SIMULATED_SIGNAL = "simulated_windows_noise_without_bw"
+WINDOWED_SIMULATED_SIGNAL = "simulated_windows_noise_without_c3"
 
 if not os.path.exists(WINDOWED_SIMULATED_SIGNAL):
     os.mkdir(WINDOWED_SIMULATED_SIGNAL)
@@ -22,6 +22,8 @@ if __name__ == '__main__':
     files = os.listdir(save_mat_dir).copy()
     for filename in os.listdir(save_mat_dir):
         if 'fecg1' not in filename:
+            continue
+        if 'c3' in filename:
             continue
         files.remove(filename)
         name = filename[:len(filename)-6]
