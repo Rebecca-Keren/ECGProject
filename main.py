@@ -17,7 +17,7 @@ from EarlyStopping import *
 from SignalPreprocessing.data_preprocess_function import *
 
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
-REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "best_windows")
+REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "NewReal")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
 LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
@@ -29,7 +29,7 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 20
+epochs = 1
 learning_rate_sim = 1e-3
 learning_rate_real = 1e-5
 
@@ -209,14 +209,9 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    #main()
-    NEWREAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "NewReal")
-    for filename in os.listdir(NEWREAL):  # present the fecg outputs
-        real = loadmat(os.path.join(NEWREAL, filename))['data'][0]
-        plt.plot(real)
-        plt.show()
-        plt.close()
-    for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
+    main()
+
+    """for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
         if "label_ecg" in filename:
             path_label = os.path.join(ECG_OUTPUTS_TEST_REAL, filename)
             number_file = filename.index("g") + 1
@@ -228,7 +223,7 @@ if __name__=="__main__":
             yf1, freq1, t = transformation('fft', np.load(path_label)[0])
 
 
-            """fig, (ax1, ax2) = plt.subplots(2, 1)
+            fig, (ax1, ax2) = plt.subplots(2, 1)
             ax1.plot(freq,np.abs(yf))
             ax1.set_xlim(0)
             ax1.set_title("Label")
@@ -236,7 +231,7 @@ if __name__=="__main__":
             ax2.set_xlim(0)
             ax2.set_title("Output")
             plt.show()
-            plt.close()"""
+            plt.close()
 
             fig, (ax1, ax2,ax3,ax4) = plt.subplots(4, 1)
             ax1.plot(np.load(path)[0])
@@ -250,7 +245,7 @@ if __name__=="__main__":
             plt.show()
             plt.close()
 
-    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
+    BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
 
 
     #BAR REPRESENTATION
