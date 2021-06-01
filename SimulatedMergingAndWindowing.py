@@ -33,8 +33,6 @@ if __name__ == '__main__':
             if tmp == name:
                 if 'fecg2' in elem:
                     continue
-                if 'noise3' in elem:
-                    continue
                 else:
                     signals.append(elem)
         size = len(signals)

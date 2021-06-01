@@ -14,7 +14,8 @@ import dataloader
 from scipy.io import loadmat
 import wfdb
 from EarlyStopping import *
-
+import scipy.fftpack as function
+from SignalPreprocessing.data_preprocess_function import *
 ECG_OUTPUTS_TEST_REAL = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                             "ECGOutputsTestReal")
 if not os.path.exists(ECG_OUTPUTS_TEST_REAL):
@@ -201,11 +202,131 @@ if __name__=="__main__":
     correlation_m = 0
     num_of_f = 0
     num_of_m = 0
+    counter = 0
+    counter2 = 0
+    counter3 = 0
+    SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
+    """for filename in os.listdir(SIMULATED_DATASET):
+        if 'c6' not in filename:
+            continue
+        if 'fecg1' not in filename:
+            continue
+        counter += 1
+        pathf = loadmat(os.path.join(SIMULATED_DATASET, filename))['data']
+        index = filename.find('fecg')
+        filemot = filename[:index] + 'mecg' + filename[index +5:]
+        pathm = loadmat(os.path.join(SIMULATED_DATASET, filemot))['data']
+        mommax = np.max(pathm)
+        fetusmax = np.max(pathf)
+        mommin = np.min(pathm)
+        fetusmin = np.min(pathf)
+        if mommax < fetusmax:
+            counter2 += 1
+        if mommin > fetusmin:
+            counter3 += 1
+    print(counter)
+    print(counter2)
+    print(counter3)"""
 
-    main()
+
+    pathf = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c4_fecg10')
+    pathm = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c4_mecg0')
+    patha = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c4_noise2_mix0')
+
+    pathf1 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c1_fecg10')
+    pathm1 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c1_mecg0')
+    patha1 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c1_noise3_mix0')
+
+    pathf2 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c6_fecg10')
+    pathm2 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c6_mecg0')
+    patha2 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c6_noise2_mix0')
+
+    pathf3 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c2_fecg10')
+    pathm3 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c2_mecg0')
+    patha3 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c2_noise2_mix0')
+
+    pathf4 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c3_fecg10')
+    pathm4 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c3_mecg0')
+    patha4 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c3_noise2_mix0')
+
+    """fig, (ax1, ax2, ax3,ax4,ax5) = plt.subplots(5, 1)
+    ax1.plot(loadmat(pathf1)['data'])
+    ax2.plot(loadmat(pathf3)['data'])
+    ax3.plot(loadmat(pathf4)['data'])
+    ax4.plot(loadmat(pathf)['data'])
+    ax5.plot(loadmat(pathf2)['data'])
+    plt.show()
+    plt.close()"""
+
+    """fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(loadmat(pathf1)['data'])
+    ax2.plot(loadmat(pathm1)['data'])
+    plt.show()
+    plt.close()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(loadmat(pathf3)['data'])
+    ax2.plot(loadmat(pathm3)['data'])
+    plt.show()
+    plt.close()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(loadmat(pathf4)['data'])
+    ax2.plot(loadmat(pathm4)['data'])
+    plt.show()
+    plt.close()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(loadmat(pathf)['data'])
+    ax2.plot(loadmat(pathm)['data'])
+    plt.show()
+    plt.close()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(loadmat(pathf2)['data'])
+    ax2.plot(loadmat(pathm2)['data'])
+    plt.show()
+    plt.close()"""
+
+    """fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(loadmat(patha)['data'])
+    ax1.set_ylabel("ECG")
+    ax2.plot(loadmat(patha1)['data'])
+    ax2.set_ylabel("LABEL ECG")
+    plt.show()
+    plt.close()"""
+
+    yf, freq, t = transformation('fft', loadmat(pathf1)['data'])
+    yf1, freq1, t = transformation('fft', loadmat(pathf3)['data'])
+    yf2, freq2, t = transformation('fft', loadmat(pathf4)['data'])
+    yf3, freq3, t = transformation('fft', loadmat(pathf)['data'])
+    yf4, freq4, t = transformation('fft', loadmat(pathf2)['data'])
+    fig, (ax1, ax2, ax3,ax4,ax5) = plt.subplots(5, 1)
+    ax1.plot(freq,np.abs(yf))
+    ax2.plot(freq1,np.abs(yf1))
+    ax3.plot(freq2,np.abs(yf2))
+    ax4.plot(freq3,np.abs(yf3))
+    ax5.plot(freq4,np.abs(yf4))
+    ax1.set_ylim([0, 80])
+    ax2.set_ylim([0, 80])
+    ax3.set_ylim([0, 80])
+    ax4.set_ylim([0, 80])
+    ax5.set_ylim([0, 80])
+    plt.show()
+    plt.close()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(freq,np.abs(yf))
+    ax1.set_ylabel("ECG")
+    ax2.plot(freq1,np.abs(yf1))
+    ax2.set_ylabel("LABEL ECG")
+    plt.show()
+    plt.close()
+
+    #main()
     #real_dataset = dataloader.RealDataset(REAL_DATASET)
     #test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    #inference(network_save_folder_orig,test_data_loader_real)
+    #inference(network_save_folder_orig,test_data_loader_real)"""
 
     """for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
         if "ecg" in filename:
@@ -228,7 +349,7 @@ if __name__=="__main__":
             plt.close()"""
 
 
-    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
+    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
 
 
     #BAR REPRESENTATION
