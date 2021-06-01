@@ -249,14 +249,14 @@ if __name__=="__main__":
     pathm4 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c3_mecg0')
     patha4 = os.path.join(SIMULATED_DATASET, 'sub01_snr03dB_l1_c3_noise2_mix0')
 
-    """fig, (ax1, ax2, ax3,ax4,ax5) = plt.subplots(5, 1)
+    fig, (ax1, ax2, ax3,ax4,ax5) = plt.subplots(5, 1)
     ax1.plot(loadmat(pathf1)['data'])
     ax2.plot(loadmat(pathf3)['data'])
     ax3.plot(loadmat(pathf4)['data'])
     ax4.plot(loadmat(pathf)['data'])
     ax5.plot(loadmat(pathf2)['data'])
     plt.show()
-    plt.close()"""
+    plt.close()
 
     """fig, (ax1, ax2) = plt.subplots(2, 1)
     ax1.plot(loadmat(pathf1)['data'])
@@ -349,7 +349,7 @@ if __name__=="__main__":
             plt.close()"""
 
 
-    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
+    BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
 
 
     #BAR REPRESENTATION
@@ -423,7 +423,7 @@ if __name__=="__main__":
     plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
     plt.title('Successful signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
     plt.show()
-    plt.close()"""
+    plt.close()
     
     
     #DROPOUT1
