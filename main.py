@@ -14,9 +14,9 @@ import dataloader
 from scipy.io import loadmat
 import wfdb
 from EarlyStopping import *
+from SignalPreprocessing.data_preprocess_function import *
 
-
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulate_windows_noise")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
 REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "best_windows")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 
@@ -209,17 +209,30 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    main()
+    #main()
 
-    """for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
-        if "ecg" in filename:
-            path = os.path.join(ECG_OUTPUTS_TEST_REAL, filename)
+    for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
+        if "label_ecg" in filename:
+            path_label = os.path.join(ECG_OUTPUTS_TEST_REAL, filename)
             number_file = filename.index("g") + 1
             end_path = filename[number_file:]
-            path_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + end_path)
+            path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + end_path)
             mecg_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + end_path)
             fecg_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "fecg" + end_path)
-            fig, (ax1, ax2,ax3,ax4) = plt.subplots(4, 1)
+            yf, freq, t = transformation('fft', np.load(path)[0])
+            yf1, freq1, t = transformation('fft', np.load(path_label)[0])
+
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.plot(freq,np.abs(yf))
+            ax1.set_xlim(0)
+            ax1.set_title("Label")
+            ax2.plot(freq1,np.abs(yf1))
+            ax2.set_xlim(0)
+            ax2.set_title("Output")
+            plt.show()
+            plt.close()
+
+            """fig, (ax1, ax2,ax3,ax4) = plt.subplots(4, 1)
             ax1.plot(np.load(path)[0])
             ax1.set_ylabel("ECG")
             ax2.plot(np.load(path_label)[0])

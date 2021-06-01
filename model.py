@@ -489,7 +489,6 @@ def test(filename_sim,filename_real,test_data_loader_sim, test_data_loader_real)
             batch_for_model_test = Variable(1000. * batch_features.float().cuda())
             outputs_m_test_real, _, outputs_f_test_real, _ = resnet_model_real(batch_for_model_test)
             test_loss_ecg += criterion(outputs_m_test_real + outputs_f_test_real, batch_for_model_test)
-
             for j, elem in enumerate(outputs_f_test_real):
                 path = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + str(j) + str(i))
                 np.save(path, batch_features[j].cpu().detach().numpy())
