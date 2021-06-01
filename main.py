@@ -222,7 +222,8 @@ if __name__=="__main__":
             yf, freq, t = transformation('fft', np.load(path)[0])
             yf1, freq1, t = transformation('fft', np.load(path_label)[0])
 
-            fig, (ax1, ax2) = plt.subplots(2, 1)
+
+            """fig, (ax1, ax2) = plt.subplots(2, 1)
             ax1.plot(freq,np.abs(yf))
             ax1.set_xlim(0)
             ax1.set_title("Label")
@@ -230,9 +231,9 @@ if __name__=="__main__":
             ax2.set_xlim(0)
             ax2.set_title("Output")
             plt.show()
-            plt.close()
+            plt.close()"""
 
-            """fig, (ax1, ax2,ax3,ax4) = plt.subplots(4, 1)
+            fig, (ax1, ax2,ax3,ax4) = plt.subplots(4, 1)
             ax1.plot(np.load(path)[0])
             ax1.set_ylabel("ECG")
             ax2.plot(np.load(path_label)[0])
@@ -242,7 +243,7 @@ if __name__=="__main__":
             ax4.plot(np.load(fecg_label)[0])
             ax4.set_ylabel("FECG")
             plt.show()
-            plt.close()"""
+            plt.close()
 
     """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
 
