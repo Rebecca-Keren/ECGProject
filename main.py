@@ -210,7 +210,12 @@ if __name__=="__main__":
     num_of_m = 0
 
     #main()
-
+    NEWREAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "NewReal")
+    for filename in os.listdir(NEWREAL):  # present the fecg outputs
+        real = loadmat(os.path.join(NEWREAL, filename))['data'][0]
+        plt.plot(real)
+        plt.show()
+        plt.close()
     for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
         if "label_ecg" in filename:
             path_label = os.path.join(ECG_OUTPUTS_TEST_REAL, filename)
