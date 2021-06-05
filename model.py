@@ -17,7 +17,7 @@ if not os.path.exists(BAR_LIST_TRAIN):
 if not os.path.exists(network_save_folder_orig):
     os.mkdir(network_save_folder_orig)
 
-delta = 3
+delta =  3
 
 fecg_lamda = 1.
 cent_lamda = 0.01
