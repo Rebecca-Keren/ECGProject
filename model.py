@@ -154,10 +154,11 @@ def val_real(
 
     val_loss_ecg /= len(val_data_loader_real.dataset)
     val_corr_average /= len(val_data_loader_real.dataset)
+    total_loss_cent = total_loss_cent / (len(val_data_loader_real.dataset))
+
     validation_loss_ecg_list.append(val_loss_ecg.cpu().detach())
     validation_corr_ecg_list.append(val_corr_average)
 
-    total_loss_cent = total_loss_cent / (len(train_data_loader_real.dataset))
 
     if epoch + 1 == epochs:
         with open("val_loss_last_epoch.txt", 'w') as f:
