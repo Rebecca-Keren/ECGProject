@@ -200,6 +200,7 @@ def main():
 if __name__=="__main__":
 
     main()
+    #main
     """real_dataset = dataloader.RealDataset(REAL_DATASET)
     test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
     inference(network_save_folder_orig,test_data_loader_real)
