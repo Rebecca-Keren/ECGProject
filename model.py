@@ -75,7 +75,7 @@ def train_real(resnet_model,
         labels_center_loss = Variable(torch.cat((torch.zeros(batch_size), torch.ones(batch_size))).cuda())
         loss_cent = criterion_cent(torch.cat((flatten_f, flatten_m), 0), labels_center_loss)
 
-        total_loss = ecg_weight * ecg_lambda * train_loss_ecg
+        total_loss = ecg_weight * ecg_lamda * train_loss_ecg
         if include_center_loss:
             total_loss += cent_weight * cent_lamda * loss_cent
         if include_hinge_loss:
