@@ -185,6 +185,7 @@ def test(filename_real, test_data_loader_real):
     criterion = nn.L1Loss().cuda()
 
     test_loss_ecg = 0
+    test_corr_ecg = 0
 
     with torch.no_grad():
         for i, batch_features in enumerate(test_data_loader_real):

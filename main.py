@@ -23,7 +23,7 @@ if not os.path.exists(LOSSES):
     os.mkdir(LOSSES)
 
 BATCH_SIZE = 32
-epochs = 20
+epochs = 100
 learning_rate_real = 1e-3
 
 def main():
