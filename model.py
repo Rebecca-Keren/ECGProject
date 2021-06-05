@@ -6,7 +6,7 @@ import math
 from HelpFunctions import *
 
 network_save_folder_orig = "./Models"
-network_file_name_last = "/last_model"
+network_file_name_best_sim = "/best_model_sim"
 network_file_name_best_cent = "/criterion_cent"
 network_file_name_best_real = "/best_model_real"
 
