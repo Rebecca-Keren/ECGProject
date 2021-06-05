@@ -47,7 +47,7 @@ def main():
     resnet_model = ResNet(1).cuda()
     best_model_accuracy_real = - math.inf
     val_loss_real = 0
-    early_stopping_real = EarlyStopping(delta_min=0.01, patience=6, verbose=True)
+    #early_stopping_real = EarlyStopping(delta_min=0.01, patience=6, verbose=True)
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
@@ -87,10 +87,10 @@ def main():
            validation_corr_ecg_list,
            best_model_accuracy_real)
         scheduler_real.step()
-        early_stopping_real(val_loss_real.cpu().detach().numpy(), resnet_model)
-        if early_stopping_real.early_stop:
-            print('Early stopping')
-            break
+        #early_stopping_real(val_loss_real.cpu().detach().numpy(), resnet_model)
+        #if early_stopping_real.early_stop:
+        #    print('Early stopping')
+        #    break
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1ECG")

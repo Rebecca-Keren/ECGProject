@@ -194,7 +194,7 @@ def test(filename_real, test_data_loader_real):
             test_loss_ecg += criterion(outputs_m_test_real + outputs_f_test_real, batch_for_model_test)
             for j, elem in enumerate(outputs_f_test_real):
                 test_corr_ecg += np.corrcoef((outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy(),
-                                                batch_for_model_val.cpu().detach().numpy()[j])[0][1]
+                                                batch_for_model_test.cpu().detach().numpy()[j])[0][1]
                 path = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + str(j) + str(i))
                 np.save(path, batch_features[j].cpu().detach().numpy())
                 path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + str(j) + str(i))
