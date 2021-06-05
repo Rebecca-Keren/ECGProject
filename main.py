@@ -24,7 +24,7 @@ if not os.path.exists(LOSSES):
 
 BATCH_SIZE = 32
 epochs = 20
-learning_rate_real =  1e-3
+learning_rate_real = 1e-3
 
 def main():
 
@@ -80,9 +80,9 @@ def main():
            val_data_loader_real,
            resnet_model,
            criterion,
+           criterion_cent,
            epoch,
            epochs,
-           criterion_cent,
            validation_loss_ecg_list,
            validation_corr_ecg_list,
            best_model_accuracy_real)
