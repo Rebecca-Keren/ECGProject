@@ -109,7 +109,7 @@ def main():
                       train_loss_average_list)
             #Validation Sim
             resnet_model.eval()
-            best_model_accuracy_sim,val_loss_sim =val_sim(val_data_loader_sim,
+            best_model_accuracy_sim,val_loss_sim = val_sim(val_data_loader_sim,
                     resnet_model,
                     criterion,
                     epoch,
@@ -209,9 +209,9 @@ if __name__=="__main__":
     num_of_f = 0
     num_of_m = 0
 
-    main()
+    #main()
 
-    """for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
+    for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
         if "label_ecg" in filename:
             path_label = os.path.join(ECG_OUTPUTS_TEST_REAL, filename)
             number_file = filename.index("g") + 1
@@ -223,7 +223,7 @@ if __name__=="__main__":
             yf1, freq1, t = transformation('fft', np.load(path_label)[0])
 
 
-            fig, (ax1, ax2) = plt.subplots(2, 1)
+            """fig, (ax1, ax2) = plt.subplots(2, 1)
             ax1.plot(freq,np.abs(yf))
             ax1.set_xlim(0)
             ax1.set_title("Label")
@@ -231,7 +231,7 @@ if __name__=="__main__":
             ax2.set_xlim(0)
             ax2.set_title("Output")
             plt.show()
-            plt.close()
+            plt.close()"""
 
             fig, (ax1, ax2,ax3,ax4) = plt.subplots(4, 1)
             ax1.plot(np.load(path)[0])
@@ -245,7 +245,8 @@ if __name__=="__main__":
             plt.show()
             plt.close()
 
-    BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
+
+    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTrain")
 
 
     #BAR REPRESENTATION

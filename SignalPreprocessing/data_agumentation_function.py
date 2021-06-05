@@ -24,14 +24,17 @@ def average_correlation_signal(list_windows):
         correlation_list.append(correlation)
     return np.mean(correlation_list)
 #FATTO
+
+
 def increase_sampling_rate(signal,rate):
     signal_size = len(signal)
     x = [j for j in range(signal_size)]
     y = [signal[i] for i in range(signal_size)]
     xvals = np.linspace(0, signal_size, int(signal_size*rate))
+    print(xvals)
     interpolated_signal = np.interp(xvals, x, y)
-    if (rate >= 1):
-        interpolated_signal = interpolated_signal[:signal_size]
+    #if (rate >= 1):
+    #    interpolated_signal = interpolated_signal[:signal_size]
     return interpolated_signal
 
 #Not to use

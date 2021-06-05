@@ -27,7 +27,7 @@ window_path = os.path.join(dir_path,REAL_WINDOWS)
 sim_path = os.path.join(dir_path,SIM_WINDOWS)
 
 if __name__ == '__main__':
-    for filename in os.listdir(BEFORE_PRE):
+    """for filename in os.listdir(BEFORE_PRE):
         before = np.ravel(loadmat(os.path.join(BEFORE_PRE, filename))['data'])
         after = np.ravel(loadmat(os.path.join(AFTER_PRE, filename))['data'])
         fig, (ax1, ax2) = plt.subplots(2, 1)
@@ -62,7 +62,7 @@ if __name__ == '__main__':
             plt.show()
             plt.close()
 
-    """for filename in os.listdir(REAL_DATASET):
+    for filename in os.listdir(REAL_DATASET):
         print(filename)
         current_signal = np.ravel(loadmat(os.path.join(REAL_DATASET, filename))['data'])
         current_signal = current_signal - np.mean(current_signal)
@@ -76,7 +76,7 @@ if __name__ == '__main__':
             record = resampled_signal[i * window_size:(i + 1) * window_size]
             sio.savemat(os.path.join(window_path, filename[:(len(filename) - 4)] + '_mix' + str(i)), {'data': record})"""
 
-    """for filename in os.listdir(REAL_DATASET):
+    for filename in os.listdir(REAL_DATASET):
         print(filename)
         current_signal = np.ravel(loadmat(os.path.join(REAL_DATASET, filename))['data'])
         #Preprocess
@@ -86,9 +86,18 @@ if __name__ == '__main__':
         yf = [0 if np.abs(elem) > 30 else yf for elem, yf in zip(freq, yf)]
         new_signal = function.ifft(yf)
         #Resampling
-        resampled_signal = increase_sampling_rate(signal,0.25)
+        resampled_signal = increase_sampling_rate(current_signal,1.5)
+        fig, (ax1, ax2) = plt.subplots(2, 1)
+        ax1.plot(current_signal)
+        ax2.plot(resampled_signal)
+        plt.show()
+        plt.close()
+
+        plt.plot(resampled_signal)
+        plt.show()
+        plt.close()
         #Windowing
-        number_of_window = int(len(resampled_signal) / 1024)
+        """number_of_window = int(len(resampled_signal) / 1024)
         window_size = 1024
         for i in range(number_of_window):
             record = resampled_signal[i * window_size:(i + 1) * window_size]
