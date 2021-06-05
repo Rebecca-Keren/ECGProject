@@ -22,7 +22,7 @@ if not os.path.exists(ECG_OUTPUTS_TEST_REAL):
     os.mkdir(ECG_OUTPUTS_TEST_REAL)
 
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise_without_c3")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "simulated_windows_noise")
 #SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SimulatedDatabase")
 REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "NewReal")
 
@@ -77,7 +77,7 @@ def main():
     pl.seed_everything(1234)
     list_simulated = simulated_database_list(SIMULATED_DATASET)[:122740]
 
-    list_simulated = remove_nan_signals(list_simulated)
+    #list_simulated = remove_nan_signals(list_simulated)
 
     simulated_dataset = dataloader.SimulatedDataset(SIMULATED_DATASET,list_simulated)
 
@@ -139,7 +139,8 @@ def main():
                                     validation_loss_average_list,
                                     validation_corr_m_list,
                                     validation_corr_f_list,
-                                    best_model_accuracy)
+                                    best_model_accuracy,
+                                    criterion_cent)
         scheduler.step()
         early_stopping(val_loss, resnet_model)
         if early_stopping.early_stop:
@@ -198,8 +199,8 @@ def main():
 
 if __name__=="__main__":
 
-    #main()
-    real_dataset = dataloader.RealDataset(REAL_DATASET)
+    main()
+    """real_dataset = dataloader.RealDataset(REAL_DATASET)
     test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
     inference(network_save_folder_orig,test_data_loader_real)
 
@@ -222,7 +223,7 @@ if __name__=="__main__":
             ax4.set_ylabel("FECG")
             plt.show()
             plt.close()
-            """
+           
 
 
     BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")

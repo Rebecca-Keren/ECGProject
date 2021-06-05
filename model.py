@@ -221,7 +221,8 @@ def val(val_data_loader_sim,
         validation_loss_average_list,
         validation_corr_m_list,
         validation_corr_f_list,
-        best_model_accuracy):
+        best_model_accuracy,
+        criterion_cent):
     val_loss_m = 0
     val_loss_f = 0
     val_corr_m = 0
@@ -283,6 +284,7 @@ def val(val_data_loader_sim,
     if (val_corr_average > best_model_accuracy):
         best_model_accuracy = val_corr_average
         torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_best))
+        torch.save(criterion_cent.state_dict(), str(network_save_folder_orig + '/criterion_cent'))
         print("saving best model")
         with open("best_model_epoch.txt", 'w') as f:
             f.write(str(epoch))
