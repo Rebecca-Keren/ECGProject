@@ -162,7 +162,7 @@ def val_real(
     if epoch + 1 == epochs:
         with open("val_loss_last_epoch.txt", 'w') as f:
             f.write("LECG = {:.4f},CorrECG = {:.4f}, LossCent\n".format(val_loss_ecg,val_corr_average,total_loss_cent))
-
+            torch.save(resnet_model.state_dict(), str(network_save_folder_orig + 'last_model'))
     if (val_corr_average > best_model_accuracy):
         best_model_accuracy = val_corr_average
         torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_best_real))
