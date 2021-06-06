@@ -52,7 +52,7 @@ def main():
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model_real = optim.SGD(params, lr=learning_rate_real, momentum=0.9, weight_decay=1e-4)
-    scheduler_real = torch.optim.lr_scheduler.StepLR(optimizer_model_real, 6, gamma=0.1)
+    scheduler_real = torch.optim.lr_scheduler.StepLR(optimizer_model_real, 6, gamma=0.1, last_epoch=12)
 
     train_loss_ecg_list = []
     validation_loss_ecg_list = []
@@ -116,5 +116,46 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    #main()
+
+
+    path_losses = os.path.join(LOSSES, "TL1ECG.npy")
+    train_loss_m_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "VL1ECG.npy")
+    validation_loss_m_list = np.load(path_losses)
+
+    path_losses = os.path.join(LOSSES, "CorrECG.npy")
+    correlation_f_list = np.load(path_losses)
+
+    # plotting validation and training losses and saving them
+    fig, (ax1,ax2) = plt.subplots(2, 1)
+    ax1.plot(train_loss_m_list, label="training")
+    ax1.plot(validation_loss_m_list, label="validation")
+    ax1.set_ylabel("L1 ECG")
+    ax1.set_xlabel("Epoch")
+    ax2.plot(correlation_f_list)
+    plt.show()
+    plt.close()
+
+    for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
+        if "label_ecg" in filename:
+            path_label = os.path.join(ECG_OUTPUTS_TEST_REAL, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + end_path)
+            mecg_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + end_path)
+            fecg_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "fecg" + end_path)
+
+            fig, (ax1, ax2,ax3,ax4) = plt.subplots(4, 1)
+            ax1.plot(np.load(path)[0])
+            ax1.set_ylabel("ECG")
+            ax2.plot(np.load(path_label)[0])
+            ax2.set_ylabel("LABEL ECG")
+            ax3.plot(np.load(mecg_label)[0])
+            ax3.set_ylabel("MECG")
+            ax4.plot(np.load(fecg_label)[0])
+            ax4.set_ylabel("FECG")
+            plt.show()
+            plt.close()
+
 
