@@ -23,8 +23,8 @@ if not os.path.exists(LOSSES):
     os.mkdir(LOSSES)
 
 BATCH_SIZE = 32
-epochs = 100
-learning_rate_real = 1e-3
+epochs = 50
+learning_rate_real = 1e-2
 
 def main():
 
@@ -116,10 +116,10 @@ def main():
 
 if __name__ == "__main__":
 
-    #main()
+    main()
 
 
-    path_losses = os.path.join(LOSSES, "TL1ECG.npy")
+    """path_losses = os.path.join(LOSSES, "TL1ECG.npy")
     train_loss_m_list = np.load(path_losses)
     path_losses = os.path.join(LOSSES, "VL1ECG.npy")
     validation_loss_m_list = np.load(path_losses)
@@ -156,6 +156,6 @@ if __name__ == "__main__":
             ax4.plot(np.load(fecg_label)[0])
             ax4.set_ylabel("FECG")
             plt.show()
-            plt.close()
+            plt.close()"""
 
 
