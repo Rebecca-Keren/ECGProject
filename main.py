@@ -75,7 +75,7 @@ def inference(filename, test_data_loader_real):
 def main():
 
     pl.seed_everything(1234)
-    list_simulated = simulated_database_list(SIMULATED_DATASET)[:122740]
+    list_simulated = simulated_database_list(SIMULATED_DATASET)[:10]#[:122740]
 
     #list_simulated = remove_nan_signals(list_simulated)
 
@@ -200,7 +200,6 @@ def main():
 if __name__=="__main__":
 
     main()
-    #main
     """real_dataset = dataloader.RealDataset(REAL_DATASET)
     test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
     inference(network_save_folder_orig,test_data_loader_real)

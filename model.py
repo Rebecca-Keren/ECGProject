@@ -18,9 +18,9 @@ if not os.path.exists(network_save_folder_orig):
 
 delta = 3
 
-fecg_lamda = 1.
-cent_lamda = 0.01
-hinge_lamda = 0.5
+fecg_lamda = 1000
+cent_lamda = 1
+hinge_lamda = 1
 
 mecg_weight = 1.
 fecg_weight = 1.
@@ -79,9 +79,9 @@ def train(resnet_model,
     for i, batch_features in enumerate(train_data_loader_sim):
         optimizer_model.zero_grad()
 
-        batch_for_model = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
-        batch_for_m = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
-        batch_for_f = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
+        batch_for_model = Variable( * batch_features[0].transpose(1, 2).float().cuda())
+        batch_for_m = Variable( * batch_features[1].transpose(1, 2).float().cuda())
+        batch_for_f = Variable( * batch_features[2].transpose(1, 2).float().cuda())
         batch_for_noise_test = batch_features[6].cpu().detach().numpy()
         batch_for_snr_test = batch_features[7].cpu().detach().numpy()
         batch_for_case_test = batch_features[8].cpu().detach().numpy()
@@ -123,9 +123,9 @@ def train(resnet_model,
             path = os.path.join(ECG_OUTPUTS, "label_f" + str(i))
             np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
             path = os.path.join(ECG_OUTPUTS, "fecg" + str(i))
-            np.save(path, outputs_f[0][0].cpu().detach().numpy() / 1000.)
+            np.save(path, outputs_f[0][0].cpu().detach().numpy())
             path = os.path.join(ECG_OUTPUTS, "mecg" + str(i))
-            np.save(path, outputs_m[0][0].cpu().detach().numpy() / 1000.)
+            np.save(path, outputs_m[0][0].cpu().detach().numpy())
 
         # if not real_epoch: #TODO add when real data
         # COST(M,M^)
@@ -229,9 +229,9 @@ def val(val_data_loader_sim,
     val_corr_f = 0
     with torch.no_grad():
         for i, batch_features in enumerate(val_data_loader_sim):
-            batch_for_model_val = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
-            batch_for_m_val = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
-            batch_for_f_val = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
+            batch_for_model_val = Variable( * batch_features[0].transpose(1, 2).float().cuda())
+            batch_for_m_val = Variable( * batch_features[1].transpose(1, 2).float().cuda())
+            batch_for_f_val = Variable( * batch_features[2].transpose(1, 2).float().cuda())
             outputs_m_test, _, outputs_f_test, _ = resnet_model(batch_for_model_val)
             val_loss_m += criterion(outputs_m_test, batch_for_m_val)
             val_loss_f += (criterion(outputs_f_test, batch_for_f_val)* fecg_weight)
@@ -251,9 +251,9 @@ def val(val_data_loader_sim,
                 path = os.path.join(ECG_OUTPUTS_VAL, "label_f" + str(i))
                 np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
                 path = os.path.join(ECG_OUTPUTS_VAL, "fecg" + str(i))
-                np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
+                np.save(path, outputs_f_test[0][0].cpu().detach().numpy() )
                 path = os.path.join(ECG_OUTPUTS_VAL, "mecg" + str(i))
-                np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
+                np.save(path, outputs_m_test[0][0].cpu().detach().numpy())
 
     val_loss_m /= len(val_data_loader_sim.dataset)
     val_loss_f /= len(val_data_loader_sim.dataset)
@@ -322,10 +322,10 @@ def test(filename,test_data_loader_sim):
 
     with torch.no_grad():
         for i, batch_features in enumerate(test_data_loader_sim):
-            batch_for_model_test = Variable(1000. * batch_features[0].transpose(1, 2).float().cuda())
-            #batch_for_model_test = Variable(1000. * batch_features[0].float().cuda())
-            batch_for_m_test = Variable(1000. * batch_features[1].transpose(1, 2).float().cuda())
-            batch_for_f_test = Variable(1000. * batch_features[2].transpose(1, 2).float().cuda())
+            batch_for_model_test = Variable( * batch_features[0].transpose(1, 2).float().cuda())
+            #batch_for_model_test = Variable( * batch_features[0].float().cuda())
+            batch_for_m_test = Variable( * batch_features[1].transpose(1, 2).float().cuda())
+            batch_for_f_test = Variable( * batch_features[2].transpose(1, 2).float().cuda())
             batch_for_noise_test = batch_features[6].cpu().detach().numpy()
             batch_for_snr_test = batch_features[7].cpu().detach().numpy()
             batch_for_case_test = batch_features[8].cpu().detach().numpy()
@@ -353,9 +353,9 @@ def test(filename,test_data_loader_sim):
             path = os.path.join(ECG_OUTPUTS_TEST, "label_f" + str(i))
             np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
             path = os.path.join(ECG_OUTPUTS_TEST, "fecg" + str(i))
-            np.save(path, outputs_f_test[0][0].cpu().detach().numpy() / 1000.)
+            np.save(path, outputs_f_test[0][0].cpu().detach().numpy())
             path = os.path.join(ECG_OUTPUTS_TEST, "mecg" + str(i))
-            np.save(path, outputs_m_test[0][0].cpu().detach().numpy() / 1000.)
+            np.save(path, outputs_m_test[0][0].cpu().detach().numpy())
 
     test_loss_m /= len(test_data_loader_sim.dataset)
     test_loss_f /= len(test_data_loader_sim.dataset)
