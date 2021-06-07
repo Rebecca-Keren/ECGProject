@@ -79,8 +79,8 @@ if __name__ == '__main__':
                 mix_new = [a + b + c + d for a, b, c, d in zip(fecg_new,mecg_new,noise1_new,noise2_new)]
                 sio.savemat(os.path.join(window_sim_dir, signals[0] + str(i)), {'data': fecg_new})
                 sio.savemat(os.path.join(window_sim_dir, signals[1] + str(i)), {'data': mecg_new})
-                sio.savemat(os.path.join(window_sim_dir, signals[2] + str(i)), {'data': noise1_new})
-                sio.savemat(os.path.join(window_sim_dir, signals[3] + str(i)), {'data': noise2_new})
+                #sio.savemat(os.path.join(window_sim_dir, signals[2] + str(i)), {'data': noise1_new})
+                #sio.savemat(os.path.join(window_sim_dir, signals[3] + str(i)), {'data': noise2_new})
                 sio.savemat(os.path.join(window_sim_dir, name + '_noise2' + '_mix' + str(i) + str(i)),
                             {'data': mix_new})
                 """fig, (ax1, ax2, ax3, ax4,ax5,ax6) = plt.subplots(6, 1)
@@ -116,11 +116,10 @@ if __name__ == '__main__':
                 mix_new = [a + b + c + d + e for a, b, c, d,e in zip(fecg_new, mecg_new, noise1_new, noise2_new,noise3_new)]
                 sio.savemat(os.path.join(window_sim_dir, signals[0] + str(i)), {'data': fecg_new})
                 sio.savemat(os.path.join(window_sim_dir, signals[1] + str(i)), {'data': mecg_new})
-                sio.savemat(os.path.join(window_sim_dir, signals[2] + str(i)), {'data': noise1_new})
-                sio.savemat(os.path.join(window_sim_dir, signals[3] + str(i)), {'data': noise2_new})
-                sio.savemat(os.path.join(window_sim_dir, signals[4] + str(i)), {'data': noise3_new})
-                sio.savemat(os.path.join(window_sim_dir, name + '_noise3' + '_mix' + str(i) + str(i)),
-                            {'data': mix_new})
+                #sio.savemat(os.path.join(window_sim_dir, signals[2] + str(i)), {'data': noise1_new})
+                #sio.savemat(os.path.join(window_sim_dir, signals[3] + str(i)), {'data': noise2_new})
+                #sio.savemat(os.path.join(window_sim_dir, signals[4] + str(i)), {'data': noise3_new})
+                sio.savemat(os.path.join(window_sim_dir, name + '_noise3' + '_mix' + str(i) + str(i)),{'data': mix_new})
                 """fig, (ax1, ax2, ax3, ax4, ax5, ax6,ax7) = plt.subplots(7, 1)
                 ax1.plot(mecg)
                 ax1.plot(mecg_new)
