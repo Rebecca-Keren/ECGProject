@@ -6,7 +6,7 @@ import os
 import scipy.io as sio
 from HelpFunctions import *
 
-ALL_SIMULATED_DATA_MAT = "simulated_signals_mat"
+ALL_SIMULATED_DATA_MAT = "SimulatedDatabaseMat"
 WINDOWED_SIMULATED_SIGNAL = "simulated_windows_noise_without_c3"
 
 if not os.path.exists(WINDOWED_SIMULATED_SIGNAL):

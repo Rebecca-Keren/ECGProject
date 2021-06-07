@@ -76,7 +76,6 @@ def train(resnet_model,
 
     for i, batch_features in enumerate(train_data_loader_sim):
         optimizer_model.zero_grad()
-
         batch_for_model = Variable(batch_features[0].transpose(1, 2).float().cuda())
         batch_for_m = Variable(batch_features[1].transpose(1, 2).float().cuda())
         batch_for_f = Variable(batch_features[2].transpose(1, 2).float().cuda())
@@ -224,9 +223,9 @@ def val(val_data_loader_sim,
                 path = os.path.join(ECG_OUTPUTS_VAL, "label_f" + str(i))
                 np.save(path, batch_features[2][0].cpu().detach().numpy()[:, 0])
                 path = os.path.join(ECG_OUTPUTS_VAL, "fecg" + str(i))
-                np.save(path, outputs_f_test[0][0].cpu().detach().numpy() )
+                np.save(path, outputs_f_val[0][0].cpu().detach().numpy() )
                 path = os.path.join(ECG_OUTPUTS_VAL, "mecg" + str(i))
-                np.save(path, outputs_m_test[0][0].cpu().detach().numpy())
+                np.save(path, outputs_m_val[0][0].cpu().detach().numpy())
             total_val_loss_m += val_loss_m.item() * mecg_weight
             total_val_loss_f += val_loss_f.item() * fecg_weight * fecg_lamda
 
@@ -298,7 +297,6 @@ def test(filename,test_data_loader_sim):
     with torch.no_grad():
         for i, batch_features in enumerate(test_data_loader_sim):
             batch_for_model_test = Variable(batch_features[0].transpose(1, 2).float().cuda())
-            #batch_for_model_test = Variable( * batch_features[0].float().cuda())
             batch_for_m_test = Variable(batch_features[1].transpose(1, 2).float().cuda())
             batch_for_f_test = Variable(batch_features[2].transpose(1, 2).float().cuda())
             batch_for_noise_test = batch_features[6].cpu().detach().numpy()

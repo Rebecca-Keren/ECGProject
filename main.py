@@ -123,7 +123,7 @@ def main():
     test_loss_m, test_loss_f, test_loss_avg, test_corr_m, test_corr_f, test_corr_average,\
         list_bar_good_example_noisetype, list_bar_bad_example_noisetype,\
         list_bar_good_example_snr,list_bar_bad_example_snr, \
-        list_bar_good_example_snrcase, list_bar_bad_example_snrcase = test(str(network_save_folder_orig + network_file_name_best),test_data_loader_sim)
+        list_bar_good_example_snrcase, list_bar_bad_example_snrcase = test(str(network_save_folder_orig + network_file_name_best),train_data_loader_sim)
 
     path_bar = os.path.join(BAR_LIST_TEST, "list_bar_good_example_noisetype")
     np.save(path_bar, np.array(list_bar_good_example_noisetype))
