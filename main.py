@@ -28,7 +28,7 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 20
+epochs = 1000
 learning_rate = 1e-3
 
 def main():
@@ -58,8 +58,8 @@ def main():
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
-    optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_model, milestones=[6, 12, 18], gamma=0.1)
+    optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=0)
+    #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_model, milestones=[6, 12, 18], gamma=0.1)
 
     train_loss_f_list = []
     train_loss_m_list = []
@@ -96,7 +96,7 @@ def main():
                                     validation_corr_m_list,
                                     validation_corr_f_list,
                                     best_model_accuracy)
-        scheduler.step()
+        #scheduler.step()
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")

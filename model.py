@@ -18,7 +18,7 @@ if not os.path.exists(network_save_folder_orig):
 
 delta = 3
 
-fecg_lamda = 10
+fecg_lamda = 100
 cent_lamda = 0.01
 hinge_lamda = 0.5
 
@@ -207,6 +207,7 @@ def val(val_data_loader_sim,
             outputs_m_val, _, outputs_f_val, _ = resnet_model(batch_for_model_val)
             val_loss_m = criterion(outputs_m_val, batch_for_m_val)
             val_loss_f = criterion(outputs_f_val, batch_for_f_val)
+
             for j, elem in enumerate(outputs_m_val):
                 val_corr_m += \
                 np.corrcoef(outputs_m_val.cpu().detach().numpy()[j], batch_for_m_val.cpu().detach().numpy()[j])[0][1]
@@ -228,6 +229,7 @@ def val(val_data_loader_sim,
                 np.save(path, outputs_m_test[0][0].cpu().detach().numpy())
             total_val_loss_m += val_loss_m.item() * mecg_weight
             total_val_loss_f += val_loss_f.item() * fecg_weight * fecg_lamda
+
 
     total_val_loss_m /= len(val_data_loader_sim.dataset)
     total_val_loss_f /= len(val_data_loader_sim.dataset)

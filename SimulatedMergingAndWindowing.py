@@ -23,8 +23,6 @@ if __name__ == '__main__':
     for filename in os.listdir(save_mat_dir):
         if 'fecg1' not in filename:
             continue
-        if 'c3' in filename:
-            continue
         files.remove(filename)
         name = filename[:len(filename)-6]
         signals = [filename]
