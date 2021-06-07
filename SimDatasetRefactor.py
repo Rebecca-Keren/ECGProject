@@ -6,8 +6,8 @@ import os
 import scipy.io as sio
 from HelpFunctions import *
 
-ALL_SIMULATED_DATA_MAT = "SimulatedDatabaseMat"
-WINDOWED_SIMULATED_SIGNAL = "RefactorDataset"
+ALL_SIMULATED_DATA_MAT = "simulated_signals_mat"
+WINDOWED_SIMULATED_SIGNAL = "RefactorDataset1"
 
 if not os.path.exists(WINDOWED_SIMULATED_SIGNAL):
     os.mkdir(WINDOWED_SIMULATED_SIGNAL)
@@ -52,7 +52,7 @@ if __name__ == '__main__':
                 mix_new = [a + b for a, b in zip(fecg_new,mecg_new)]
                 sio.savemat(os.path.join(window_sim_dir, signals[0] + str(i)), {'data':fecg_new})
                 sio.savemat(os.path.join(window_sim_dir, signals[1] + str(i)), {'data':mecg_new})
-                sio.savemat(os.path.join(window_sim_dir, name + '_noise0' + '_mix' + str(i)+ str(i)), {'data':mix_new})
+                sio.savemat(os.path.join(window_sim_dir, name + '_noise0' + '_mix' + str(i)), {'data':mix_new})
                 """fig, (ax1, ax2, ax3,ax4) = plt.subplots(4, 1)
                 ax1.plot(mecg)
                 ax1.plot(mecg_new)
@@ -81,7 +81,7 @@ if __name__ == '__main__':
                 sio.savemat(os.path.join(window_sim_dir, signals[1] + str(i)), {'data': mecg_new})
                 #sio.savemat(os.path.join(window_sim_dir, signals[2] + str(i)), {'data': noise1_new})
                 #sio.savemat(os.path.join(window_sim_dir, signals[3] + str(i)), {'data': noise2_new})
-                sio.savemat(os.path.join(window_sim_dir, name + '_noise2' + '_mix' + str(i) + str(i)),
+                sio.savemat(os.path.join(window_sim_dir, name + '_noise2' + '_mix' + str(i)),
                             {'data': mix_new})
                 """fig, (ax1, ax2, ax3, ax4,ax5,ax6) = plt.subplots(6, 1)
                 ax1.plot(mecg)

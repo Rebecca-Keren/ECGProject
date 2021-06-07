@@ -57,13 +57,17 @@ def simulated_database_list(sim_dir):
     for filename in os.listdir(sim_dir):
         if 'mix' not in filename:
             continue
+        print(filename)
         name = filename[:(filename.find("noise"))]
+        print(name)
         name_mix = filename[:(filename.find("mix"))]
+        print(name_mix)
         index_noise = filename.find('noise') + 5
         number_of_noise = int(filename[index_noise])
         index_snr = filename.find('snr') + 3
         string_of_snr = get_index_snr(filename[index_snr:index_snr+2])
         number = filename[(filename.find("mix")) + 3:]
+        print(number)
         index_case = filename.find('_c')
         if(index_case == -1):
             index_case = 6
