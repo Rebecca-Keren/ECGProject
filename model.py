@@ -29,8 +29,8 @@ hinge_weight = 1.
 
 include_mecg_loss = True
 include_fecg_loss = True
-include_center_loss = True
-include_hinge_loss = True
+include_center_loss = False
+include_hinge_loss = False
 
 ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsTrain")
 if not os.path.exists(ECG_OUTPUTS):
@@ -130,8 +130,6 @@ def train(resnet_model,
 
         # COST(F,F^)
         train_loss_fecg = criterion(outputs_f, batch_for_f)
-        print(train_loss_mecg.item())
-        print(train_loss_fecg.item())
         flatten_m, flatten_f = torch.flatten(one_before_last_m, start_dim=1), torch.flatten(one_before_last_f,
                                                                                             start_dim=1)
         hinge_loss = criterion_hinge_loss(one_before_last_m, one_before_last_f, delta)
@@ -150,8 +148,6 @@ def train(resnet_model,
 
         total_loss_m += mecg_weight * train_loss_mecg.item()
         total_loss_f += fecg_weight * fecg_lamda * train_loss_fecg.item()
-        print(total_loss_m)
-        print(total_loss_f)
 
         total_loss_cent += cent_weight * cent_lamda * loss_cent.item()
         total_loss_hinge += hinge_weight * hinge_lamda * hinge_loss.item()
@@ -159,8 +155,6 @@ def train(resnet_model,
 
     total_loss_m = total_loss_m / (len(train_data_loader_sim.dataset))
     total_loss_f = total_loss_f / (len(train_data_loader_sim.dataset))
-    print(total_loss_m)
-    print(total_loss_f)
     train_loss_f_list.append(total_loss_f)
     train_loss_m_list.append(total_loss_m)
     train_loss_average_list.append((total_loss_m+total_loss_f)/2)
@@ -168,7 +162,6 @@ def train(resnet_model,
     total_loss_cent = total_loss_cent / (len(train_data_loader_sim.dataset))
     total_loss_hinge = total_loss_hinge / (len(train_data_loader_sim.dataset))
     total_loss_epoch = total_loss_epoch / (len(train_data_loader_sim.dataset))
-    print(len(train_data_loader_sim.dataset))
     # display the epoch training loss
     print("epoch S : {}/{}  total_loss = {:.8f}".format(epoch + 1, epochs, total_loss_epoch))
     if include_mecg_loss:
@@ -214,8 +207,6 @@ def val(val_data_loader_sim,
             outputs_m_val, _, outputs_f_val, _ = resnet_model(batch_for_model_val)
             val_loss_m = criterion(outputs_m_val, batch_for_m_val)
             val_loss_f = criterion(outputs_f_val, batch_for_f_val)
-            print(val_loss_m.item())
-            print(val_loss_f.item())
             for j, elem in enumerate(outputs_m_val):
                 val_corr_m += \
                 np.corrcoef(outputs_m_val.cpu().detach().numpy()[j], batch_for_m_val.cpu().detach().numpy()[j])[0][1]
@@ -237,13 +228,9 @@ def val(val_data_loader_sim,
                 np.save(path, outputs_m_test[0][0].cpu().detach().numpy())
             total_val_loss_m += val_loss_m.item() * mecg_weight
             total_val_loss_f += val_loss_f.item() * fecg_weight * fecg_lamda
-            print(total_val_loss_m)
-            print(total_val_loss_f)
 
     total_val_loss_m /= len(val_data_loader_sim.dataset)
     total_val_loss_f /= len(val_data_loader_sim.dataset)
-    print(total_val_loss_m)
-    print(total_val_loss_f)
     val_corr_m /= len(val_data_loader_sim.dataset)
     val_corr_f /= len(val_data_loader_sim.dataset)
     val_corr_average = (val_corr_m + val_corr_f) / 2
