@@ -28,13 +28,13 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 100
+epochs = 25
 learning_rate = 1e-3
 
 def main():
 
     pl.seed_everything(1234)
-    list_simulated = simulated_database_list(SIMULATED_DATASET)[:10]
+    list_simulated = simulated_database_list(SIMULATED_DATASET)[:127740]
 
     #list_simulated = remove_nan_signals(list_simulated)
 
@@ -47,6 +47,8 @@ def main():
     train_dataset_sim, val_dataset_sim, test_dataset_sim = torch.utils.data.random_split(simulated_dataset, [train_size_sim, val_size_sim,test_size_sim])
 
     train_data_loader_sim = data.DataLoader(train_dataset_sim, batch_size=BATCH_SIZE, shuffle=True, num_workers=12)
+    val_data_loader_sim = data.DataLoader(val_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
+    test_data_loader_sim = data.DataLoader(test_dataset_sim, batch_size=BATCH_SIZE, shuffle=False)
 
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
@@ -55,6 +57,7 @@ def main():
     resnet_model = ResNet(1).cuda()
     best_model_accuracy = - math.inf
     val_loss = 0
+    early_stopping = EarlyStopping(delta_min=0.01, patience=6, verbose=True)
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
@@ -85,7 +88,7 @@ def main():
               train_loss_average_list)
         #Evaluation
         resnet_model.eval()
-        best_model_accuracy, val_loss = val(train_data_loader_sim,
+        best_model_accuracy, val_loss = val(val_data_loader_sim,
                                     resnet_model,
                                     criterion,
                                     epoch,
@@ -95,8 +98,13 @@ def main():
                                     validation_loss_average_list,
                                     validation_corr_m_list,
                                     validation_corr_f_list,
-                                    best_model_accuracy)
+                                    best_model_accuracy,
+                                    criterion_cent)
         #scheduler.step()
+        early_stopping(val_loss, resnet_model)
+        if early_stopping.early_stop:
+            print('Early stopping')
+            break
 
     #Saving graphs training
     path_losses = os.path.join(LOSSES, "TL1M")
@@ -123,7 +131,7 @@ def main():
     test_loss_m, test_loss_f, test_loss_avg, test_corr_m, test_corr_f, test_corr_average,\
         list_bar_good_example_noisetype, list_bar_bad_example_noisetype,\
         list_bar_good_example_snr,list_bar_bad_example_snr, \
-        list_bar_good_example_snrcase, list_bar_bad_example_snrcase = test(str(network_save_folder_orig + network_file_name_best),train_data_loader_sim)
+        list_bar_good_example_snrcase, list_bar_bad_example_snrcase = test(str(network_save_folder_orig + network_file_name_best),test_data_loader_sim)
 
     path_bar = os.path.join(BAR_LIST_TEST, "list_bar_good_example_noisetype")
     np.save(path_bar, np.array(list_bar_good_example_noisetype))

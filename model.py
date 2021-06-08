@@ -29,8 +29,8 @@ hinge_weight = 1.
 
 include_mecg_loss = True
 include_fecg_loss = True
-include_center_loss = False
-include_hinge_loss = False
+include_center_loss = True
+include_hinge_loss = True
 
 ECG_OUTPUTS = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ECGOutputsTrain")
 if not os.path.exists(ECG_OUTPUTS):
@@ -191,7 +191,8 @@ def val(val_data_loader_sim,
         validation_loss_average_list,
         validation_corr_m_list,
         validation_corr_f_list,
-        best_model_accuracy):
+        best_model_accuracy,
+        criterion_cent):
     total_val_loss_m = 0
     total_val_loss_f = 0
     val_loss_m = 0
@@ -259,6 +260,7 @@ def val(val_data_loader_sim,
     if (val_corr_average > best_model_accuracy):
         best_model_accuracy = val_corr_average
         torch.save(resnet_model.state_dict(), str(network_save_folder_orig + network_file_name_best))
+        torch.save(criterion_cent.state_dict(), str(network_save_folder_orig + '/criterion_cent'))
         print("saving best model")
         with open("best_model_epoch.txt", 'w') as f:
             f.write(str(epoch))
