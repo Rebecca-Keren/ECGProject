@@ -28,7 +28,7 @@ if not os.path.exists(BAR_LIST_TEST):
     os.mkdir(BAR_LIST_TEST)
 
 BATCH_SIZE = 32
-epochs = 25
+epochs = 30
 learning_rate = 1e-3
 
 def main():
@@ -57,12 +57,12 @@ def main():
     resnet_model = ResNet(1).cuda()
     best_model_accuracy = - math.inf
     val_loss = 0
-    early_stopping = EarlyStopping(delta_min=0.01, patience=6, verbose=True)
+    early_stopping = EarlyStopping(delta_min=0.001, patience=6, verbose=True)
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-5)
-    #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_model, milestones=[6, 12, 18], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_model, milestones=[4, 13, 20], gamma=0.1)
 
     train_loss_f_list = []
     train_loss_m_list = []
@@ -100,7 +100,7 @@ def main():
                                     validation_corr_f_list,
                                     best_model_accuracy,
                                     criterion_cent)
-        #scheduler.step()
+        scheduler.step()
         early_stopping(val_loss, resnet_model)
         if early_stopping.early_stop:
             print('Early stopping')
@@ -159,3 +159,123 @@ def main():
 if __name__=="__main__":
 
     main()
+    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
+
+    # BAR REPRESENTATION
+    ind = np.arange(4)
+    x_labels = ['NONE', 'MA', 'MA+EM', 'MA+EM+BW']
+    results = np.load(os.path.join(BAR_LIST, "list_bar_bad_example_noisetype.npy"))
+    sum = np.sum(np.matrix(results))
+    plt.bar(ind, results)
+    plt.title('Failing signals according to noise type. Total: {}'.format(sum))
+    plt.xticks(ind, ('NONE', 'MA', 'MA+EM', 'MA+EM+BW'))
+    plt.show()
+    plt.close()
+
+    ind = np.arange(4)
+    x_labels = ['NONE', 'MA', 'MA+EM', 'MA+EM+BW']
+    results = np.load(os.path.join(BAR_LIST, "list_bar_good_example_noisetype.npy"))
+    sum = np.sum(np.matrix(results))
+    plt.bar(ind, results)
+    plt.title('Successful signals according to noise type. Total: {}'.format(sum))
+    plt.xticks(ind, ('NONE', 'MA', 'MA+EM', 'MA+EM+BW'))
+    plt.show()
+    plt.close()
+
+    ind = np.arange(5)
+    x_labels = ['00', '03', '06', '09', '12']
+    results = np.load(os.path.join(BAR_LIST, "list_bar_bad_example_snr.npy"))
+    sum = np.sum(np.matrix(results))
+    plt.bar(ind, results)
+    plt.title('Failing signals according to SNR [dB]. Total: {}'.format(sum))
+    plt.xticks(ind, ('00', '03', '06', '09', '12'))
+    plt.show()
+    plt.close()
+
+    ind = np.arange(5)
+    x_labels = ['00', '03', '06', '09', '12']
+    results = np.load(os.path.join(BAR_LIST, "list_bar_good_example_snr.npy"))
+    sum = np.sum(np.matrix(results))
+    plt.bar(ind, results)
+    plt.title('Successful signals according to SNR [dB]. Total: {}'.format(sum))
+    plt.xticks(ind, ('00', '03', '06', '09', '12'))
+    plt.show()
+    plt.close()
+
+    X = np.arange(7)
+    data = np.load(os.path.join(BAR_LIST, "list_bar_bad_example_snrcase.npy"))
+    print(np.sum(data, axis=0))
+    sum = np.sum(np.matrix(data))
+    a = plt.bar(X, data[0], color='b', width=0.1)
+    b = plt.bar(X + 0.1, data[1], color='g', width=0.1)
+    c = plt.bar(X + 0.2, data[2], color='r', width=0.1)
+    d = plt.bar(X + 0.3, data[3], color='c', width=0.1)
+    e = plt.bar(X + 0.4, data[4], color='y', width=0.1)
+    plt.legend((a, b, c, d, e), ('00', '03', '06', '09', '12'))
+    plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
+    plt.title('Failing signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
+    plt.show()
+    plt.close()
+
+    X = np.arange(7)
+    data = np.load(os.path.join(BAR_LIST, "list_bar_good_example_snrcase.npy"))
+    print(np.sum(data, axis=0))
+    sum = np.sum(np.matrix(data))
+    a = plt.bar(X, data[0], color='b', width=0.1)
+    b = plt.bar(X + 0.1, data[1], color='g', width=0.1)
+    c = plt.bar(X + 0.2, data[2], color='r', width=0.1)
+    d = plt.bar(X + 0.3, data[3], color='c', width=0.1)
+    e = plt.bar(X + 0.4, data[4], color='y', width=0.1)
+    plt.legend((a, b, c, d, e), ('00', '03', '06', '09', '12'))
+    plt.xticks(X, ('CO', 'C1', 'C2', 'C3', 'C4', 'C5', 'BASELINE'))
+    plt.title('Successful signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
+    plt.show()
+    plt.close()
+
+    path_losses = os.path.join(LOSSES, "TL1M.npy")
+    train_loss_m_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "TL1F.npy")
+    train_loss_f_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "TL1Avg.npy")
+    train_loss_average_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "VL1M.npy")
+    validation_loss_m_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "VL1F.npy")
+    validation_loss_f_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "VL1Avg.npy")
+    validation_loss_average_list = np.load(path_losses)
+
+    path_losses = os.path.join(LOSSES, "CorrF.npy")
+    correlation_f_list = np.load(path_losses)
+    path_losses = os.path.join(LOSSES, "CorrM.npy")
+    correlation_m_list = np.load(path_losses)
+
+    # plotting validation and training losses and saving them
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    ax1.plot(train_loss_m_list, label="training")
+    ax1.plot(validation_loss_m_list, label="validation")
+    ax1.set_ylabel("L1 M")
+    ax1.set_xlabel("Epoch")
+    ax2.plot(train_loss_f_list, label="training")
+    ax2.plot(validation_loss_f_list, label="validation")
+    ax2.set_ylabel("L1 F")
+    ax2.set_xlabel("Epoch")
+    ax3.plot(train_loss_average_list, label="training")
+    ax3.plot(validation_loss_average_list, label="validation")
+    ax3.set_ylabel("L1 Avg")
+    ax3.set_xlabel("Epoch")
+    ax1.legend()
+    ax2.legend()
+    ax3.legend()
+    plt.show()
+    plt.close()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(correlation_f_list)
+    ax1.set_ylabel("CorrF")
+    ax1.set_xlabel("Epoch")
+    ax2.plot(correlation_m_list)
+    ax2.set_ylabel("CorrM")
+    ax2.set_xlabel("Epoch")
+    plt.show()
+    plt.close()"""
