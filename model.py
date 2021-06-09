@@ -19,7 +19,7 @@ if not os.path.exists(network_save_folder_orig):
 delta = 3
 
 fecg_lamda = 100
-cent_lamda = 0.01
+cent_lamda = 0.001
 hinge_lamda = 0.5
 
 mecg_weight = 1.

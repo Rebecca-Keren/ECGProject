@@ -62,7 +62,7 @@ def main():
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model = optim.SGD(params, lr=learning_rate, momentum=0.9,weight_decay=1e-5)
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_model, milestones=[4, 13, 20], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_model, milestones=[20], gamma=0.1)
 
     train_loss_f_list = []
     train_loss_m_list = []
@@ -158,7 +158,7 @@ def main():
 
 if __name__=="__main__":
 
-    main()
+    #main()
     """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
 
     # BAR REPRESENTATION
@@ -231,7 +231,7 @@ if __name__=="__main__":
     plt.title('Successful signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
     plt.show()
     plt.close()
-
+    """
     path_losses = os.path.join(LOSSES, "TL1M.npy")
     train_loss_m_list = np.load(path_losses)
     path_losses = os.path.join(LOSSES, "TL1F.npy")
@@ -278,4 +278,4 @@ if __name__=="__main__":
     ax2.set_ylabel("CorrM")
     ax2.set_xlabel("Epoch")
     plt.show()
-    plt.close()"""
+    plt.close()
