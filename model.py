@@ -12,8 +12,8 @@ network_file_name_best_real = "/best_model_real"
 
 delta = 3
 
-ecg_lamda = 1.
-cent_lamda = 0.01
+ecg_lamda = 100.
+cent_lamda = 0.001
 hinge_lamda = 0.5
 
 ecg_weight = 1.
@@ -134,7 +134,7 @@ def val_real(
     for i, batch_features in enumerate(val_data_loader_real):
         batch_for_model_val = Variable(1000. * batch_features.float().cuda())
         outputs_m_val, one_before_last_m, outputs_f_val, one_before_last_f = resnet_model(batch_for_model_val)
-        val_loss_ecg += criterion(outputs_m_val + outputs_f_val, batch_for_model_val)
+        val_loss_ecg += ecg_weight * ecg_lamda * criterion(outputs_m_val + outputs_f_val, batch_for_model_val)
         flatten_m, flatten_f = torch.flatten(one_before_last_m, start_dim=1), torch.flatten(one_before_last_f,
                                                                                             start_dim=1)
         batch_size = one_before_last_m.size()[0]
@@ -190,7 +190,7 @@ def test(filename_real, test_data_loader_real):
         for i, batch_features in enumerate(test_data_loader_real):
             batch_for_model_test = Variable(1000. * batch_features.float().cuda())
             outputs_m_test_real, _, outputs_f_test_real, _ = resnet_model_real(batch_for_model_test)
-            test_loss_ecg += criterion(outputs_m_test_real + outputs_f_test_real, batch_for_model_test)
+            test_loss_ecg += ecg_weight * ecg_lamda * criterion(outputs_m_test_real + outputs_f_test_real, batch_for_model_test)
             for j, elem in enumerate(outputs_f_test_real):
                 test_corr_ecg += np.corrcoef((outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy(),
                                                 batch_for_model_test.cpu().detach().numpy()[j])[0][1]
