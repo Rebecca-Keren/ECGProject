@@ -51,7 +51,7 @@ def main():
     criterion = nn.L1Loss().cuda()
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
-    optimizer_model_real = optim.SGD(params, lr=learning_rate_real, momentum=0.9, weight_decay=1e-4)
+    optimizer_model_real = optim.SGD(params, lr=learning_rate_real, momentum=0.9, weight_decay=1e-5)
     scheduler_real = torch.optim.lr_scheduler.MultiStepLR(optimizer_model_real, [6,20,45], gamma=0.1, last_epoch=-1, verbose=False)
 
     train_loss_ecg_list = []
