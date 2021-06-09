@@ -23,8 +23,8 @@ if not os.path.exists(LOSSES):
     os.mkdir(LOSSES)
 
 BATCH_SIZE = 32
-epochs = 50
-learning_rate_real = 1e-2
+epochs = 30
+learning_rate_real = 1e-5
 
 def main():
 
@@ -52,7 +52,7 @@ def main():
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model_real = optim.SGD(params, lr=learning_rate_real, momentum=0.9, weight_decay=1e-5)
-    scheduler_real = torch.optim.lr_scheduler.MultiStepLR(optimizer_model_real, [6,20,45], gamma=0.1, last_epoch=-1, verbose=False)
+    scheduler_real = torch.optim.lr_scheduler.OneCycleLR(optimizer_model_real, max_lr = 1e-3, steps_per_epoch= len(dataloader),epochs=4,reduce_factor = 0.1)
 
     train_loss_ecg_list = []
     validation_loss_ecg_list = []
