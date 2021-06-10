@@ -25,23 +25,23 @@ if not os.path.exists(LOSSES):
 BATCH_SIZE = 32
 epochs = 15
 learning_rate_real = 1e-5
-steps = 0
 
-def change_lr():
+
+def change_lr(steps):
     if(steps==0):
         steps+=1
-        return 1e-5
+        return 1e-5,steps
     elif(steps==1):
         steps+=1
-        return 1e-4
+        return 1e-4,steps
     elif(steps==2):
-        steps+=1
+        steps+=1,steps
         return 1e-3
     else:
-        return 0
+        return 0,steps
 
 def main():
-
+    steps = 0
     pl.seed_everything(1234)
     real_dataset = dataloader.RealDataset(REAL_DATASET)
     train_size_real = int(0.6 * len(real_dataset))
@@ -100,7 +100,7 @@ def main():
            validation_loss_ecg_list,
            validation_corr_ecg_list,
            best_model_accuracy_real)
-        value = change_lr()
+        value,steps = change_lr(steps)
         if(value == 0):
             scheduler_real.step()
         else:
