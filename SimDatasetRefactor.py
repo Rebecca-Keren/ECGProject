@@ -7,7 +7,7 @@ import scipy.io as sio
 import random
 from HelpFunctions import *
 
-ALL_SIMULATED_DATA_MAT = "simulated_signals_mat"
+ALL_SIMULATED_DATA_MAT = "SimulatedDatabaseMat"
 WINDOWED_SIMULATED_SIGNAL = "RefactorDataset"
 
 if not os.path.exists(WINDOWED_SIMULATED_SIGNAL):
@@ -106,7 +106,7 @@ if __name__ == '__main__':
                 noise2 = loadmat(os.path.join(save_mat_dir, signals[3]))['data'][i * window_size:(i + 1) * window_size]
                 noise3 = loadmat(os.path.join(save_mat_dir, signals[4]))['data'][i * window_size:(i + 1) * window_size]
                 mix = [a + b + c + d + e for a, b, c, d, e in zip(fecg, mecg, noise1, noise2,noise3)]
-                abs_signal = [abs(mecg[i] + sigma * fecg[i] + noise1 + noise2 + noise3) for i in range(len(mecg))]
+                abs_signal = [abs(mecg[i] + sigma * fecg[i] + noise1[i] + noise2[i] + noise3[i]) for i in range(len(mecg))]
                 max_signal = max(abs_signal)
                 fecg_new = [(sample / max_signal) * sigma for sample in fecg]
                 mecg_new = [sample / max_signal for sample in mecg]
