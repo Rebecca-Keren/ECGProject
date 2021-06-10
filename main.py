@@ -26,22 +26,7 @@ BATCH_SIZE = 32
 epochs = 15
 learning_rate_real = 1e-5
 
-
-def change_lr(steps):
-    if(steps==0):
-        steps+=1
-        return 1e-5,steps
-    elif(steps==1):
-        steps+=1
-        return 1e-4,steps
-    elif(steps==2):
-        steps+=1
-        return 1e-3,steps
-    else:
-        return 0,steps
-
 def main():
-    steps = 0
     pl.seed_everything(1234)
     real_dataset = dataloader.RealDataset(REAL_DATASET)
     train_size_real = int(0.6 * len(real_dataset))
@@ -101,10 +86,7 @@ def main():
            validation_corr_ecg_list,
            best_model_accuracy_real)
         value,steps = change_lr(steps)
-        if(value == 0):
-            scheduler_real.step()
-        else:
-            optimizer_model_real.param_groups[0]['lr'] = value
+        scheduler_real.step()
         #early_stopping_real(val_loss_real.cpu().detach().numpy(), resnet_model)
         #if early_stopping_real.early_stop:
         #    print('Early stopping')
