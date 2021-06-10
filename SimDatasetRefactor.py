@@ -7,7 +7,7 @@ import scipy.io as sio
 import random
 from HelpFunctions import *
 
-ALL_SIMULATED_DATA_MAT = "SimulatedDatabaseMat"
+ALL_SIMULATED_DATA_MAT = "simulated_signals_mat"
 WINDOWED_SIMULATED_SIGNAL = "RefactorDataset"
 
 if not os.path.exists(WINDOWED_SIMULATED_SIGNAL):
@@ -119,7 +119,7 @@ if __name__ == '__main__':
                 #sio.savemat(os.path.join(window_sim_dir, signals[2] + str(i)), {'data': noise1_new})
                 #sio.savemat(os.path.join(window_sim_dir, signals[3] + str(i)), {'data': noise2_new})
                 #sio.savemat(os.path.join(window_sim_dir, signals[4] + str(i)), {'data': noise3_new})
-                sio.savemat(os.path.join(window_sim_dir, name + '_noise3' + '_mix' + str(i) + str(i)),{'data': mix_new})
+                sio.savemat(os.path.join(window_sim_dir, name + '_noise3' + '_mix' + str(i)),{'data': mix_new})
                 """fig, (ax1, ax2, ax3, ax4, ax5, ax6,ax7) = plt.subplots(7, 1)
                 ax1.plot(mecg)
                 ax1.plot(mecg_new)
