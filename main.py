@@ -17,7 +17,7 @@ from EarlyStopping import *
 import scipy.fftpack as function
 from SignalPreprocessing.data_preprocess_function import *
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RefactorDataset1")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RefactorDataset")
 
 LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
 if not os.path.exists(LOSSES):
