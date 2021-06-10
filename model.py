@@ -12,7 +12,7 @@ network_file_name_best_real = "/best_model_real"
 
 delta = 3
 
-ecg_lamda = 100.
+ecg_lamda = 1.
 cent_lamda = 0.001
 hinge_lamda = 0.5
 
