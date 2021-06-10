@@ -83,7 +83,7 @@ def train_real(resnet_model,
         total_loss.backward()
         optimizer_model.step()
 
-        total_loss_ecg += train_loss_ecg.item()
+        total_loss_ecg += train_loss_ecg.item() * ecg_lamda * ecg_weight
         total_loss_cent += cent_weight * cent_lamda * loss_cent.item()
         total_loss_hinge += hinge_weight * hinge_lamda * hinge_loss.item()
         total_loss_epoch += total_loss.item()

@@ -35,8 +35,8 @@ def change_lr(steps):
         steps+=1
         return 1e-4,steps
     elif(steps==2):
-        steps+=1,steps
-        return 1e-3
+        steps+=1
+        return 1e-3,steps
     else:
         return 0,steps
 
