@@ -45,7 +45,8 @@ def train_real(resnet_model,
               epochs,
               criterion,
               criterion_cent,
-              train_loss_ecg_list):
+              train_loss_ecg_list,
+              scheduler_real):
 
     total_loss_epoch = 0.
     total_loss_ecg = 0.
@@ -82,7 +83,7 @@ def train_real(resnet_model,
             total_loss += hinge_weight * hinge_lamda * hinge_loss
         total_loss.backward()
         optimizer_model.step()
-
+        scheduler_real.step()
         total_loss_ecg += train_loss_ecg.item() * ecg_lamda * ecg_weight
         total_loss_cent += cent_weight * cent_lamda * loss_cent.item()
         total_loss_hinge += hinge_weight * hinge_lamda * hinge_loss.item()

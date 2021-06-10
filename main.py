@@ -51,7 +51,7 @@ def main():
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model_real = optim.SGD(params, lr=learning_rate_real, momentum=0.9, weight_decay=1e-5)
-    scheduler_real = torch.optim.lr_scheduler.MultiStepLR(optimizer_model_real, milestones=[6,11],gamma=0.1)
+    scheduler_real = torch.optim.lr_scheduler.OneCycleLR(optimizer_model_real, max_lr=1e-2, total_steps=len(train_dataset_real.dataset)/BATCH_SIZE)
 
     train_loss_ecg_list = []
     validation_loss_ecg_list = []
@@ -71,7 +71,8 @@ def main():
            epochs,
            criterion,
            criterion_cent,
-           train_loss_ecg_list)
+           train_loss_ecg_list,
+           scheduler_real)
         # Validation Real
         resnet_model.eval()
         criterion_cent.eval()
@@ -85,8 +86,6 @@ def main():
            validation_loss_ecg_list,
            validation_corr_ecg_list,
            best_model_accuracy_real)
-        value,steps = change_lr(steps)
-        scheduler_real.step()
         #early_stopping_real(val_loss_real.cpu().detach().numpy(), resnet_model)
         #if early_stopping_real.early_stop:
         #    print('Early stopping')
