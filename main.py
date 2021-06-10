@@ -86,8 +86,7 @@ def main():
            epochs,
            criterion,
            criterion_cent,
-           train_loss_ecg_list,
-            scheduler_real)
+           train_loss_ecg_list)
         # Validation Real
         resnet_model.eval()
         criterion_cent.eval()
