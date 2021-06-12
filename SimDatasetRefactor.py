@@ -38,7 +38,7 @@ if __name__ == '__main__':
         print(signals)
         window_size = 1024
         number_of_window = 73
-        sigma = random.uniform(0.2,0.5)
+        sigma = 0.5 #random.uniform(0.2,0.5)
 
         if size == 2:
             for i in range(number_of_window):

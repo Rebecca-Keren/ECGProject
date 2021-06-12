@@ -159,7 +159,7 @@ def main():
 if __name__=="__main__":
 
     #main()
-    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
+    BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
 
     # BAR REPRESENTATION
     ind = np.arange(4)
@@ -231,7 +231,7 @@ if __name__=="__main__":
     plt.title('Successful signals according to physiological case and SNR [dB]. Total: {}'.format(sum))
     plt.show()
     plt.close()
-    """
+
     path_losses = os.path.join(LOSSES, "TL1M.npy")
     train_loss_m_list = np.load(path_losses)
     path_losses = os.path.join(LOSSES, "TL1F.npy")
@@ -279,3 +279,22 @@ if __name__=="__main__":
     ax2.set_xlabel("Epoch")
     plt.show()
     plt.close()
+
+
+    for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
+        if "fecg" in filename:
+            path = os.path.join(ECG_OUTPUTS_TEST, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path_label = os.path.join(ECG_OUTPUTS_TEST,"label_f" + end_path)
+            real = np.load(path)
+            label = np.load(path_label)
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.plot(real)
+            ax1.set_ylabel("FECG")
+            ax2.plot(label)
+            ax2.set_ylabel("LABEL")
+            plt.show()
+            plt.close()
+
+
