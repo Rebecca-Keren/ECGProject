@@ -51,7 +51,7 @@ def main():
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model_real = optim.SGD(params, lr=learning_rate_real, momentum=0.9, weight_decay=1e-5)
-    scheduler_real = torch.optim.lr_scheduler.OneCycleLR(optimizer_model_real, max_lr=1e-2, steps_per_epoch=int(len(train_data_loader_real.dataset)/BATCH_SIZE,epochs=epochs+1))
+    scheduler_real = torch.optim.lr_scheduler.OneCycleLR(optimizer_model_real, max_lr=1e-2, steps_per_epoch=int(len(train_data_loader_real.dataset)/BATCH_SIZE),epochs=epochs+1)
 
     train_loss_ecg_list = []
     validation_loss_ecg_list = []
@@ -115,9 +115,9 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    #main()
 
-    """path_losses = os.path.join(LOSSES, "TL1ECG.npy")
+    path_losses = os.path.join(LOSSES, "TL1ECG.npy")
     train_loss_m_list = np.load(path_losses)
     path_losses = os.path.join(LOSSES, "VL1ECG.npy")
     validation_loss_m_list = np.load(path_losses)
@@ -154,4 +154,4 @@ if __name__ == "__main__":
             ax4.plot(np.load(fecg_label)[0])
             ax4.set_ylabel("FECG")
             plt.show()
-            plt.close()"""
+            plt.close()

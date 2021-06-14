@@ -4,6 +4,7 @@ import wfdb
 from scipy.io import loadmat
 import os
 import scipy.io as sio
+from SignalPreprocessing.data_agumentation_function import *
 
 REAL_SIGNALS = "NewReal"
 NEW_SIGNALS = "NormalizedReal"
@@ -22,4 +23,5 @@ if __name__ == '__main__':
         abs_signal = [abs(signal[i]) for i in range(len(signal))]
         max_signal = max(abs_signal)
         signal_new = [sample / max_signal for sample in signal]
-        sio.savemat(os.path.join(new_dir,filename), {'data': signal_new})
+        resampled_signal = increase_sampling_rate(signal_new,0.4)
+        sio.savemat(os.path.join(new_dir,filename), {'data': resampled_signal})

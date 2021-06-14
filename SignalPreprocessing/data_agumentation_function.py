@@ -31,7 +31,6 @@ def increase_sampling_rate(signal,rate):
     x = [j for j in range(signal_size)]
     y = [signal[i] for i in range(signal_size)]
     xvals = np.linspace(0, signal_size, int(signal_size*rate))
-    print(xvals)
     interpolated_signal = np.interp(xvals, x, y)
     #if (rate >= 1):
     #    interpolated_signal = interpolated_signal[:signal_size]
