@@ -23,9 +23,12 @@ if __name__ == '__main__':
         abs_signal = [abs(signal[i]) for i in range(len(signal))]
         max_signal = max(abs_signal)
         signal_new = [sample / max_signal for sample in signal]
-        resampled_signal = increase_sampling_rate(signal_new,0.25)
+        resampled_signal = increase_sampling_rate(signal_new,1.25)
         number_of_window = int(len(resampled_signal) / 1024)
         window_size = 1024
         for k in range(number_of_window):
             record = np.array(resampled_signal[k * window_size:(k + 1) * window_size])
+            #plt.plot(record)
+            #plt.show()
+            #plt.close()
             sio.savemat(os.path.join(new_dir, filename + str(k)), {'data': record})
