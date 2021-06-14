@@ -42,7 +42,6 @@ def main():
     #  use gpu if available
     device = torch.device("cuda:0" if (torch.cuda.is_available()) else "cpu")
     print(device)
-    torch.cuda.clear_memory_allocated()
     resnet_model = ResNet(1).cuda()
     best_model_accuracy_real = - math.inf
     val_loss_real = 0

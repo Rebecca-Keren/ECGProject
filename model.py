@@ -55,17 +55,17 @@ def train_real(resnet_model,
 
     for i, batch_features in enumerate(train_data_loader_real):
         optimizer_model.zero_grad()
-        batch_for_model = Variable(1000. * batch_features.float().cuda())
+        batch_for_model = Variable(batch_features.float().cuda())
         outputs_m, one_before_last_m, outputs_f, one_before_last_f = resnet_model(batch_for_model)
         for j, elem in enumerate(outputs_f):
             path = os.path.join(ECG_OUTPUTS_REAL, "label_ecg" + str(j) + str(i) + str(epoch))
             np.save(path, batch_features[j].cpu().detach().numpy())
             path = os.path.join(ECG_OUTPUTS_REAL, "ecg" + str(j) + str(i) + str(epoch))
-            np.save(path, (outputs_m[j] + outputs_f[j]).cpu().detach().numpy() / 1000.)
+            np.save(path, (outputs_m[j] + outputs_f[j]).cpu().detach().numpy())
             path = os.path.join(ECG_OUTPUTS_REAL, "mecg" + str(j) + str(i) + str(epoch))
-            np.save(path, (outputs_m[j]).cpu().detach().numpy() / 1000.)
+            np.save(path, (outputs_m[j]).cpu().detach().numpy())
             path = os.path.join(ECG_OUTPUTS_REAL, "fecg" + str(j) + str(i) + str(epoch))
-            np.save(path, (outputs_f[j]).cpu().detach().numpy() / 1000.)
+            np.save(path, (outputs_f[j]).cpu().detach().numpy())
 
         outputs_ecg = outputs_m + outputs_f
         train_loss_ecg = criterion(outputs_ecg, batch_for_model)
@@ -129,7 +129,7 @@ def val_real(
     total_loss_cent = 0
 
     for i, batch_features in enumerate(val_data_loader_real):
-        batch_for_model_val = Variable(1000. * batch_features.float().cuda())
+        batch_for_model_val = Variable(batch_features.float().cuda())
         outputs_m_val, one_before_last_m, outputs_f_val, one_before_last_f = resnet_model(batch_for_model_val)
         val_loss_ecg += ecg_weight * ecg_lamda * criterion(outputs_m_val + outputs_f_val, batch_for_model_val)
         flatten_m, flatten_f = torch.flatten(one_before_last_m, start_dim=1), torch.flatten(one_before_last_f,
@@ -142,11 +142,11 @@ def val_real(
             path = os.path.join(ECG_OUTPUTS_VAL_REAL, "label_ecg" + str(j) + str(i) + str(epoch))
             np.save(path, batch_features[j].cpu().detach().numpy())
             path = os.path.join(ECG_OUTPUTS_VAL_REAL, "ecg" + str(j) + str(i) + str(epoch))
-            np.save(path, (outputs_m_val[j] + outputs_f_val[j]).cpu().detach().numpy() / 1000.)
+            np.save(path, (outputs_m_val[j] + outputs_f_val[j]).cpu().detach().numpy())
             path = os.path.join(ECG_OUTPUTS_VAL_REAL, "mecg" + str(j) + str(i) + str(epoch))
-            np.save(path, (outputs_m_val[j]).cpu().detach().numpy() / 1000.)
+            np.save(path, (outputs_m_val[j]).cpu().detach().numpy())
             path = os.path.join(ECG_OUTPUTS_VAL_REAL, "fecg" + str(j) + str(i) + str(epoch))
-            np.save(path, (outputs_f_val[j]).cpu().detach().numpy() / 1000.)
+            np.save(path, (outputs_f_val[j]).cpu().detach().numpy())
 
     val_loss_ecg /= len(val_data_loader_real.dataset)
     val_corr_average /= len(val_data_loader_real.dataset)
@@ -185,7 +185,7 @@ def test(filename_real, test_data_loader_real):
 
     with torch.no_grad():
         for i, batch_features in enumerate(test_data_loader_real):
-            batch_for_model_test = Variable(1000. * batch_features.float().cuda())
+            batch_for_model_test = Variable(batch_features.float().cuda())
             outputs_m_test_real, _, outputs_f_test_real, _ = resnet_model_real(batch_for_model_test)
             test_loss_ecg += ecg_weight * ecg_lamda * criterion(outputs_m_test_real + outputs_f_test_real, batch_for_model_test)
             for j, elem in enumerate(outputs_f_test_real):
@@ -194,11 +194,11 @@ def test(filename_real, test_data_loader_real):
                 path = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + str(j) + str(i))
                 np.save(path, batch_features[j].cpu().detach().numpy())
                 path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + str(j) + str(i))
-                np.save(path, (outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy() / 1000.)
+                np.save(path, (outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy())
                 path = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + str(j) + str(i))
-                np.save(path, (outputs_m_test_real[j]).cpu().detach().numpy() / 1000.)
+                np.save(path, (outputs_m_test_real[j]).cpu().detach().numpy())
                 path = os.path.join(ECG_OUTPUTS_TEST_REAL, "fecg" + str(j) + str(i))
-                np.save(path, (outputs_f_test_real[j]).cpu().detach().numpy() / 1000.)
+                np.save(path, (outputs_f_test_real[j]).cpu().detach().numpy())
 
 
     test_loss_ecg /= len(test_data_loader_real.dataset)
