@@ -51,7 +51,7 @@ def main():
     criterion_cent = CenterLoss(num_classes=2, feat_dim=512*64, use_gpu=device)
     params = list(resnet_model.parameters()) + list(criterion_cent.parameters())
     optimizer_model_real = optim.SGD(params, lr=learning_rate_real, momentum=0.9, weight_decay=1e-5)
-    scheduler_real = torch.optim.lr_scheduler.OneCycleLR(optimizer_model_real, max_lr=1e-2, total_steps=len(train_dataset_real.dataset)/BATCH_SIZE)
+    scheduler_real = torch.optim.lr_scheduler.OneCycleLR(optimizer_model_real, max_lr=1e-2, steps_per_epoch=len(train_data_loader_real.dataset)/BATCH_SIZE,epochs=epochs+1)
 
     train_loss_ecg_list = []
     validation_loss_ecg_list = []
