@@ -7,7 +7,7 @@ import scipy.io as sio
 from SignalPreprocessing.data_agumentation_function import *
 
 REAL_SIGNALS = "SignalsReal"
-NEW_SIGNALS = "NormalizedReal"
+NEW_SIGNALS = "NormalizedRealWithoutScaling"
 
 if not os.path.exists(NEW_SIGNALS):
     os.mkdir(NEW_SIGNALS)
@@ -23,11 +23,12 @@ if __name__ == '__main__':
         abs_signal = [abs(signal[i]) for i in range(len(signal))]
         max_signal = max(abs_signal)
         signal_new = [sample / max_signal for sample in signal]
-        resampled_signal = increase_sampling_rate(signal_new,1.25)
-        number_of_window = int(len(resampled_signal) / 1024)
+        #resampled_signal = increase_sampling_rate(signal_new,1.25)
+        number_of_window = int(len(signal_new) / 1024)
         window_size = 1024
         for k in range(number_of_window):
-            record = np.array(resampled_signal[k * window_size:(k + 1) * window_size])
+            record = np.array(signal_new[k * window_size:(k + 1) * window_size])
+            print(len(record))
             #plt.plot(record)
             #plt.show()
             #plt.close()
