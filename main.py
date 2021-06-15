@@ -73,7 +73,7 @@ def inference(filename, test_data_loader_real):
 def main():
 
     pl.seed_everything(1234)
-    list_simulated = simulated_database_list(SIMULATED_DATASET)[:127740]
+    list_simulated = simulated_database_list(SIMULATED_DATASET)#[:127740]
 
     list_simulated = remove_nan_signals(list_simulated)
 
