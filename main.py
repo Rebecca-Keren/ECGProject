@@ -20,6 +20,10 @@ from SignalPreprocessing.data_preprocess_function import *
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RefactorDataset")
 
 REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "NormalizedSignals")
+if not os.path.exists(REAL_DATASET):
+    os.mkdir(REAL_DATASET)
+
+ECG_OUTPUTS_TEST_REAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RealTest")
 
 LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
 if not os.path.exists(LOSSES):
