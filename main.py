@@ -17,7 +17,7 @@ from EarlyStopping import *
 import scipy.fftpack as function
 from SignalPreprocessing.data_preprocess_function import *
 
-SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RefactorDataset")
+SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "PartialDataset")
 
 ECG_OUTPUTS_TEST_REAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RealTest")
 if not os.path.exists(ECG_OUTPUTS_TEST_REAL):
