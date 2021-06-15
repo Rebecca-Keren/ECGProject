@@ -19,6 +19,8 @@ from SignalPreprocessing.data_preprocess_function import *
 
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RefactorDataset")
 
+REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "NormalizedSignals")
+
 LOSSES = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Losses")
 if not os.path.exists(LOSSES):
     os.mkdir(LOSSES)
@@ -30,6 +32,41 @@ if not os.path.exists(BAR_LIST_TEST):
 BATCH_SIZE = 32
 epochs = 30
 learning_rate = 1e-3
+
+
+def inference(filename, test_data_loader_real):
+    resnet_model = ResNet(1)
+    resnet_model.load_state_dict(torch.load('./best_model'))
+    resnet_model.eval()
+
+    resnet_model.cuda()
+
+    criterion = nn.L1Loss().cuda()
+
+    test_loss_ecg = 0
+    test_corr_ecg = 0
+    with torch.no_grad():
+        for i, batch_features in enumerate(test_data_loader_real):
+            batch_for_model_test = Variable(batch_features.float().cuda())
+            outputs_m_test_real, _, outputs_f_test_real, _ = resnet_model(batch_for_model_test)
+            test_loss_ecg += criterion(outputs_m_test_real + outputs_f_test_real, batch_for_model_test)
+
+            for j, elem in enumerate(outputs_f_test_real):
+                test_corr_ecg += np.corrcoef((outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy(), batch_for_model_test.cpu().detach().numpy()[j])[0][1]
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "label_ecg" + str(j) + str(i))
+                np.save(path, batch_features[j].cpu().detach().numpy())
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + str(j) + str(i))
+                np.save(path, (outputs_m_test_real[j] + outputs_f_test_real[j]).cpu().detach().numpy())
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + str(j) + str(i))
+                np.save(path, (outputs_m_test_real[j]).cpu().detach().numpy())
+                path = os.path.join(ECG_OUTPUTS_TEST_REAL, "fecg" + str(j) + str(i))
+                np.save(path, (outputs_f_test_real[j]).cpu().detach().numpy())
+
+        test_loss_ecg /= len(test_data_loader_real.dataset)
+        test_corr_ecg /= len(test_data_loader_real.dataset)
+        print('L1: ' + str(test_loss_ecg.item()))
+        print('Corr: ' + str(test_corr_ecg))
+
 
 def main():
 
@@ -159,7 +196,11 @@ def main():
 if __name__=="__main__":
 
     #main()
-    BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
+    real_dataset = dataloader.RealDataset(REAL_DATASET)
+    test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    inference(network_save_folder_orig, test_data_loader_real)
+
+    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
 
     # BAR REPRESENTATION
     ind = np.arange(4)
@@ -295,6 +336,6 @@ if __name__=="__main__":
             ax2.plot(label)
             ax2.set_ylabel("LABEL")
             plt.show()
-            plt.close()
+            plt.close()"""
 
 
