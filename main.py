@@ -19,9 +19,6 @@ from SignalPreprocessing.data_preprocess_function import *
 
 SIMULATED_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RefactorDataset")
 
-REAL_DATASET = os.path.join(os.path.dirname(os.path.realpath(__file__)), "NormalizedSignals")
-
-
 ECG_OUTPUTS_TEST_REAL = os.path.join(os.path.dirname(os.path.realpath(__file__)), "RealTest")
 if not os.path.exists(ECG_OUTPUTS_TEST_REAL):
     os.mkdir(ECG_OUTPUTS_TEST_REAL)
@@ -200,12 +197,66 @@ def main():
 
 if __name__=="__main__":
 
-    #main()
-    real_dataset = dataloader.RealDataset(REAL_DATASET)
-    test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    inference(network_save_folder_orig, test_data_loader_real)
+    main()
+    #real_dataset = dataloader.RealDataset(REAL_DATASET)
+    #test_data_loader_real = data.DataLoader(real_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    #inference(network_save_folder_orig, test_data_loader_real)
+    """for filename in os.listdir(ECG_OUTPUTS_TEST):  # present the fecg outputs
+        if "fecg" in filename:
+            num_of_f += 1
+            path = os.path.join(ECG_OUTPUTS_TEST, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path_label = os.path.join(ECG_OUTPUTS_TEST, "label_f" + end_path)
+            real = np.load(path)
+            label = np.load(path_label)
+            correlation = check_correlation(real, label)
+            if (correlation < 0.70):
+                correlation_f += 1
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.plot(real)
+            ax1.set_ylabel("FECG")
+            ax2.plot(label)
+            ax2.set_ylabel("LABEL")
+            plt.show()
+            plt.close()
 
-    """BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
+        if "mecg" in filename:
+            path = os.path.join(ECG_OUTPUTS_TEST, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path_label = os.path.join(ECG_OUTPUTS_TEST, "label_m" + end_path)
+            real = np.load(path)
+            label = np.load(path_label)
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.plot(np.load(path))
+            ax1.set_ylabel("MECG")
+            ax2.plot(np.load(path_label))
+            ax2.set_ylabel("LABEL")
+            plt.show()
+            plt.close()"""
+
+    """for filename in os.listdir(ECG_OUTPUTS_TEST_REAL):  # present the fecg outputs
+        if "label_ecg" in filename:
+            path_label = os.path.join(ECG_OUTPUTS_TEST_REAL, filename)
+            number_file = filename.index("g") + 1
+            end_path = filename[number_file:]
+            path = os.path.join(ECG_OUTPUTS_TEST_REAL, "ecg" + end_path)
+            mecg_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "mecg" + end_path)
+            fecg_label = os.path.join(ECG_OUTPUTS_TEST_REAL, "fecg" + end_path)
+            fig, (ax1, ax2,ax3,ax4) = plt.subplots(4, 1)
+            ax1.plot(np.load(path)[0])
+            ax1.set_ylabel("ECG")
+            ax2.plot(np.load(path_label)[0])
+            ax2.set_ylabel("LABEL ECG")
+            ax3.plot(np.load(mecg_label)[0])
+            ax3.set_ylabel("MECG")
+            ax4.plot(np.load(fecg_label)[0])
+            ax4.set_ylabel("FECG")
+            plt.show()
+            plt.close()
+
+    BAR_LIST = os.path.join(os.path.dirname(os.path.realpath(__file__)), "BarListTest")
 
     # BAR REPRESENTATION
     ind = np.arange(4)
@@ -327,14 +378,18 @@ if __name__=="__main__":
     plt.close()
 
 
-    for filename in os.listdir(ECG_OUTPUTS_TEST): #present the fecg outputs
+    for filename in os.listdir(SIMULATED_DATASET): #present the fecg outputs
         if "fecg" in filename:
-            path = os.path.join(ECG_OUTPUTS_TEST, filename)
-            number_file = filename.index("g") + 1
+            print(filename)
+            path = os.path.join(SIMULATED_DATASET, filename)
+            number_file = filename.index("g") + 2
+            start_path = filename[:number_file -5]
             end_path = filename[number_file:]
-            path_label = os.path.join(ECG_OUTPUTS_TEST,"label_f" + end_path)
-            real = np.load(path)
-            label = np.load(path_label)
+            print(end_path)
+            path_label = os.path.join(SIMULATED_DATASET,start_path + "mecg" + end_path)
+            print(path_label)
+            real = loadmat(path)['data']
+            label = loadmat(path_label)['data']
             fig, (ax1, ax2) = plt.subplots(2, 1)
             ax1.plot(real)
             ax1.set_ylabel("FECG")
@@ -342,5 +397,4 @@ if __name__=="__main__":
             ax2.set_ylabel("LABEL")
             plt.show()
             plt.close()"""
-
 
